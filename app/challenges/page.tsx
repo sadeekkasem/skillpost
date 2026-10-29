@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Page(){return <><h1>أفكار تحديات تدريبية</h1><p className="notice">صفحة أفكار فقط: لا يوجد نظام اشتراك أو تقييم أو جوائز بعد.</p><div className="grid">{[['تنظيف بيانات مبيعات','وثّق المشكلات والتعديلات ثم ارفع ملفًا من بيانات افتراضية.'],['تصميم فاتورة Excel','صمّم فاتورة بصيغ حسابية وقيم تجريبية.'],['بناء موقع تعريفي','أنشئ صفحة تعرض مشروعًا من أعمالك.']].map(([t,d])=><article className="card" key={t}><h2>{t}</h2><p>{d}</p><Link href="/projects/new">نشر مشروع للتحدي</Link></article>)}</div></>}

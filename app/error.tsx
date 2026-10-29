@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{error:Error;reset:()=>void}){return <section className="card"><h1>حدث خطأ أثناء التحميل</h1><p>تحقق من إعداد الاتصال وقاعدة البيانات.</p><button onClick={reset}>حاول مجددًا</button></section>}
