@@ -24,7 +24,7 @@ export default function Layout({
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body>
-        <header>
+        <header className="site-header">
           <Link href="/" className="brand">
             <svg className="brand-mark" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
               <rect width="32" height="32" rx="9" fill="#ffffff" fillOpacity="0.18" />

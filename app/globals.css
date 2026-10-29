@@ -6,10 +6,10 @@
 :root{--primary:#4f46e5;--primary-dark:#3730a3;--accent:#6d28d9;--surface:#ffffff;--bg:#f6f7fb;--text:#172238;--muted:#667085;--border:#e5e7ef;--radius:16px;--radius-sm:10px;--shadow:0 1px 2px rgba(16,24,40,.04),0 4px 14px rgba(16,24,40,.06);--shadow-hover:0 6px 22px rgba(16,24,40,.12);--ring:0 0 0 3px rgba(99,102,241,.35);--gradient:linear-gradient(135deg,#3730a3 0%,#6d28d9 100%)}
 body{background:var(--bg);color:var(--text);font-family:var(--font-cairo),Arial,sans-serif}
 a{color:var(--primary)}
-header{position:sticky;top:0;z-index:40;background:var(--gradient);border-bottom:0;box-shadow:0 4px 18px rgba(55,48,163,.25);padding:14px 5%}
-header .brand,header nav>a,header nav>.nav-item>a{color:#fff}
-header nav>a:hover,header nav>.nav-item>a:hover{color:#e0e7ff}
-header .muted{color:#e0e7ff}
+.site-header{position:sticky;top:0;z-index:40;background:var(--gradient);border-bottom:0;box-shadow:0 4px 18px rgba(55,48,163,.25);padding:14px 5%}
+header.site-header .brand,header.site-header nav>a,header.site-header nav>.nav-item>a{color:#fff}
+header.site-header nav>a:hover,header.site-header nav>.nav-item>a:hover{color:#e0e7ff}
+header.site-header .muted{color:#e0e7ff}
 .brand{display:inline-flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
 .brand-mark{flex:none}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
@@ -29,5 +29,5 @@ input[type=checkbox]{accent-color:var(--primary)}
 footer{border-top:1px solid var(--border);background:#fbfbfe;color:var(--muted);font-size:14px}
 .menu-toggle{background:rgba(255,255,255,.18);color:#fff}
 .cookie-banner{border-top:1px solid var(--border);font-family:inherit}
-@media(max-width:767px){header{padding:12px 16px}.menu-toggle{background:rgba(255,255,255,.18);color:#fff}nav.open>.nav-item{background:#fff;margin:0 -16px;padding:0 16px}nav.open>.nav-item:first-of-type{border-radius:12px 12px 0 0;margin-top:6px}nav.open>.nav-item>a{color:var(--text)}nav.open>.nav-item a{border-top:1px solid var(--border)}}
+@media(max-width:767px){.site-header{padding:12px 16px}.menu-toggle{background:rgba(255,255,255,.18);color:#fff}nav.open>.nav-item{background:#fff;margin:0 -16px;padding:0 16px}nav.open>.nav-item:first-of-type{border-radius:12px 12px 0 0;margin-top:6px}nav.open>.nav-item>a{color:var(--text)}nav.open>.nav-item a{border-top:1px solid var(--border)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}.grid>.card:hover{transform:none}}
