@@ -202,7 +202,7 @@ button.danger:hover{background:#dc2626!important;color:#fff!important;border-col
 .feed-hero::after{content:"";position:absolute;left:-60px;bottom:-80px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.08)}
 .feed-hero::before{content:"";position:absolute;left:120px;top:-50px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.07)}
 .feed-hero a.button,.feed-hero button{background:#fff!important;color:var(--primary-dark)!important;border-radius:999px!important;font-weight:700;position:relative}
-.feed-hero ~ section.card{border:none!important;border-radius:18px!important;box-shadow:0 6px 20px rgba(15,23,42,.06)!important}
+.feed-hero{margin-bottom:24px}.feed-hero ~ section.card,section.card{border:none!important;border-radius:18px!important;box-shadow:0 6px 20px rgba(15,23,42,.06)!important}
 .feed-hero ~ section.card h2{display:flex;align-items:center;gap:10px}
 .feed-hero ~ section.card h2::before{content:"";width:6px;height:22px;border-radius:4px;background:var(--gradient)}
 .project-card{border:1px solid #e5efe9!important;border-radius:18px!important;box-shadow:0 4px 14px rgba(15,23,42,.05)!important;overflow:hidden;position:relative;padding-top:24px!important;transition:transform .2s,box-shadow .2s}
