@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Cairo } from "next/font/google";
 import HeaderNav from "@/components/HeaderNav";
 import CookieBanner from "@/components/CookieBanner";
+import ChatWidget from "@/components/ChatWidget";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -45,6 +46,7 @@ export default function Layout({
         <Link href="/terms">الشروط</Link> ·{" "}
         <Link href="/advertise">أعلن معنا</Link>
       </footer>   
+        <ChatWidget />
         <CookieBanner />   
       </body>
     </html>

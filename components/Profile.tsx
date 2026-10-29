@@ -469,6 +469,17 @@ export default function UserProfile({
 
                 {friendshipStatus === "friends" && (
                   <div className="row">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.dispatchEvent(
+                          new CustomEvent("open-chat", { detail: { id } })
+                        )
+                      }
+                    >
+                      💬 راسل
+                    </button>
+
                     <button disabled>
                       أنتما صديقان
                     </button>
