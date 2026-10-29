@@ -26,6 +26,7 @@ export default function Layout({
             <Link href="/">المشاريع</Link>
             <Link href="/projects/new">نشر مشروع</Link>
             <Link href="/challenges">التحديات</Link>
+            <Link href="/search" aria-label="البحث">🔍 بحث</Link>
             <Link href="/friends">الأصدقاء</Link>
             <AuthNavLink />
             <AdminNavLink />

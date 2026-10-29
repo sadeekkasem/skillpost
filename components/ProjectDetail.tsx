@@ -5,6 +5,7 @@ import type { ComponentProps } from "react";
 import { getClient } from "@/lib/supabase";
 import { categories, demoProjects } from "@/lib/demo";
 import type { Project, Comment } from "@/lib/types";
+import ReportButton from "@/components/ReportButton";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -426,6 +427,8 @@ export default function Detail({
                   {liked ? "إلغاء الإعجاب" : "إعجاب"} · {likes}
                 </button>
 
+                <ReportButton db={db} viewerId={uid} ownerId={p.user_id} targetType="project" targetId={p.id} />
+
                 {isOwner && (
                   <>
                     <button
@@ -612,6 +615,9 @@ export default function Detail({
                       "عضو"}
                   </strong>
                   <p>{item.content}</p>
+                  {item.user_id && (
+                    <ReportButton db={db} viewerId={uid} ownerId={item.user_id} targetType="comment" targetId={item.id} />
+                  )}
                 </article>
               ))}
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getClient } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
 import AdRequestsAdmin from "@/components/AdRequestsAdmin";
+import ReportsAdmin from "@/components/ReportsAdmin";
 
 export default function AdminPage() {
   const [db] = useState(() => getClient());
@@ -181,6 +182,8 @@ export default function AdminPage() {
 
       {isAdmin && (
         <>
+          <ReportsAdmin />
+
           <AdRequestsAdmin />
 
           <h2>إدارة المشاريع</h2>

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Post, PostComment } from "@/lib/types";
+import ReportButton from "@/components/ReportButton";
 
 type Props = {
   db: SupabaseClient;
@@ -193,6 +194,7 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
             تعديل
           </button>
         )}
+        <ReportButton db={db} viewerId={viewerId} ownerId={post.user_id} targetType="post" targetId={post.id} />
         {canDelete && (
           <button type="button" className="secondary" disabled={busy} onClick={deletePost}>
             حذف
@@ -264,6 +266,7 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
                   <span className="muted" style={{ fontSize: "13px" }}>
                     {formatTime(comment.created_at)}
                   </span>
+                  <ReportButton db={db} viewerId={viewerId} ownerId={comment.user_id} targetType="post_comment" targetId={comment.id} />
                   {viewerId && (viewerId === comment.user_id || isAdmin) && (
                     <button type="button" className="secondary" disabled={busy} onClick={() => deleteComment(comment.id)}>
                       حذف
