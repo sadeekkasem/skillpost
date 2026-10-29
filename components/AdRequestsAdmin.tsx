@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { getClient } from "@/lib/supabase";
+import { safeLink } from "@/lib/safeLink";
 
 type AdRequest = {
   id: string;
@@ -204,13 +205,12 @@ export default function AdRequestsAdmin() {
               </p>
 
               <p>
-                <a
-                  href={request.target_url}
+                {safeLink(request.target_url) ? (<a href={safeLink(request.target_url) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   فتح رابط المعلن
-                </a>
+                </a>) : (<span style={{ overflowWrap: "anywhere" }}>{request.target_url}</span>)}
               </p>
 
               <p>المدة المطلوبة: {request.duration_days} يومًا</p>

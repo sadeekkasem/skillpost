@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getClient } from "@/lib/supabase";
+import { safeLink } from "@/lib/safeLink";
 
 type ActiveAd = {
   id: string;
@@ -11,20 +12,6 @@ type ActiveAd = {
   starts_at: string;
   ends_at: string;
 };
-
-function safeLink(value: string): string | null {
-  try {
-    const url = new URL(value);
-
-    if (url.protocol !== "https:" || !url.hostname) {
-      return null;
-    }
-
-    return url.href;
-  } catch {
-    return null;
-  }
-}
 
 export default function ActiveAds() {
   const [db] = useState(() => getClient());
