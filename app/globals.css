@@ -31,3 +31,6 @@ footer{border-top:1px solid var(--border);background:#fbfbfe;color:var(--muted);
 .cookie-banner{border-top:1px solid var(--border);font-family:inherit}
 @media(max-width:767px){.site-header{padding:12px 16px}.menu-toggle{background:rgba(255,255,255,.18);color:#fff}nav.open>.nav-item{background:#fff;margin:0 -16px;padding:0 16px}nav.open>.nav-item:first-of-type{border-radius:12px 12px 0 0;margin-top:6px}nav.open>.nav-item>a{color:var(--text)}nav.open>.nav-item a{border-top:1px solid var(--border)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}.grid>.card:hover{transform:none}}
+/* post/card headers: gradient strip with white text */
+header:not(.site-header){background:var(--gradient);border-radius:12px;padding:14px 18px;box-shadow:0 4px 14px rgba(55,48,163,.18)}
+header:not(.site-header),header:not(.site-header) *,header:not(.site-header) a{color:#fff!important}
