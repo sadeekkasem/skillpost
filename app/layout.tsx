@@ -22,7 +22,7 @@ export default function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className={cairo.variable}>
+    <html lang="ar" dir="rtl" className={cairo.variable} suppressHydrationWarning>
       <body>
         <header className="site-header">
           <Link href="/" className="brand">

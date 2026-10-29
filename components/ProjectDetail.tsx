@@ -408,7 +408,7 @@ export default function Detail({
 
       {p && (
         <>
-          <article className="card">
+          <article className="card project-hero">
             <span className="badge">{p.category}</span>
             <h1>{p.title}</h1>
             <p className="description">{p.description}</p>

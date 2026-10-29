@@ -161,7 +161,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="narrow">
+    <div className="narrow admin-page">
       <h1>لوحة الإدارة</h1>
 
       {message && (

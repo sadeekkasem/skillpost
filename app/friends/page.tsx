@@ -234,7 +234,7 @@ export default function FriendsPage() {
 
     return (
       <article
-        className="card"
+        className="card friend-card"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -347,7 +347,7 @@ export default function FriendsPage() {
   }
 
   return (
-    <div className="narrow">
+    <div className="narrow friends-page">
       <h1>الأصدقاء</h1>
 
       {message && (
@@ -360,7 +360,7 @@ export default function FriendsPage() {
         <p className="notice">جار التحميل...</p>
       ) : (
         <>
-          <section className="card">
+          <section className="card friends-incoming">
             <h2>
               طلبات الصداقة الواردة{" "}
               {incoming.length > 0 && `(${incoming.length})`}

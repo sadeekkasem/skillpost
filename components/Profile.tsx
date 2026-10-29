@@ -307,7 +307,7 @@ export default function UserProfile({
       {profile && (
         <>
           <section
-            className="card"
+            className="card profile-hero"
             aria-label="بيانات صاحب الملف الشخصي"
             style={{ marginBottom: "24px" }}
           >

@@ -45,7 +45,7 @@ export default function ProjectCard({
 
   return (
     <article
-      className="card"
+      className="card project-card"
       style={{
         display: "flex",
         flexDirection: "column",

@@ -476,9 +476,7 @@ export default function Account() {
   }
 
   return (
-    <div className="narrow">
-      <h1>حسابي</h1>
-
+    <div className="account-page">
       {msg && (
         <p className="notice" aria-live="polite">
           {msg}
@@ -489,6 +487,7 @@ export default function Account() {
         <>
           {!profileReady ? (
             <section className="card">
+              <h1>حسابي</h1>
               <p>
                 تعذر تحميل ملفك الشخصي. أعد المحاولة قبل تعديل بياناتك.
               </p>
@@ -511,327 +510,342 @@ export default function Account() {
               </div>
             </section>
           ) : (
-            <form className="card" onSubmit={save}>
-              <h2>بيانات الملف الشخصي</h2>
+            <form onSubmit={save}>
+              <section className="card account-hero">
+                <div className="account-banner" aria-hidden="true" />
+                <div className="account-hero-body">
+                  <div className="account-avatar">
+                    {displayedAvatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={displayedAvatar}
+                        alt={name ? `الصورة الشخصية لـ ${name}` : "صورتك الشخصية"}
+                        width={120}
+                        height={120}
+                      />
+                    ) : (
+                      <div
+                        className="account-avatar-fallback"
+                        aria-label="لم تُضف صورة شخصية"
+                      >
+                        {name.trim().charAt(0) || "؟"}
+                      </div>
+                    )}
+                  </div>
+                  <h1 className="account-name">{name.trim() || "حسابي"}</h1>
+                  {specialty.trim() && (
+                    <p className="account-specialty">{specialty}</p>
+                  )}
+                  {avatarFile && (
+                    <p className="muted">
+                      هذه معاينة؛ اضغط حفظ لاعتماد الصورة.
+                    </p>
+                  )}
+                  <div className="account-quick">
+                    <a className="button secondary" href={`/profile/${uid}`}>
+                      👤 معرض أعمالي
+                    </a>
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={busy}
+                      onClick={signOut}
+                    >
+                      ↩ خروج
+                    </button>
+                  </div>
+                </div>
+              </section>
 
-              <p className="muted">
+              <p className="muted account-note">
                 الاسم والصورة والنبذة والتخصص وروابط التواصل
                 التي تحفظها هنا مخصصة للعرض العام. بريد التواصل
                 اختياري ولا يغيّر بريد تسجيل الدخول.
               </p>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "20px",
-                }}
-              >
-                {displayedAvatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={displayedAvatar}
-                    alt={name ? `الصورة الشخصية لـ ${name}` : "صورتك الشخصية"}
-                    width={120}
-                    height={120}
-                    style={{
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "2px solid #cbd5e1",
+              <section className="card account-section">
+                <h2><span aria-hidden="true">📝</span> المعلومات الشخصية</h2>
+                <div className="account-fields">
+                  <label>
+                    الاسم الظاهر للزوار
+                    <input
+                      required
+                      maxLength={80}
+                      autoComplete="name"
+                      value={name}
+                      disabled={busy}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    التخصص
+                    <input
+                      maxLength={120}
+                      placeholder="مثال: تحليل البيانات وإعداد تقارير Excel"
+                      value={specialty}
+                      disabled={busy}
+                      onChange={(e) => setSpecialty(e.target.value)}
+                    />
+                  </label>
+
+                  <label className="account-wide">
+                    نبذة عنك
+                    <textarea
+                      maxLength={1000}
+                      rows={5}
+                      placeholder="عرّف الزوار بمهاراتك ونوع المشاريع التي تقدمها"
+                      value={bio}
+                      disabled={busy}
+                      onChange={(e) => setBio(e.target.value)}
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <section className="card account-section">
+                <h2><span aria-hidden="true">🔗</span> الروابط</h2>
+                <div className="account-fields">
+                  <label>
+                    موقعك الشخصي — اختياري
+                    <input
+                      type="url"
+                      maxLength={500}
+                      dir="ltr"
+                      placeholder="https://example.com"
+                      value={website}
+                      disabled={busy}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    رابط LinkedIn — اختياري
+                    <input
+                      type="url"
+                      maxLength={500}
+                      dir="ltr"
+                      placeholder="https://www.linkedin.com/in/your-name"
+                      value={linkedin}
+                      disabled={busy}
+                      onChange={(e) => setLinkedin(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    بريد التواصل العام — اختياري
+                    <input
+                      type="email"
+                      maxLength={254}
+                      dir="ltr"
+                      placeholder="contact@example.com"
+                      value={contactEmail}
+                      disabled={busy}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <section className="card account-section">
+                <h2><span aria-hidden="true">🖼️</span> الصورة</h2>
+                <label>
+                  الصورة الشخصية
+                  <input
+                    key={fileInputKey}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={busy}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      if (!file) return;
+
+                      if (
+                        !["image/jpeg", "image/png", "image/webp"].includes(
+                          file.type
+                        )
+                      ) {
+                        setMsg("اختر صورة JPG أو PNG أو WebP");
+                        e.target.value = "";
+                        return;
+                      }
+
+                      if (file.size > 2 * 1024 * 1024) {
+                        setMsg("الحد الأقصى للصورة 2 ميغابايت");
+                        e.target.value = "";
+                        return;
+                      }
+
+                      setMsg("");
+                      setAvatarFile(file);
                     }}
                   />
-                ) : (
-                  <div
-                    aria-label="لم تُضف صورة شخصية"
-                    style={{
-                      width: "120px",
-                      height: "120px",
-                      borderRadius: "50%",
-                      backgroundColor: "#e2e8f0",
-                      color: "#334155",
-                      display: "grid",
-                      placeItems: "center",
-                      fontSize: "40px",
-                    }}
-                  >
-                    {name.trim().charAt(0) || "؟"}
-                  </div>
-                )}
+                </label>
+
+                <p className="muted">
+                  JPG أو PNG أو WebP، حتى 2 ميغابايت. الصورة
+                  المحفوظة عامة، لذا لا ترفع صورة خاصة أو حساسة.
+                </p>
 
                 {avatarFile && (
-                  <p className="muted">
-                    هذه معاينة؛ اضغط حفظ لاعتماد الصورة.
-                  </p>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() => {
+                      setAvatarFile(null);
+                      setFileInputKey((key) => key + 1);
+                    }}
+                  >
+                    إلغاء اختيار الصورة الجديدة
+                  </button>
                 )}
-              </div>
+              </section>
 
-              <label>
-                الصورة الشخصية
-                <input
-                  key={fileInputKey}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  disabled={busy}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] ?? null;
-                    if (!file) return;
+              <section className="card account-section">
+                <h2><span aria-hidden="true">🔒</span> الخصوصية والرسائل</h2>
+                <label className="switch-row">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    className="switch"
+                    checked={marketingOptIn}
+                    disabled={busy}
+                    onChange={(e) => void toggleMarketing(e.target.checked)}
+                  />
+                  <span>
+                    أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
+                    الإلغاء في أي وقت). يُحفظ هذا الخيار فورًا.
+                  </span>
+                </label>
+              </section>
 
-                    if (
-                      !["image/jpeg", "image/png", "image/webp"].includes(
-                        file.type
-                      )
-                    ) {
-                      setMsg("اختر صورة JPG أو PNG أو WebP");
-                      e.target.value = "";
-                      return;
-                    }
-
-                    if (file.size > 2 * 1024 * 1024) {
-                      setMsg("الحد الأقصى للصورة 2 ميغابايت");
-                      e.target.value = "";
-                      return;
-                    }
-
-                    setMsg("");
-                    setAvatarFile(file);
-                  }}
-                />
-              </label>
-
-              <p className="muted">
-                JPG أو PNG أو WebP، حتى 2 ميغابايت. الصورة
-                المحفوظة عامة، لذا لا ترفع صورة خاصة أو حساسة.
-              </p>
-
-              {avatarFile && (
-                <button
-                  type="button"
-                  className="secondary"
-                  disabled={busy}
-                  onClick={() => {
-                    setAvatarFile(null);
-                    setFileInputKey((key) => key + 1);
-                  }}
-                >
-                  إلغاء اختيار الصورة الجديدة
-                </button>
-              )}
-
-              <label>
-                الاسم الظاهر للزوار
-                <input
-                  required
-                  maxLength={80}
-                  autoComplete="name"
-                  value={name}
-                  disabled={busy}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </label>
-
-              <label>
-                التخصص
-                <input
-                  maxLength={120}
-                  placeholder="مثال: تحليل البيانات وإعداد تقارير Excel"
-                  value={specialty}
-                  disabled={busy}
-                  onChange={(e) => setSpecialty(e.target.value)}
-                />
-              </label>
-
-              <label>
-                نبذة عنك
-                <textarea
-                  maxLength={1000}
-                  rows={5}
-                  placeholder="عرّف الزوار بمهاراتك ونوع المشاريع التي تقدمها"
-                  value={bio}
-                  disabled={busy}
-                  onChange={(e) => setBio(e.target.value)}
-                />
-              </label>
-
-              <label>
-                موقعك الشخصي — اختياري
-                <input
-                  type="url"
-                  maxLength={500}
-                  dir="ltr"
-                  placeholder="https://example.com"
-                  value={website}
-                  disabled={busy}
-                  onChange={(e) => setWebsite(e.target.value)}
-                />
-              </label>
-
-              <label>
-                رابط LinkedIn — اختياري
-                <input
-                  type="url"
-                  maxLength={500}
-                  dir="ltr"
-                  placeholder="https://www.linkedin.com/in/your-name"
-                  value={linkedin}
-                  disabled={busy}
-                  onChange={(e) => setLinkedin(e.target.value)}
-                />
-              </label>
-
-              <label>
-                بريد التواصل العام — اختياري
-                <input
-                  type="email"
-                  maxLength={254}
-                  dir="ltr"
-                  placeholder="contact@example.com"
-                  value={contactEmail}
-                  disabled={busy}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                />
-              </label>
-
-              <label
-                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "18px" }}
-              >
-                <input
-                  type="checkbox"
-                  checked={marketingOptIn}
-                  disabled={busy}
-                  onChange={(e) => void toggleMarketing(e.target.checked)}
-                  style={{ width: "auto", margin: "6px 0 0" }}
-                />
-                <span>
-                  أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
-                  الإلغاء في أي وقت). يُحفظ هذا الخيار فورًا.
-                </span>
-              </label>
-
-              <div className="row" style={{ flexWrap: "wrap" }}>
+              <div className="account-actions">
                 <button type="submit" disabled={busy}>
                   {busy ? "جار التنفيذ..." : "حفظ البيانات"}
-                </button>
-
-                <a href={`/profile/${uid}`}>معرض أعمالي</a>
-
-                <button
-                  type="button"
-                  className="secondary"
-                  disabled={busy}
-                  onClick={signOut}
-                >
-                  خروج
                 </button>
               </div>
             </form>
           )}
         </>
       ) : (
-        <form className="card" onSubmit={auth}>
-          <h2>
-            {mode === "signup" ? "إنشاء حساب" : "تسجيل الدخول"}
-          </h2>
+        <form className="card auth-card" onSubmit={auth}>
+          <div className="auth-strip">
+            <span className="auth-welcome">أهلًا بك في مهاراتي 👋</span>
+          </div>
 
-          <label>
-            بريد تسجيل الدخول
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              disabled={busy}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-
-          <label>
-            كلمة المرور
-            <input
-              type="password"
-              minLength={8}
-              required
-              autoComplete={
-                mode === "signup" ? "new-password" : "current-password"
-              }
-              value={password}
-              disabled={busy}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-
-          {mode === "signup" && (
-            <>
-              <label
-                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "12px" }}
+          <div className="auth-body">
+            <div className="auth-tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "login"}
+                className={mode === "login" ? "auth-tab active" : "auth-tab"}
+                disabled={busy}
+                onClick={() => {
+                  if (mode === "login") return;
+                  setMode("login");
+                  setPassword("");
+                  setMsg("");
+                }}
               >
-                <input
-                  type="checkbox"
-                  required
-                  checked={confirmAge}
-                  disabled={busy}
-                  onChange={(e) => setConfirmAge(e.target.checked)}
-                  style={{ width: "auto", margin: "6px 0 0" }}
-                />
-                <span>أؤكد أن عمري 18 سنة أو أكثر</span>
-              </label>
-              <label
-                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "12px" }}
+                تسجيل الدخول
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "signup"}
+                className={mode === "signup" ? "auth-tab active" : "auth-tab"}
+                disabled={busy}
+                onClick={() => {
+                  if (mode === "signup") return;
+                  setMode("signup");
+                  setPassword("");
+                  setMsg("");
+                }}
               >
-                <input
-                  type="checkbox"
-                  required
-                  checked={acceptTerms}
-                  disabled={busy}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  style={{ width: "auto", margin: "6px 0 0" }}
-                />
-                <span>
-                  أوافق على <a href="/terms" target="_blank">الشروط</a> و
-                  <a href="/privacy" target="_blank">سياسة الخصوصية</a>
-                </span>
-              </label>
+                إنشاء حساب
+              </button>
+            </div>
 
-              <label
-                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "18px" }}
-              >
-                <input
-                  type="checkbox"
-                  checked={signupMarketing}
-                  disabled={busy}
-                  onChange={(e) => setSignupMarketing(e.target.checked)}
-                  style={{ width: "auto", margin: "6px 0 0" }}
-                />
-                <span>
-                  أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
-                  الإلغاء في أي وقت)
-                </span>
-              </label>
-            </>
-          )}
+            <h1 className="auth-title">
+              {mode === "signup" ? "إنشاء حساب" : "تسجيل الدخول"}
+            </h1>
 
-          <div className="row">
+            <label>
+              بريد تسجيل الدخول
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                disabled={busy}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
+
+            <label>
+              كلمة المرور
+              <input
+                type="password"
+                minLength={8}
+                required
+                autoComplete={
+                  mode === "signup" ? "new-password" : "current-password"
+                }
+                value={password}
+                disabled={busy}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
+
+            {mode === "signup" && (
+              <div className="check-list">
+                <label className="check-row">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={confirmAge}
+                    disabled={busy}
+                    onChange={(e) => setConfirmAge(e.target.checked)}
+                  />
+                  <span>أؤكد أن عمري 18 سنة أو أكثر</span>
+                </label>
+                <label className="check-row">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={acceptTerms}
+                    disabled={busy}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                  />
+                  <span>
+                    أوافق على <a href="/terms" target="_blank">الشروط</a> و
+                    <a href="/privacy" target="_blank">سياسة الخصوصية</a>
+                  </span>
+                </label>
+
+                <label className="check-row">
+                  <input
+                    type="checkbox"
+                    checked={signupMarketing}
+                    disabled={busy}
+                    onChange={(e) => setSignupMarketing(e.target.checked)}
+                  />
+                  <span>
+                    أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
+                    الإلغاء في أي وقت)
+                  </span>
+                </label>
+              </div>
+            )}
+
             <button
               type="submit"
+              className="auth-submit"
               disabled={busy || (mode === "signup" && (!acceptTerms || !confirmAge))}
             >
               {busy ? "جار التنفيذ..." : "متابعة"}
-            </button>
-
-            <button
-              type="button"
-              className="secondary"
-              disabled={busy}
-              onClick={() => {
-                setMode((current) =>
-                  current === "login" ? "signup" : "login"
-                );
-                setPassword("");
-                setMsg("");
-              }}
-            >
-              {mode === "login" ? "إنشاء حساب" : "لدي حساب"}
             </button>
           </div>
         </form>
