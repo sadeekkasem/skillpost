@@ -66,6 +66,12 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
   const [commentText, setCommentText] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [content, setContent] = useState(post.content);
+  const [updatedAt, setUpdatedAt] = useState(post.updated_at ?? post.created_at);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(post.content);
+  const isOwner = Boolean(viewerId && viewerId === post.user_id);
+  const edited = new Date(updatedAt).getTime() > new Date(post.created_at).getTime() + 60_000;
   const busyRef = useRef(false);
 
   const authorName = post.profiles?.full_name || post.profiles?.username || "عضو";
@@ -133,6 +139,22 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
     });
   }
 
+  function saveEdit() {
+    const text = draft.trim();
+    if (!isOwner || text.length < 1 || text.length > 3000) {
+      setMessage("النص يجب أن يكون بين 1 و 3000 حرف.");
+      return;
+    }
+    void run(async () => {
+      const now = new Date().toISOString();
+      const { error } = await db.from("posts").update({ content: text, updated_at: now }).eq("id", post.id).eq("user_id", viewerId);
+      if (error) throw error;
+      setContent(text);
+      setUpdatedAt(now);
+      setEditing(false);
+    });
+  }
+
   function deletePost() {
     if (!window.confirm("هل تريد حذف هذا المنشور؟")) return;
     void run(async () => {
@@ -155,8 +177,22 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
           </Link>
           <div className="muted" style={{ fontSize: "14px" }}>
             {formatTime(post.created_at)}
+            {edited && " (معدَّل)"}
           </div>
         </div>
+        {isOwner && !editing && (
+          <button
+            type="button"
+            className="secondary"
+            disabled={busy}
+            onClick={() => {
+              setDraft(content);
+              setEditing(true);
+            }}
+          >
+            تعديل
+          </button>
+        )}
         {canDelete && (
           <button type="button" className="secondary" disabled={busy} onClick={deletePost}>
             حذف
@@ -164,7 +200,29 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
         )}
       </header>
 
-      <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: "0 0 12px" }}>{post.content}</p>
+      {editing ? (
+        <div style={{ marginBottom: "12px" }}>
+          <textarea
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            maxLength={3000}
+            rows={4}
+            aria-label="تعديل المنشور"
+            disabled={busy}
+            style={{ width: "100%", boxSizing: "border-box" }}
+          />
+          <div className="row" style={{ gap: "8px", marginTop: "8px", flexWrap: "wrap" }}>
+            <button type="button" disabled={busy || !draft.trim()} onClick={saveEdit}>
+              {busy ? "..." : "حفظ"}
+            </button>
+            <button type="button" className="secondary" disabled={busy} onClick={() => setEditing(false)}>
+              إلغاء
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: "0 0 12px" }}>{content}</p>
+      )}
 
       {imageUrl && (
         // eslint-disable-next-line @next/next/no-img-element

@@ -2,6 +2,7 @@ import "./globals.css";
 import Link from "next/link";
 import AuthNavLink from "@/components/AuthNavLink";
 import AdminNavLink from "@/components/AdminNavLink";
+import NotificationBell from "@/components/NotificationBell";
 
 export const metadata = {
   title: "مهاراتي | SkillPost",
@@ -28,6 +29,7 @@ export default function Layout({
             <Link href="/friends">الأصدقاء</Link>
             <AuthNavLink />
             <AdminNavLink />
+            <NotificationBell />
             <Link href="/setup">التجهيز</Link>
           </nav>
         </header>
