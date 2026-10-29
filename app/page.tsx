@@ -1,2 +1,3 @@
 import Feed from '@/components/Feed';
-export default function Home(){return <Feed/>}
+import PostsSection from '@/components/PostsSection';
+export default function Home(){return <><PostsSection/><Feed/></>}

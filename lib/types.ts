@@ -60,3 +60,25 @@ export type Friendship = {
   created_at: string;
   updated_at: string;
 };
+export type PostAuthor = Pick<Profile, "id" | "username" | "full_name" | "avatar_path">;
+
+export type PostComment = {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  profiles?: PostAuthor | null;
+};
+
+export type Post = {
+  id: string;
+  user_id: string;
+  content: string;
+  image_path: string | null;
+  created_at: string;
+  updated_at?: string;
+  profiles?: PostAuthor | null;
+  post_likes?: { user_id: string }[];
+  post_comments?: PostComment[];
+};

@@ -9,6 +9,7 @@ import type {
   Project,
 } from "@/lib/types";
 import Card from "./ProjectCard";
+import PostsSection from "./PostsSection";
 
 function safeWebUrl(
   value: string | null | undefined,
@@ -555,6 +556,10 @@ export default function UserProfile({
             {projects.map((project) => (
               <Card key={project.id} project={project} />
             ))}
+          </div>
+
+          <div style={{ marginTop: "32px" }}>
+            <PostsSection userId={id} />
           </div>
         </>
       )}
