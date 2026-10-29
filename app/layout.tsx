@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import HeaderNav from "@/components/HeaderNav";
+import CookieBanner from "@/components/CookieBanner";
 
 export const metadata = {
   title: "مهاراتي | SkillPost",
@@ -32,6 +33,7 @@ export default function Layout({
         <Link href="/terms">الشروط</Link> ·{" "}
         <Link href="/advertise">أعلن معنا</Link>
       </footer>   
+        <CookieBanner />   
       </body>
     </html>
   );

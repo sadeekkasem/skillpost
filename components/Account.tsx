@@ -69,6 +69,10 @@ export default function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [confirmAge, setConfirmAge] = useState(false);
+  const [signupMarketing, setSignupMarketing] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -119,6 +123,7 @@ export default function Account() {
     setLinkedin(data.linkedin_url ?? "");
     setContactEmail(data.contact_email ?? "");
     setAvatarPath(data.avatar_path ?? "");
+    setMarketingOptIn(data.marketing_opt_in === true);
     setAvatarFile(null);
     setFileInputKey((key) => key + 1);
     setProfileReady(true);
@@ -194,9 +199,24 @@ export default function Account() {
 
     try {
       if (mode === "signup") {
+        if (!confirmAge) {
+          throw new Error("التسجيل متاح لمن هم في سن 18 عامًا فأكثر فقط");
+        }
+
+        if (!acceptTerms) {
+          throw new Error("يجب الموافقة على الشروط وسياسة الخصوصية لإنشاء حساب");
+        }
+
         const { data, error } = await db.auth.signUp({
           email: email.trim(),
           password,
+          options: {
+            data: {
+              terms_accepted: true,
+              age_confirmed: true,
+              marketing_opt_in: signupMarketing,
+            },
+          },
         });
 
         if (error) throw error;
@@ -370,6 +390,38 @@ export default function Account() {
       }
 
       setMsg(message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function toggleMarketing(next: boolean) {
+    if (!db || busy || !uid) return;
+
+    setBusy(true);
+    setMsg("");
+
+    try {
+      const { error } = await db
+        .from("profiles")
+        .update({
+          marketing_opt_in: next,
+          marketing_opt_in_at: new Date().toISOString(),
+        })
+        .eq("id", uid)
+        .select("id")
+        .single();
+
+      if (error) throw error;
+
+      setMarketingOptIn(next);
+      setMsg(
+        next
+          ? "تم تفعيل استلام الأخبار والعروض على بريدك"
+          : "تم إيقاف رسائل الأخبار والعروض"
+      );
+    } catch (error) {
+      setMsg(errorMessage(error));
     } finally {
       setBusy(false);
     }
@@ -641,6 +693,22 @@ export default function Account() {
                 />
               </label>
 
+              <label
+                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "18px" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={marketingOptIn}
+                  disabled={busy}
+                  onChange={(e) => void toggleMarketing(e.target.checked)}
+                  style={{ width: "auto", margin: "6px 0 0" }}
+                />
+                <span>
+                  أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
+                  الإلغاء في أي وقت). يُحفظ هذا الخيار فورًا.
+                </span>
+              </label>
+
               <div className="row" style={{ flexWrap: "wrap" }}>
                 <button type="submit" disabled={busy}>
                   {busy ? "جار التنفيذ..." : "حفظ البيانات"}
@@ -693,8 +761,61 @@ export default function Account() {
             />
           </label>
 
+          {mode === "signup" && (
+            <>
+              <label
+                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "12px" }}
+              >
+                <input
+                  type="checkbox"
+                  required
+                  checked={confirmAge}
+                  disabled={busy}
+                  onChange={(e) => setConfirmAge(e.target.checked)}
+                  style={{ width: "auto", margin: "6px 0 0" }}
+                />
+                <span>أؤكد أن عمري 18 سنة أو أكثر</span>
+              </label>
+              <label
+                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "12px" }}
+              >
+                <input
+                  type="checkbox"
+                  required
+                  checked={acceptTerms}
+                  disabled={busy}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  style={{ width: "auto", margin: "6px 0 0" }}
+                />
+                <span>
+                  أوافق على <a href="/terms" target="_blank">الشروط</a> و
+                  <a href="/privacy" target="_blank">سياسة الخصوصية</a>
+                </span>
+              </label>
+
+              <label
+                style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontWeight: "normal", marginBottom: "18px" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={signupMarketing}
+                  disabled={busy}
+                  onChange={(e) => setSignupMarketing(e.target.checked)}
+                  style={{ width: "auto", margin: "6px 0 0" }}
+                />
+                <span>
+                  أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
+                  الإلغاء في أي وقت)
+                </span>
+              </label>
+            </>
+          )}
+
           <div className="row">
-            <button type="submit" disabled={busy}>
+            <button
+              type="submit"
+              disabled={busy || (mode === "signup" && (!acceptTerms || !confirmAge))}
+            >
               {busy ? "جار التنفيذ..." : "متابعة"}
             </button>
 
