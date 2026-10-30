@@ -307,7 +307,7 @@ input[type=file]{max-width:100%}
 @media (max-width:640px){.admin-stats-top .admin-stat{padding:14px}.admin-stats-top .admin-stat-value{font-size:28px}}
 
 /* Membership tiers */
-.tier-badge *{color:inherit!important}
+.tier-badge *,header:not(.site-header) .tier-badge .tier-name{color:inherit!important}
 .tier-badge{display:inline-flex;align-items:center;gap:3px;font-size:.8em;font-weight:700;line-height:1.4;padding:0 6px;border-radius:999px;vertical-align:middle;white-space:nowrap}
 .tier-bronze{padding:0;opacity:.75}
 .tier-badge.tier-silver{background:#f8fafc!important;color:#334155!important;border:1px solid #94a3b8}
