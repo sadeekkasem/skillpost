@@ -3,16 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getClient } from "@/lib/supabase";
+import { useT } from "@/components/LanguageProvider";
+import type { DictKey } from "@/lib/i18n";
 import AdRequestsAdmin from "@/components/AdRequestsAdmin";
 import ExcelQuotaAdmin from "@/components/ExcelQuotaAdmin";
 import StatsCards, { type AdminStats } from "@/components/admin/StatsCards";
 import ReportsTab from "@/components/admin/ReportsTab";
 import ContentList from "@/components/admin/ContentList";
 import UsersTab from "@/components/admin/UsersTab";
+import ModeratorsTab from "@/components/admin/ModeratorsTab";
 
-type Tab = "reports" | "today" | "projects" | "ads" | "users" | "tools";
+type Tab = "reports" | "today" | "projects" | "ads" | "users" | "moderators" | "tools";
 
-const tabs: { id: Tab; label: string; badge?: (s: AdminStats) => number }[] = [
+const tabs: { id: Tab; label: string; labelKey?: DictKey; badge?: (s: AdminStats) => number }[] = [
   { id: "reports", label: "البلاغات", badge: (s) => s.reports_open },
   {
     id: "today",
@@ -22,10 +25,12 @@ const tabs: { id: Tab; label: string; badge?: (s: AdminStats) => number }[] = [
   { id: "projects", label: "المشاريع", badge: (s) => s.projects_total },
   { id: "ads", label: "الإعلانات والطلبات", badge: (s) => s.ads_pending },
   { id: "users", label: "المشتركون", badge: (s) => s.profiles_total },
+  { id: "moderators", label: "المشرفون", labelKey: "admin.moderators" },
   { id: "tools", label: "أدوات" },
 ];
 
 export default function AdminPage() {
+  const tr = useT();
   const [db] = useState(() => getClient());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -111,7 +116,7 @@ export default function AdminPage() {
                   className={tab === t.id ? "active" : ""}
                   onClick={() => setTab(t.id)}
                 >
-                  {t.label}
+                  {t.labelKey ? tr(t.labelKey) : t.label}
                   {count !== null && <span className="admin-tab-count">{count.toLocaleString("ar")}</span>}
                 </button>
               );
@@ -126,6 +131,7 @@ export default function AdminPage() {
             {tab === "projects" && <ContentList db={db} kinds={["projects"]} onChanged={refresh} />}
             {tab === "ads" && <AdRequestsAdmin />}
             {tab === "users" && <UsersTab db={db} onChanged={refresh} />}
+            {tab === "moderators" && <ModeratorsTab db={db} />}
             {tab === "tools" && <ExcelQuotaAdmin />}
           </div>
         </>

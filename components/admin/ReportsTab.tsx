@@ -5,9 +5,9 @@ import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Filters, PAGE_SIZE, Pager, errorText, formatDate, setBanned, sinceIso, type Period } from "./shared";
 
-type TargetType = "post" | "project" | "comment" | "post_comment" | "profile";
+export type TargetType = "post" | "project" | "comment" | "post_comment" | "profile";
 
-type Report = {
+export type Report = {
   id: string;
   reporter_id: string;
   target_type: TargetType;
@@ -18,7 +18,7 @@ type Report = {
   reporter?: { username: string; full_name: string } | null;
 };
 
-type Target = { href: string; text: string; ownerId: string; ownerName: string };
+export type Target = { href: string; text: string; ownerId: string; ownerName: string };
 
 const typeLabels: Record<TargetType, string> = {
   post: "منشور",
@@ -40,7 +40,7 @@ const statusLabels: Record<string, string> = { open: "مفتوحة", resolved: "
 type Owner = { id: string; username: string; full_name: string } | null;
 type TargetRow = { id: string; user_id: string; title?: string; content?: string; project_id?: string; owner?: Owner };
 
-async function loadTargets(db: SupabaseClient, rows: Report[]) {
+export async function loadTargets(db: SupabaseClient, rows: Report[]) {
   const ids = (t: TargetType) => [...new Set(rows.filter((r) => r.target_type === t).map((r) => r.target_id))];
   const owner = "owner:profiles!%s(id,username,full_name)";
   const q = (table: string, cols: string, fk: string, list: string[]) =>

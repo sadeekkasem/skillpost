@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import AuthNavLink from "@/components/AuthNavLink";
 import AdminNavLink from "@/components/AdminNavLink";
+import ModerationNavLink from "@/components/ModerationNavLink";
 import NotificationBell from "@/components/NotificationBell";
 import LanguageToggle from "@/components/LanguageToggle";
 
@@ -44,6 +45,7 @@ export default function HeaderNav() {
       <span className="nav-item"><Link href="/friends">{t("nav.friends")}</Link></span>
       <AuthNavLink />
       <span className="nav-item"><AdminNavLink /></span>
+      <span className="nav-item"><ModerationNavLink /></span>
       <NotificationBell />
       </nav>
     </>
