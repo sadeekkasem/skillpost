@@ -1,4 +1,6 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Cairo } from "next/font/google";
 import HeaderNav from "@/components/HeaderNav";
 import CookieBanner from "@/components/CookieBanner";
@@ -20,6 +22,7 @@ const cairo = Cairo({
 export async function generateMetadata() {
   const t = await getT();
   return {
+    metadataBase: new URL("https://www.skillpostapp.com"),
     title: t("meta.title"),
     description: t("meta.description"),
   };
@@ -47,6 +50,8 @@ export default async function Layout({
           <CookieBanner />
           <LanguagePicker />
         </LanguageProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
