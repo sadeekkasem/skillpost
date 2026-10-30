@@ -6,6 +6,7 @@ import { getClient } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
 import AdRequestsAdmin from "@/components/AdRequestsAdmin";
 import ReportsAdmin from "@/components/ReportsAdmin";
+import ExcelQuotaAdmin from "@/components/ExcelQuotaAdmin";
 
 export default function AdminPage() {
   const [db] = useState(() => getClient());
@@ -185,6 +186,9 @@ export default function AdminPage() {
           <ReportsAdmin />
 
           <AdRequestsAdmin />
+
+
+          <ExcelQuotaAdmin />
 
           <h2>إدارة المشاريع</h2>
 
