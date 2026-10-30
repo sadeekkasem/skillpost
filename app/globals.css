@@ -342,3 +342,15 @@ input[type=file]{max-width:100%}
 [dir=ltr] .chat-msg.theirs{align-self:flex-start}
 @media(max-width:640px){[dir=ltr] .chat-bubble{left:auto;right:16px}[dir=ltr] .chat-panel{right:0;left:0}}
 .lang-toggle-short{display:none}@media(max-width:767px){.lang-toggle{order:3;padding:3px 10px!important;font-size:12px;line-height:1.5}}@media(max-width:480px){.lang-toggle-full{display:none}.lang-toggle-short{display:inline}.lang-toggle{min-width:36px;font-size:14px}header.site-header nav>a{white-space:nowrap}}
+
+/* ===== Post card header layout (2026-10-30) ===== */
+.post-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;padding:14px 16px}
+.post-head-main{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0}
+.post-head-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.post-head-name-row{display:flex;align-items:center;gap:8px;min-width:0}
+.post-head-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;unicode-bidi:isolate}
+.post-head-badge{flex-shrink:0;display:inline-flex;white-space:nowrap}
+.post-head-meta{font-size:13px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.post-head-actions:empty{display:none}
+@media(max-width:520px){.post-head{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:10px}.post-head-actions{justify-content:flex-end;flex-wrap:wrap}header.post-head .post-head-actions button{padding:4px 14px!important;font-size:13px}}

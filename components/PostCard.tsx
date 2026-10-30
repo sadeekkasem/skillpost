@@ -171,37 +171,45 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
 
   return (
     <article className="card" style={{ marginBottom: "16px" }}>
-      <header style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
-        <Avatar db={db} path={post.profiles?.avatar_path} name={authorName} size={44} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Link href={`/profile/${post.user_id}`} style={{ fontWeight: 700, overflowWrap: "anywhere" }}>
-            {authorName}
-          </Link>{" "}
-          <TierBadge id={post.user_id} />
-          <div className="muted" style={{ fontSize: "14px" }}>
-            {formatTime(post.created_at)}
-            {edited && " (معدَّل)"}
+      <header className="post-head">
+        <div className="post-head-main">
+          <Avatar db={db} path={post.profiles?.avatar_path} name={authorName} size={44} />
+          <div className="post-head-info">
+            <div className="post-head-name-row">
+              <Link href={`/profile/${post.user_id}`} className="post-head-name" dir="auto">
+                {authorName}
+              </Link>
+              <span className="post-head-badge">
+                <TierBadge id={post.user_id} />
+              </span>
+            </div>
+            <div className="post-head-meta">
+              {formatTime(post.created_at)}
+              {edited && " (معدَّل)"}
+            </div>
           </div>
         </div>
-        {isOwner && !editing && (
-          <button
-            type="button"
-            className="secondary"
-            disabled={busy}
-            onClick={() => {
-              setDraft(content);
-              setEditing(true);
-            }}
-          >
-            تعديل
-          </button>
-        )}
-        <ReportButton db={db} viewerId={viewerId} ownerId={post.user_id} targetType="post" targetId={post.id} />
-        {canDelete && (
-          <button type="button" className="secondary" disabled={busy} onClick={deletePost}>
-            حذف
-          </button>
-        )}
+        <div className="post-head-actions">
+          {isOwner && !editing && (
+            <button
+              type="button"
+              className="secondary"
+              disabled={busy}
+              onClick={() => {
+                setDraft(content);
+                setEditing(true);
+              }}
+            >
+              تعديل
+            </button>
+          )}
+          <ReportButton db={db} viewerId={viewerId} ownerId={post.user_id} targetType="post" targetId={post.id} />
+          {canDelete && (
+            <button type="button" className="secondary" disabled={busy} onClick={deletePost}>
+              حذف
+            </button>
+          )}
+        </div>
       </header>
 
       {editing ? (
