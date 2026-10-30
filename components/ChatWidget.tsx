@@ -44,6 +44,8 @@ export default function ChatWidget() {
   const [db] = useState(() => getClient());
   const [uid, setUid] = useState("");
   const [friends, setFriends] = useState<Person[]>([]);
+  // Non-friends you are talking with (diamond members can message anyone; others can reply).
+  const [others, setOthers] = useState<Person[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState("");
@@ -72,6 +74,7 @@ export default function ChatWidget() {
   useEffect(() => {
     if (!db || !uid) {
       setFriends([]);
+      setOthers([]);
       setMessages([]);
       setOpen(false);
       setActiveId("");
@@ -142,13 +145,40 @@ export default function ChatWidget() {
     return () => window.removeEventListener("open-chat", onOpen);
   }, []);
 
+  const contacts = useMemo(() => [...friends, ...others], [friends, others]);
+
+  // Load names for people in your messages (or the opened chat) who are not friends
+  useEffect(() => {
+    if (!db || !uid) return;
+    const known = new Set(contacts.map((c) => c.id));
+    const missing = new Set<string>();
+    for (const m of messages) {
+      const other = m.sender_id === uid ? m.recipient_id : m.sender_id;
+      if (!known.has(other)) missing.add(other);
+    }
+    if (activeId && activeId !== uid && !known.has(activeId)) missing.add(activeId);
+    if (!missing.size) return;
+    let alive = true;
+    void db
+      .from("profiles")
+      .select("id,username,full_name,avatar_path")
+      .in("id", [...missing].slice(0, 100))
+      .then(({ data }) => {
+        const fresh = ((data ?? []) as Person[]).filter((p) => !known.has(p.id));
+        if (alive && fresh.length) setOthers((cur) => [...cur, ...fresh.filter((p) => !cur.some((c) => c.id === p.id))]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [db, uid, messages, activeId, contacts]);
+
   const unreadTotal = useMemo(
     () => messages.filter((m) => m.recipient_id === uid && !m.read_at).length,
     [messages, uid]
   );
 
   const conversations = useMemo(() => {
-    return friends
+    return contacts
       .map((f) => {
         const thread = messages.filter(
           (m) =>
@@ -160,9 +190,9 @@ export default function ChatWidget() {
         return { friend: f, last, unread };
       })
       .sort((a, b) => (b.last?.created_at ?? "").localeCompare(a.last?.created_at ?? ""));
-  }, [friends, messages, uid]);
+  }, [contacts, messages, uid]);
 
-  const active = friends.find((f) => f.id === activeId) ?? null;
+  const active = contacts.find((f) => f.id === activeId) ?? null;
 
   const thread = useMemo(
     () =>
@@ -244,7 +274,7 @@ export default function ChatWidget() {
           ? CONTACT_BLOCKED_MESSAGE
           : err.message.includes("rate_limit")
           ? "أرسلت رسائل كثيرة بسرعة، انتظر دقيقة."
-          : "تعذّر إرسال الرسالة. تأكد أنكما صديقان."
+          : "تعذّر إرسال الرسالة. الدردشة متاحة بين الأصدقاء، ولأعضاء ماسي مع الجميع."
       );
       return;
     }

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getMyTierInfo, tierLabel, type Tier } from "./tiers";
 
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
 export const MAX_RAW_IMAGE_BYTES = 15 * 1024 * 1024;
@@ -70,20 +71,35 @@ export async function compressImage(
   return new File([best], `${base}.${ext}`, { type: best.type });
 }
 
-/** Compress images, then make sure the file fits the 2 MB limit. */
-export async function prepareUpload(file: File): Promise<File> {
+/** Compress images, then make sure the file fits the member's size limit (2 MB, 10 MB for diamond). */
+export async function prepareUpload(file: File, maxBytes = MAX_FILE_BYTES): Promise<File> {
   const ready = isImageFile(file) ? await compressImage(file) : file;
-  if (ready.size > MAX_FILE_BYTES) {
-    throw new Error(`الملف "${file.name}" أكبر من 2 ميغابايت`);
+  if (ready.size > maxBytes) {
+    throw new Error(`الملف "${file.name}" أكبر من ${Math.round(maxBytes / 1024 / 1024)} ميغابايت`);
   }
   return ready;
 }
 
-/** How many Excel/CSV files the account has used, and its quota (default 3). */
-export async function getExcelQuotaInfo(
-  db: SupabaseClient,
-  uid: string
-): Promise<{ used: number; quota: number }> {
+export type ExcelQuotaInfo = {
+  used: number;
+  quota: number;
+  tier?: Tier;
+  monthly?: boolean;
+  maxBytes: number;
+};
+
+/** Excel/CSV files used and allowed for the account (tier aware; falls back to excel_quota before the tiers migration). */
+export async function getExcelQuotaInfo(db: SupabaseClient, uid: string): Promise<ExcelQuotaInfo> {
+  const info = await getMyTierInfo(db);
+  if (info) {
+    return {
+      used: info.excel_used,
+      quota: info.excel_limit,
+      tier: info.tier,
+      monthly: info.excel_monthly,
+      maxBytes: info.max_file_mb * 1024 * 1024,
+    };
+  }
   const { count, error } = await db
     .from("attachments")
     .select("id", { count: "exact", head: true })
@@ -92,24 +108,26 @@ export async function getExcelQuotaInfo(
   if (error) throw error;
   const prof = await db.from("profiles").select("excel_quota").eq("id", uid).maybeSingle();
   const quota = (prof.data as { excel_quota?: number } | null)?.excel_quota ?? MAX_EXCEL_PER_USER;
-  return { used: count ?? 0, quota };
+  return { used: count ?? 0, quota, maxBytes: MAX_FILE_BYTES };
 }
 
 /** Arabic line shown to owners near the upload field. */
-export function excelQuotaText(info: { used: number; quota: number }): string {
+export function excelQuotaText(info: ExcelQuotaInfo): string {
   const left = Math.max(0, info.quota - info.used);
-  if (left === 0) return "استخدمت كل ملفات Excel المجانية";
-  return `لديك ${info.quota} ملفات Excel مجانية لعرض نماذج من عملك يجرّبها العملاء. المتبقي: ${left}`;
+  const prefix = info.tier ? `درجتك: ${tierLabel(info.tier)} — ` : "";
+  const period = info.monthly ? " هذا الشهر" : "";
+  if (left === 0) return `${prefix}استخدمت كل ملفات Excel المتاحة لك${period}`;
+  return `${prefix}لديك ${info.quota} ملفات Excel${info.monthly ? " شهريًا" : " مجانية"} لعرض نماذج من عملك يجرّبها العملاء. المتبقي${period}: ${left}`;
 }
 
-/** Each account may keep at most 3 Excel/CSV files across all projects. */
+/** Stop before uploading when the Excel/CSV allowance would be exceeded (the database enforces it too). */
 export async function assertExcelQuota(db: SupabaseClient, uid: string, adding: number) {
   if (adding <= 0) return;
-  const { used, quota } = await getExcelQuotaInfo(db, uid);
+  const { used, quota, monthly } = await getExcelQuotaInfo(db, uid);
   if (used + adding > quota) {
     const left = Math.max(0, quota - used);
     throw new Error(
-      `مسموح ${quota} ملفات Excel لحسابك. عندك ${used}، وباقي ${left}. احذف ملفًا قديمًا أو اطلب ملفات إضافية`
+      `مسموح ${quota} ملفات Excel لحسابك${monthly ? " شهريًا" : ""}. عندك ${used}، وباقي ${left}. احذف ملفًا قديمًا أو ارفع درجتك`
     );
   }
 }

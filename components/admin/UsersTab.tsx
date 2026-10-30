@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import TierBadge from "@/components/TierBadge";
+import type { Tier } from "@/lib/tiers";
 import { Filters, PAGE_SIZE, Pager, cleanQuery, errorText, formatDate, setBanned, sinceIso, type Period } from "./shared";
 
 type Member = {
@@ -13,6 +15,15 @@ type Member = {
   is_admin: boolean;
   is_banned?: boolean;
 };
+
+type TierRow = { id: string; tier: Tier; diamond_until: string | null };
+
+function plusMonth(from?: string | null): string {
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Helsinki" });
+  const base = new Date(`${from && from > today ? from : today}T12:00:00Z`);
+  base.setUTCMonth(base.getUTCMonth() + 1);
+  return base.toISOString().slice(0, 10);
+}
 
 export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChanged?: () => void }) {
   const [query, setQuery] = useState("");
@@ -26,6 +37,8 @@ export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChan
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [reload, setReload] = useState(0);
+  const [tiers, setTiers] = useState<Record<string, TierRow> | null>(null);
+  const [until, setUntil] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -54,8 +67,12 @@ export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChan
         if (res.error) throw new Error(res.error.message);
         if (cancelled) return;
         setHasBan(withBan);
-        setRows((res.data ?? []) as unknown as Member[]);
+        const list = (res.data ?? []) as unknown as Member[];
+        setRows(list);
         setTotal(res.count ?? 0);
+        const t = list.length ? await db.rpc("admin_tiers", { ids: list.map((m) => m.id) }) : { data: [], error: null };
+        if (cancelled) return;
+        setTiers(t.error ? null : Object.fromEntries(((t.data ?? []) as TierRow[]).map((r) => [r.id, r])));
       } catch (error) {
         if (!cancelled) setMessage(errorText(error, "تعذر تحميل المشتركين."));
       } finally {
@@ -78,6 +95,28 @@ export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChan
         setReload((n) => n + 1);
         onChanged?.();
       }
+    } catch (error) {
+      setMessage(errorText(error, "تعذر تنفيذ الإجراء."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function setDiamond(m: Member, date: string | null) {
+    if (busy) return;
+    const who = m.full_name || m.username;
+    const ok = window.confirm(
+      date ? `تفعيل عضوية ماسي لـ «${who}» حتى ${date}؟` : `إزالة عضوية ماسي من «${who}»؟`
+    );
+    if (!ok) return;
+    setBusy(m.id);
+    setMessage("");
+    try {
+      const { error } = await db.rpc("set_diamond", { target: m.id, until: date });
+      if (error) throw new Error(error.message);
+      setMessage(date ? `تم تفعيل ماسي حتى ${date}.` : "تمت إزالة ماسي.");
+      setReload((n) => n + 1);
+      onChanged?.();
     } catch (error) {
       setMessage(errorText(error, "تعذر تنفيذ الإجراء."));
     } finally {
@@ -115,9 +154,36 @@ export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChan
               </span>
               <span>
                 {m.is_admin && <span className="badge">مدير</span>}{" "}
-                {m.is_banned && <span className="badge admin-badge-danger">محظور</span>}
+                {m.is_banned && <span className="badge admin-badge-danger">محظور</span>}{" "}
+                {tiers?.[m.id] && <TierBadge tier={tiers[m.id].tier} />}
+                {tiers?.[m.id]?.diamond_until && (
+                  <span className="muted"> ماسي حتى {tiers[m.id].diamond_until}</span>
+                )}
               </span>
             </div>
+            {tiers?.[m.id] && (
+              <div className="admin-actions admin-diamond">
+                <input
+                  type="date"
+                  aria-label="ماسي حتى"
+                  value={until[m.id] ?? plusMonth(tiers[m.id].diamond_until)}
+                  onChange={(e) => setUntil((u) => ({ ...u, [m.id]: e.target.value }))}
+                />
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={Boolean(busy)}
+                  onClick={() => void setDiamond(m, until[m.id] ?? plusMonth(tiers[m.id].diamond_until))}
+                >
+                  {tiers[m.id].diamond_until ? "💎 تمديد ماسي" : "💎 تفعيل ماسي"}
+                </button>
+                {tiers[m.id].diamond_until && (
+                  <button type="button" className="ghost" disabled={Boolean(busy)} onClick={() => void setDiamond(m, null)}>
+                    إزالة ماسي
+                  </button>
+                )}
+              </div>
+            )}
             {hasBan && !m.is_admin && (
               <div className="admin-actions">
                 <button type="button" className={m.is_banned ? "ghost" : "secondary"} disabled={Boolean(busy)} onClick={() => void toggle(m)}>

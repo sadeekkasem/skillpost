@@ -13,7 +13,9 @@ import {
   getExcelQuotaInfo,
   excelQuotaText,
   scanAttachment,
+  MAX_FILE_BYTES,
 } from "@/lib/upload";
+import TierBadge from "@/components/TierBadge";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -55,6 +57,7 @@ export default function Detail({
   const [fileInputKey, setFileInputKey] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [quotaText, setQuotaText] = useState("");
+  const [maxBytes, setMaxBytes] = useState(MAX_FILE_BYTES);
   const scanRequested = useRef(new Set<string>());
 
   const isDemo = id.startsWith("demo-");
@@ -99,7 +102,9 @@ export default function Detail({
       const owner = (projectResult.data as { user_id?: string }).user_id === user.id;
       if (owner) {
         try {
-          setQuotaText(excelQuotaText(await getExcelQuotaInfo(db, user.id)));
+          const info = await getExcelQuotaInfo(db, user.id);
+          setQuotaText(excelQuotaText(info));
+          setMaxBytes(info.maxBytes);
         } catch {
           setQuotaText("");
         }
@@ -240,7 +245,7 @@ export default function Detail({
       }
 
       const ready: File[] = [];
-      for (const file of files) ready.push(await prepareUpload(file));
+      for (const file of files) ready.push(await prepareUpload(file, maxBytes));
       await assertExcelQuota(db, uid, ready.filter((f) => isExcel(f.name)).length);
 
       const updateResult = await db
@@ -416,7 +421,7 @@ export default function Detail({
     });
   }
 
-  async function download(path: string) {
+  async function download(path: string, attachmentId: string) {
     await runAction(async () => {
       if (!db || !uid) {
         throw new Error("سجّل الدخول أولًا لتنزيل الملف");
@@ -429,6 +434,7 @@ export default function Detail({
       if (result.error) throw result.error;
 
       if (result.data) {
+        void db.rpc("count_download", { att: attachmentId }).then(() => undefined, () => undefined);
         window.location.assign(result.data.signedUrl);
       }
     });
@@ -485,7 +491,8 @@ export default function Detail({
 
             <a href={`/profile/${p.user_id}`}>
               {p.profiles?.full_name || p.profiles?.username || "عضو"}
-            </a>
+            </a>{" "}
+            <TierBadge id={p.user_id} />
 
             {!isDemo && (
               <div className="row">
@@ -585,7 +592,7 @@ export default function Detail({
               </label>
 
               <p className="muted">
-                حتى 2 ميغابايت لكل ملف، و3 ملفات Excel كحد أقصى لكل حساب. الصور تُضغط تلقائيًا. المرفقات الجديدة تُضاف إلى
+                حتى {Math.round(maxBytes / 1048576)} ميغابايت لكل ملف. الصور تُضغط تلقائيًا. المرفقات الجديدة تُضاف إلى
                 المرفقات الحالية ولا تستبدلها. لا ترفع بيانات
                 شخصية أو مالية حقيقية.
               </p>
@@ -658,7 +665,7 @@ export default function Detail({
                         !isOwner &&
                         !isAdmin)
                     }
-                    onClick={() => download(attachment.path)}
+                    onClick={() => download(attachment.path, attachment.id)}
                   >
                     {attachment.name}
                   </button>
@@ -701,7 +708,8 @@ export default function Detail({
                     {item.profiles?.full_name ||
                       item.profiles?.username ||
                       "عضو"}
-                  </strong>
+                  </strong>{" "}
+                  <TierBadge id={item.user_id} />
                   <p>{item.content}</p>
                   {item.user_id && (
                     <ReportButton db={db} viewerId={uid} ownerId={item.user_id} targetType="comment" targetId={item.id} />

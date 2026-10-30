@@ -5,6 +5,7 @@ import { getClient } from "@/lib/supabase";
 import { demoProjects, categories } from "@/lib/demo";
 import type { Project } from "@/lib/types";
 import Card from "./ProjectCard";
+import { diamondFirst, getDiamondMembers } from "@/lib/tiers";
 import ActiveAds from "./ActiveAds";
 
 
@@ -48,6 +49,7 @@ export default function Feed() {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [diamonds, setDiamonds] = useState<string[]>([]);
   const [failedAvatars, setFailedAvatars] = useState<string[]>([]);
 
   useEffect(() => {
@@ -88,9 +90,24 @@ export default function Feed() {
           return;
         }
 
-        setItems(
-          (projectsResult.data ?? []) as unknown as Project[]
-        );
+        const recent = (projectsResult.data ?? []) as unknown as Project[];
+        const diamondIds = await getDiamondMembers(db);
+        let featured: Project[] = [];
+        if (diamondIds.length) {
+          const featuredResult = await db
+            .from("projects")
+            .select(
+              "*,profiles!projects_user_id_fkey(username,full_name,avatar_path,specialty),attachments(*)"
+            )
+            .in("user_id", diamondIds.slice(0, 100))
+            .order("created_at", { ascending: false })
+            .limit(12);
+          featured = (featuredResult.data ?? []) as unknown as Project[];
+        }
+        if (cancelled) return;
+        const seen = new Set(featured.map((p) => p.id));
+        setDiamonds(diamondIds);
+        setItems([...featured, ...recent.filter((p) => !seen.has(p.id))]);
 
         const membersResult = await db
           .from("profiles")
@@ -163,7 +180,7 @@ export default function Feed() {
       );
     });
 
-    return results.sort((a, b) => {
+    const sorted = results.sort((a, b) => {
       if (sort === "title") {
         return a.title.localeCompare(b.title, "ar", {
           sensitivity: "base",
@@ -176,7 +193,8 @@ export default function Feed() {
 
       return sort === "oldest" ? difference : -difference;
     });
-  }, [items, q, cat, sort]);
+    return diamondFirst(sorted, (p) => p.user_id, diamonds);
+  }, [items, q, cat, sort, diamonds]);
 
   const hasFilters =
     q.trim() !== "" || cat !== "" || sort !== "newest";

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getClient } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
+import TierBadge from "./TierBadge";
 
 type ProjectWithOwner = Project & {
   profiles?: {
@@ -14,7 +15,8 @@ type ProjectWithOwner = Project & {
 
 export default function ProjectCard({
   project,
-}: Readonly<{ project: Project }>) {
+  pinned = false,
+}: Readonly<{ project: Project; pinned?: boolean }>) {
   const p = project as ProjectWithOwner;
   const owner = p.profiles ?? null;
 
@@ -56,6 +58,7 @@ export default function ProjectCard({
         className="badge"
         style={{ alignSelf: "flex-start" }}
       >
+        {pinned && "📌 مثبّت · "}
         {p.category}
       </span>
 
@@ -120,7 +123,7 @@ export default function ProjectCard({
                   overflowWrap: "anywhere",
                 }}
               >
-                {ownerName}
+                {ownerName} <TierBadge id={ownerId} />
               </span>
 
               {owner?.specialty && (
@@ -140,7 +143,7 @@ export default function ProjectCard({
         </div>
       ) : (
         <p className="muted" style={{ margin: 0 }}>
-          {ownerName}
+          {ownerName} <TierBadge id={ownerId} />
         </p>
       )}
 

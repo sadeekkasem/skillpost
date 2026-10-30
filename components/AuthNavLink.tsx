@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getClient } from "@/lib/supabase";
+import { applyStoredReferral, rememberReferral, touchActivity } from "@/lib/tiers";
 
 export default function AuthNavLink() {
   const [db] = useState(() => getClient());
@@ -13,6 +14,7 @@ export default function AuthNavLink() {
     let cancelled = false;
 
     async function load() {
+      rememberReferral();
       if (!db) {
         setLoading(false);
         return;
@@ -23,6 +25,10 @@ export default function AuthNavLink() {
 
         if (!cancelled) {
           setUserId(data.user?.id ?? "");
+        }
+        if (data.user) {
+          void touchActivity(db, data.user.id);
+          void applyStoredReferral(db);
         }
       } catch {
         if (!cancelled) {

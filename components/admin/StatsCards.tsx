@@ -59,6 +59,17 @@ export default function StatsCards({ stats }: { stats: AdminStats }) {
       tone: adsPending > 0 ? "warn" : "info",
       sub: `بانتظار المراجعة · ${fmt(n(stats, "ads_approved"))} موافق عليه · ${fmt(n(stats, "ads_active"))} نشط الآن`,
     },
+    ...("tier_bronze" in stats
+      ? [
+          {
+            label: "الدرجات",
+            icon: "🏅",
+            value: n(stats, "tier_diamond"),
+            tone: "main" as Tone,
+            sub: `💎 ${fmt(n(stats, "tier_diamond"))} · 🥇 ${fmt(n(stats, "tier_gold"))} · 🥈 ${fmt(n(stats, "tier_silver"))} · 🥉 ${fmt(n(stats, "tier_bronze"))}`,
+          },
+        ]
+      : []),
     { label: "رسائل المحادثة", icon: "💬", value: n(stats, "messages_total"), tone: "info", sub: `+${fmt(n(stats, "messages_24h"))} آخر 24 ساعة` },
     { label: "المنشورات", icon: "📝", value: n(stats, "posts_total"), tone: "info", sub: `+${fmt(n(stats, "posts_24h"))} آخر 24 ساعة` },
     { label: "ملفات Excel/CSV", icon: "📊", value: n(stats, "excel_files"), tone: "info" },

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import TierBadge from "./TierBadge";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Post, PostComment } from "@/lib/types";
 import ReportButton from "@/components/ReportButton";
@@ -175,7 +176,8 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
         <div style={{ flex: 1, minWidth: 0 }}>
           <Link href={`/profile/${post.user_id}`} style={{ fontWeight: 700, overflowWrap: "anywhere" }}>
             {authorName}
-          </Link>
+          </Link>{" "}
+          <TierBadge id={post.user_id} />
           <div className="muted" style={{ fontSize: "14px" }}>
             {formatTime(post.created_at)}
             {edited && " (معدَّل)"}
@@ -263,6 +265,7 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
                   <Link href={`/profile/${comment.user_id}`} style={{ fontWeight: 600 }}>
                     {name}
                   </Link>
+                  <TierBadge id={comment.user_id} />
                   <span className="muted" style={{ fontSize: "13px" }}>
                     {formatTime(comment.created_at)}
                   </span>

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import type { ComponentProps } from "react";
 import { getClient } from "@/lib/supabase";
 import { compressImage, MAX_RAW_IMAGE_BYTES } from "@/lib/upload";
+import { applyStoredReferral, storedReferral, touchActivity } from "@/lib/tiers";
+import MembershipPanel from "./MembershipPanel";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -217,6 +219,7 @@ export default function Account() {
               terms_accepted: true,
               age_confirmed: true,
               marketing_opt_in: signupMarketing,
+              ...(storedReferral() ? { ref: storedReferral() } : {}),
             },
           },
         });
@@ -228,6 +231,7 @@ export default function Account() {
         if (data.session && data.user) {
           clearProfile();
           setUid(data.user.id);
+          await applyStoredReferral(db);
           await loadProfile(data.user.id);
           setMsg("تم إنشاء الحساب وتسجيل الدخول");
         } else {
@@ -246,6 +250,8 @@ export default function Account() {
         clearProfile();
         setUid(data.user.id);
         setPassword("");
+        void touchActivity(db, data.user.id);
+        await applyStoredReferral(db);
         await loadProfile(data.user.id);
         setMsg("تم تسجيل الدخول");
       }
@@ -730,6 +736,7 @@ export default function Account() {
               </div>
             </form>
           )}
+          {profileReady && db && <MembershipPanel db={db} uid={uid} />}
         </>
       ) : (
         <form className="card auth-card" onSubmit={auth}>

@@ -11,6 +11,8 @@ import type {
 import Card from "./ProjectCard";
 import PostsSection from "./PostsSection";
 import ReportButton from "./ReportButton";
+import TierBadge from "./TierBadge";
+import { loadTier, type Tier } from "@/lib/tiers";
 
 function safeWebUrl(
   value: string | null | undefined,
@@ -70,6 +72,8 @@ export default function UserProfile({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [viewerId, setViewerId] = useState("");
+  const [ownerTier, setOwnerTier] = useState<Tier | null>(null);
+  const [viewerTier, setViewerTier] = useState<Tier | null>(null);
   const [failedAvatar, setFailedAvatar] = useState("");
 
   const [friendship, setFriendship] =
@@ -141,6 +145,15 @@ export default function UserProfile({
         if (cancelled) return;
 
         setViewerId(currentUserId);
+        void loadTier(db, id).then((t) => {
+          if (!cancelled) setOwnerTier(t);
+        });
+        if (currentUserId && currentUserId !== id) {
+          void db.rpc("record_profile_view", { target: id }).then(() => undefined, () => undefined);
+          void loadTier(db, currentUserId).then((t) => {
+            if (!cancelled) setViewerTier(t);
+          });
+        }
 
         if (currentUserId && currentUserId !== id) {
           const friendshipResult = await db
@@ -208,6 +221,12 @@ export default function UserProfile({
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail);
 
   const isOwner = Boolean(viewerId && viewerId === id);
+  // Diamond members can pin one of their projects to the top.
+  const pinnedId =
+    ownerTier === "diamond" ? (profile as { pinned_project_id?: string | null } | null)?.pinned_project_id ?? "" : "";
+  const orderedProjects = pinnedId
+    ? [...projects.filter((p) => p.id === pinnedId), ...projects.filter((p) => p.id !== pinnedId)]
+    : projects;
   const canUseFriends = Boolean(
     viewerId && !isOwner && profile
   );
@@ -367,7 +386,7 @@ export default function UserProfile({
                     overflowWrap: "anywhere",
                   }}
                 >
-                  {displayName}
+                  {displayName} <TierBadge id={id} tier={ownerTier} />
                 </h1>
 
                 {profile.specialty && (
@@ -466,6 +485,19 @@ export default function UserProfile({
                       رفض الطلب
                     </button>
                   </div>
+                )}
+
+                {friendshipStatus !== "friends" && viewerTier === "diamond" && (
+                  <button
+                    type="button"
+                    className="secondary"
+                    style={{ marginTop: "8px" }}
+                    onClick={() =>
+                      window.dispatchEvent(new CustomEvent("open-chat", { detail: { id } }))
+                    }
+                  >
+                    💬 راسل (ميزة ماسي)
+                  </button>
                 )}
 
                 {friendshipStatus === "friends" && (
@@ -578,8 +610,8 @@ export default function UserProfile({
             )}
 
           <div className="grid">
-            {projects.map((project) => (
-              <Card key={project.id} project={project} />
+            {orderedProjects.map((project) => (
+              <Card key={project.id} project={project} pinned={project.id === pinnedId} />
             ))}
           </div>
 

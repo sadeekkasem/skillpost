@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import TierBadge from "@/components/TierBadge";
 import { getClient } from "@/lib/supabase";
 import type { Friendship, Profile } from "@/lib/types";
 
@@ -276,7 +277,9 @@ export default function FriendsPage() {
           </div>
         )}
 
-        <h3 style={{ margin: 0 }}>{name}</h3>
+        <h3 style={{ margin: 0 }}>
+          {name} <TierBadge id={person.id} />
+        </h3>
 
         {person.specialty && (
           <p className="muted" style={{ margin: 0 }}>

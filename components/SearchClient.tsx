@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getClient } from "@/lib/supabase";
+import { diamondFirst, getDiamondMembers } from "@/lib/tiers";
+import TierBadge from "./TierBadge";
 
 type MemberHit = { id: string; username: string; full_name: string; specialty: string | null };
-type ProjectHit = { id: string; title: string; description: string; category: string };
+type ProjectHit = { id: string; user_id: string; title: string; description: string; category: string };
 type PostHit = {
   id: string;
   user_id: string;
@@ -85,7 +87,7 @@ export default function SearchClient() {
           .limit(20),
         db
           .from("projects")
-          .select("id,title,description,category")
+          .select("id,user_id,title,description,category")
           .or(`title.ilike.${pattern},description.ilike.${pattern},category.ilike.${pattern}`)
           .order("created_at", { ascending: false })
           .limit(20),
@@ -95,13 +97,14 @@ export default function SearchClient() {
           .ilike("content", pattern)
           .order("created_at", { ascending: false })
           .limit(20),
+        getDiamondMembers(db),
       ])
-        .then(([m, pr, po]) => {
+        .then(([m, pr, po, diamonds]) => {
           if (cancelled) return;
           const error = m.error || pr.error || po.error;
           if (error) setMessage(error.message);
-          setMembers((m.data ?? []) as MemberHit[]);
-          setProjects((pr.data ?? []) as ProjectHit[]);
+          setMembers(diamondFirst((m.data ?? []) as MemberHit[], (x) => x.id, diamonds));
+          setProjects(diamondFirst((pr.data ?? []) as ProjectHit[], (x) => x.user_id, diamonds));
           setPosts((po.data ?? []) as unknown as PostHit[]);
           setSearched(term);
         })
@@ -172,6 +175,7 @@ export default function SearchClient() {
                   <Link href={`/profile/${member.id}`} style={{ fontWeight: 700 }}>
                     {member.full_name || member.username}
                   </Link>{" "}
+                  <TierBadge id={member.id} />{" "}
                   <span className="muted">
                     <bdi>@{member.username}</bdi>
                   </span>
@@ -204,6 +208,7 @@ export default function SearchClient() {
                   <Link href={`/profile/${post.user_id}`} style={{ fontWeight: 700 }}>
                     {post.profiles?.full_name || post.profiles?.username || "عضو"}
                   </Link>{" "}
+                  <TierBadge id={post.user_id} />{" "}
                   <span className="muted" style={{ fontSize: 14 }}>
                     {new Date(post.created_at).toLocaleString("ar")}
                   </span>
