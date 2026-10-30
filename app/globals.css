@@ -375,3 +375,6 @@ input[type=file]{max-width:100%}
 .video-post-link{display:inline-block;margin-top:10px;font-weight:600}
 .feed-project{margin-bottom:16px;min-width:0;max-width:100%}
 .feed-project>*{width:100%;max-width:100%;box-sizing:border-box}
+.members-strip .grid{display:grid;grid-auto-flow:column;grid-template-columns:none!important;grid-auto-columns:220px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.members-strip .grid>*{scroll-snap-align:start;min-width:0}
+@media(max-width:520px){.members-strip .grid{grid-auto-columns:72%}}

@@ -232,9 +232,267 @@ export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = 
         </p>
       )}
 
+      {inTimeline ? (
+        <>
+      <section
+        className="card"
+        aria-label={t("feed.filtersLabel")}
+      >
+        <div
+          className="row"
+          style={{
+            flexWrap: "wrap",
+            gap: "12px",
+            alignItems: "end",
+          }}
+        >
+          <label
+            style={{ flex: "2 1 240px", minWidth: 0 }}
+          >
+            {t("feed.searchLabel")}
+            <input
+              type="search"
+              placeholder={t("feed.searchPlaceholder")}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+              }}
+            />
+          </label>
+
+          <label
+            style={{ flex: "1 1 180px", minWidth: 0 }}
+          >
+            {t("feed.specialty")}
+            <select
+              value={cat}
+              onChange={(e) => setCat(e.target.value)}
+              style={{ width: "100%" }}
+            >
+              <option value="">{t("feed.allSpecialties")}</option>
+
+              {availableCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label
+            style={{ flex: "1 1 180px", minWidth: 0 }}
+          >
+            {t("feed.sort")}
+            <select
+              value={sort}
+              onChange={(e) =>
+                setSort(e.target.value as SortOrder)
+              }
+              style={{ width: "100%" }}
+            >
+              <option value="newest">{t("feed.newest")}</option>
+              <option value="oldest">{t("feed.oldest")}</option>
+              <option value="title">{t("feed.byTitle")}</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            className="secondary"
+            disabled={!hasFilters}
+            onClick={resetFilters}
+          >
+            {t("feed.clearFilters")}
+          </button>
+        </div>
+
+        {!loading && !failed && (
+          <p className="muted" aria-live="polite">
+            {t("feed.resultCount", { shown: filtered.length, total: items.length })}
+          </p>
+        )}
+
+        {!loading && !failed && items.length === 100 && (
+          <p className="muted">
+            {t("feed.searchScope")}
+          </p>
+        )}
+      </section>
+
+      {loading ? (
+        <p className="notice" aria-live="polite">
+          {t("feed.loading")}
+        </p>
+      ) : failed ? (
+        <button
+          type="button"
+          onClick={() => setReloadKey((key) => key + 1)}
+        >
+          {t("feed.retry")}
+        </button>
+      ) : (
+        <>
+          {inTimeline && !hasFilters ? (
+            <p className="muted">{t("feed.inTimelineHint")}</p>
+          ) : (
+          <div className="grid">
+            {filtered.map((project) => (
+              <Card key={project.id} project={project} />
+            ))}
+          </div>
+          )}
+
+          {filtered.length === 0 && (
+            <section className="card">
+              <h2>
+                {items.length === 0
+                  ? t("feed.noProjects")
+                  : t("feed.noMatches")}
+              </h2>
+
+              <p>
+                {items.length === 0
+                  ? t("feed.noProjectsHint")
+                  : t("feed.noMatchesHint")}
+              </p>
+
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                >
+                  {t("feed.clearFilters")}
+                </button>
+              )}
+            </section>
+          )}
+        </>
+      )}
       {!loading && !failed && members.length > 0 && (
         <section
-          className="card"
+          className={inTimeline ? "card members-strip" : "card"}
+          aria-label={t("feed.membersLabel")}
+          style={{ marginBottom: "24px" }}
+        >
+          <h2>{t("feed.members")}</h2>
+
+          <p className="muted">
+            {t("feed.membersHint")}
+          </p>
+
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns:
+                "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: "16px",
+            }}
+          >
+            {members.map((member) => {
+              const name = memberName(member);
+              const avatar = memberAvatar(member);
+              const isAvatarFailed =
+                Boolean(avatar) &&
+                failedAvatars.includes(avatar);
+
+              return (
+                <article
+                  key={member.id}
+                  className="card"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    gap: "12px",
+                    padding: "20px",
+                  }}
+                >
+                  {avatar && !isAvatarFailed ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatar}
+                      alt={t("feed.avatarAlt", { name })}
+                      width={88}
+                      height={88}
+                      onError={() =>
+                        setFailedAvatars((current) => [
+                          ...current,
+                          avatar,
+                        ])
+                      }
+                      style={{
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "2px solid #cbd5e1",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      aria-label={t("feed.noAvatar")}
+                      style={{
+                        width: "88px",
+                        height: "88px",
+                        borderRadius: "50%",
+                        backgroundColor: "#e2e8f0",
+                        color: "#334155",
+                        display: "grid",
+                        placeItems: "center",
+                        fontSize: "32px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {name.trim().charAt(0) || "؟"}
+                    </div>
+                  )}
+
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: "18px",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {name}
+                  </h3>
+
+                  {member.specialty && (
+                    <p
+                      className="muted"
+                      style={{ margin: 0 }}
+                    >
+                      {member.specialty}
+                    </p>
+                  )}
+
+                  <a
+                    href={`/profile/${member.id}`}
+                    className="button"
+                    style={{ marginTop: "auto" }}
+                  >
+                    {t("feed.viewProfile")}
+                  </a>
+                </article>
+              );
+            })}
+          </div>
+
+          {members.length === 24 && (
+            <p className="muted">
+              {t("feed.membersLimit")}
+            </p>
+          )}
+        </section>
+      )}
+
+        </>
+      ) : (
+        <>
+      {!loading && !failed && members.length > 0 && (
+        <section
+          className={inTimeline ? "card members-strip" : "card"}
           aria-label={t("feed.membersLabel")}
           style={{ marginBottom: "24px" }}
         >
@@ -483,6 +741,8 @@ export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = 
               )}
             </section>
           )}
+        </>
+      )}
         </>
       )}
     </>
