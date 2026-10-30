@@ -212,6 +212,7 @@ export default function Account() {
           email: email.trim(),
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/account`,
             data: {
               terms_accepted: true,
               age_confirmed: true,
