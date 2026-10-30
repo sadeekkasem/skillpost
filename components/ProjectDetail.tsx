@@ -1,12 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ComponentProps } from "react";
 import { getClient } from "@/lib/supabase";
 import { categories, demoProjects } from "@/lib/demo";
 import type { Project, Comment } from "@/lib/types";
 import ReportButton from "@/components/ReportButton";
-import { prepareUpload, assertExcelQuota, isExcel } from "@/lib/upload";
+import {
+  prepareUpload,
+  assertExcelQuota,
+  isExcel,
+  getExcelQuotaInfo,
+  excelQuotaText,
+  scanAttachment,
+} from "@/lib/upload";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -46,6 +53,9 @@ export default function Detail({
   const [category, setCategory] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [quotaText, setQuotaText] = useState("");
+  const scanRequested = useRef(new Set<string>());
 
   const isDemo = id.startsWith("demo-");
   const isOwner = Boolean(p && uid && uid === p.user_id);
@@ -77,6 +87,29 @@ export default function Detail({
     const authResult = await db.auth.getUser();
     const user = authResult.data.user;
     setUid(user?.id ?? "");
+
+    if (user) {
+      const adminResult = await db
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+      setIsAdmin(Boolean((adminResult.data as { is_admin?: boolean } | null)?.is_admin));
+
+      const owner = (projectResult.data as { user_id?: string }).user_id === user.id;
+      if (owner) {
+        try {
+          setQuotaText(excelQuotaText(await getExcelQuotaInfo(db, user.id)));
+        } catch {
+          setQuotaText("");
+        }
+      } else {
+        setQuotaText("");
+      }
+    } else {
+      setIsAdmin(false);
+      setQuotaText("");
+    }
 
     const commentsResult = await db
       .from("comments")
@@ -126,6 +159,33 @@ export default function Detail({
         setMsg(errorMessage(error));
       });
   }, [load, isDemo]);
+
+  // Scan attachments still pending (e.g. older uploads) when the owner or an admin views them.
+  useEffect(() => {
+    if (!db || isDemo || !p || !uid || !(isOwner || isAdmin)) return;
+    const pending = (p.attachments ?? []).filter(
+      (a) => (a.scan_status ?? "pending") === "pending" && !scanRequested.current.has(a.id)
+    );
+    if (!pending.length) return;
+    pending.forEach((a) => scanRequested.current.add(a.id));
+    void (async () => {
+      const notes: string[] = [];
+      let changed = false;
+      for (const a of pending) {
+        const scan = await scanAttachment(db, a.id);
+        if (scan.status !== "pending") changed = true;
+        if (scan.status === "rejected") notes.push(`رُفض الملف "${a.name}" وحُذف: ${scan.reason_ar}`);
+      }
+      if (changed) {
+        try {
+          await load();
+        } catch {
+          // ignore; the list refreshes on next visit
+        }
+      }
+      if (notes.length) setMsg(notes.join(" "));
+    })();
+  }, [db, isDemo, p, uid, isOwner, isAdmin, load]);
 
   async function runAction(action: () => Promise<void>) {
     if (busy) return;
@@ -198,6 +258,7 @@ export default function Detail({
       if (updateResult.error) throw updateResult.error;
 
       let uploadedCount = 0;
+      const scanNotes: string[] = [];
 
       try {
         for (const file of ready) {
@@ -217,7 +278,9 @@ export default function Detail({
               owner_id: uid,
               path,
               name: file.name,
-            });
+            })
+            .select("id")
+            .single();
 
           if (attachmentResult.error) {
             const cleanupResult = await db.storage
@@ -234,6 +297,14 @@ export default function Detail({
           }
 
           uploadedCount += 1;
+          scanRequested.current.add(attachmentResult.data.id);
+
+          const scan = await scanAttachment(db, attachmentResult.data.id);
+          if (scan.status === "rejected") {
+            scanNotes.push(`رُفض الملف "${file.name}" وحُذف: ${scan.reason_ar}`);
+          } else if (scan.status === "pending") {
+            scanNotes.push(`الملف "${file.name}" قيد الفحص.`);
+          }
         }
       } catch (error) {
         setFiles((current) => current.slice(uploadedCount));
@@ -255,7 +326,7 @@ export default function Detail({
       setEditing(false);
 
       await load();
-      setMsg("تم حفظ التعديلات");
+      setMsg(["تم حفظ التعديلات", ...scanNotes].join(" "));
     });
   }
 
@@ -519,6 +590,8 @@ export default function Detail({
                 شخصية أو مالية حقيقية.
               </p>
 
+              {quotaText && <p className="muted">{quotaText}</p>}
+
               {files.length > 0 && (
                 <ul>
                   {files.map((file, index) => (
@@ -563,8 +636,10 @@ export default function Detail({
               <h2>المرفقات</h2>
 
               <p className="muted">
-                يتطلب التنزيل تسجيل الدخول. الملفات من المستخدمين
-                ولم تُفحص بمضاد فيروسات.
+                يتطلب التنزيل تسجيل الدخول. يفحص الموقع كل ملف تلقائيًا قبل إتاحته
+                للآخرين: يتأكد من نوعه الحقيقي، ويرفض ملفات Excel التي فيها ماكرو أو
+                روابط خارجية، وملفات CSV التي فيها صيغ، وملفات PDF التي فيها أكواد.
+                هذا فحص أمان أساسي وليس مضاد فيروسات كاملًا.
               </p>
 
               {!p.attachments?.length && (
@@ -576,11 +651,24 @@ export default function Detail({
                   <button
                     type="button"
                     className="secondary"
-                    disabled={busy}
+                    disabled={
+                      busy ||
+                      ((attachment.scan_status ?? "pending") !== "clean" &&
+                        !isOwner &&
+                        !isAdmin)
+                    }
                     onClick={() => download(attachment.path)}
                   >
                     {attachment.name}
                   </button>
+
+                  <span className="muted">
+                    {attachment.scan_status === "clean"
+                      ? "✅ تم فحص الملف"
+                      : attachment.scan_status === "rejected"
+                        ? "⛔ مرفوض"
+                        : "⏳ قيد الفحص"}
+                  </span>
 
                   {isOwner && (
                     <button

@@ -23,6 +23,8 @@ export type Attachment = {
   owner_id: string;
   path: string;
   name: string;
+  scan_status?: "pending" | "clean" | "rejected";
+  scanned_at?: string | null;
 };
 
 export type Project = {

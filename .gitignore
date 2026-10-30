@@ -7,3 +7,4 @@ node_modules/
 *.local
 out/
 coverage/
+supabase/functions/scan-file/samples/

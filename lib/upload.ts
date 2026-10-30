@@ -79,9 +79,11 @@ export async function prepareUpload(file: File): Promise<File> {
   return ready;
 }
 
-/** Each account may keep at most 3 Excel/CSV files across all projects. */
-export async function assertExcelQuota(db: SupabaseClient, uid: string, adding: number) {
-  if (adding <= 0) return;
+/** How many Excel/CSV files the account has used, and its quota (default 3). */
+export async function getExcelQuotaInfo(
+  db: SupabaseClient,
+  uid: string
+): Promise<{ used: number; quota: number }> {
   const { count, error } = await db
     .from("attachments")
     .select("id", { count: "exact", head: true })
@@ -90,11 +92,45 @@ export async function assertExcelQuota(db: SupabaseClient, uid: string, adding: 
   if (error) throw error;
   const prof = await db.from("profiles").select("excel_quota").eq("id", uid).maybeSingle();
   const quota = (prof.data as { excel_quota?: number } | null)?.excel_quota ?? MAX_EXCEL_PER_USER;
-  const used = count ?? 0;
+  return { used: count ?? 0, quota };
+}
+
+/** Arabic line shown to owners near the upload field. */
+export function excelQuotaText(info: { used: number; quota: number }): string {
+  const left = Math.max(0, info.quota - info.used);
+  if (left === 0) return "استخدمت كل ملفات Excel المجانية";
+  return `لديك ${info.quota} ملفات Excel مجانية لعرض نماذج من عملك يجرّبها العملاء. المتبقي: ${left}`;
+}
+
+/** Each account may keep at most 3 Excel/CSV files across all projects. */
+export async function assertExcelQuota(db: SupabaseClient, uid: string, adding: number) {
+  if (adding <= 0) return;
+  const { used, quota } = await getExcelQuotaInfo(db, uid);
   if (used + adding > quota) {
     const left = Math.max(0, quota - used);
     throw new Error(
       `مسموح ${quota} ملفات Excel لحسابك. عندك ${used}، وباقي ${left}. احذف ملفًا قديمًا أو اطلب ملفات إضافية`
     );
+  }
+}
+
+export type ScanOutcome =
+  | { status: "clean" }
+  | { status: "rejected"; reason_ar: string }
+  | { status: "pending" };
+
+/** Ask the scan-file Edge Function to check an uploaded attachment. Never throws. */
+export async function scanAttachment(db: SupabaseClient, attachmentId: string): Promise<ScanOutcome> {
+  try {
+    const { data, error } = await db.functions.invoke("scan-file", {
+      body: { attachment_id: attachmentId },
+    });
+    if (error || !data) return { status: "pending" };
+    const d = data as { status?: string; reason_ar?: string };
+    if (d.status === "clean") return { status: "clean" };
+    if (d.status === "rejected") return { status: "rejected", reason_ar: d.reason_ar || "رُفض الملف" };
+    return { status: "pending" };
+  } catch {
+    return { status: "pending" };
   }
 }
