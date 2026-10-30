@@ -15,7 +15,6 @@ export const ar = {
   "nav.myAccount": "حسابي",
   "nav.login": "تسجيل الدخول",
   "nav.admin": "لوحة الإدارة",
-  "nav.setup": "التجهيز",
   "nav.switchLanguage": "English",
   "nav.switchLanguageLabel": "Switch to English",
 
@@ -31,7 +30,6 @@ export const ar = {
   "notif.friend_request": "أرسل لك طلب صداقة",
   "notif.friend_accept": "قبل طلب صداقتك",
 
-  "footer.version": "نسخة تطوير أولية",
   "footer.about": "عن المنصة",
   "footer.privacy": "الخصوصية",
   "footer.terms": "الشروط",
@@ -81,7 +79,7 @@ export const ar = {
   "auth.signupSent": "تم إرسال طلب التسجيل. إذا كان تأكيد البريد مفعّلًا، أكّد بريدك ثم سجّل الدخول.",
   "auth.signedIn": "تم تسجيل الدخول",
   "auth.signedOut": "تم تسجيل الخروج",
-  "auth.notConfigured": "أنشئ ملف الإعدادات واربط Supabase أولًا. راجع صفحة التجهيز.",
+  "auth.notConfigured": "الخدمة غير متاحة حاليًا. حاول لاحقًا.",
   "auth.loadingAccount": "جار تحميل الحساب...",
   "auth.welcome": "أهلًا بك في مهاراتي 👋",
   "auth.login": "تسجيل الدخول",

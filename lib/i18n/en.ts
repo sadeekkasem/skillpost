@@ -16,7 +16,6 @@ export const en: Dict = {
   "nav.myAccount": "My account",
   "nav.login": "Sign in",
   "nav.admin": "Admin",
-  "nav.setup": "Setup",
   "nav.switchLanguage": "العربية",
   "nav.switchLanguageLabel": "التبديل إلى العربية",
 
@@ -32,7 +31,6 @@ export const en: Dict = {
   "notif.friend_request": "sent you a friend request",
   "notif.friend_accept": "accepted your friend request",
 
-  "footer.version": "Early preview",
   "footer.about": "About",
   "footer.privacy": "Privacy",
   "footer.terms": "Terms",
@@ -82,7 +80,7 @@ export const en: Dict = {
   "auth.signupSent": "Almost there! If email confirmation is on, confirm your email and then sign in.",
   "auth.signedIn": "You're signed in.",
   "auth.signedOut": "You've been signed out.",
-  "auth.notConfigured": "Create the settings file and connect Supabase first. See the Setup page.",
+  "auth.notConfigured": "The service is unavailable right now. Please try again later.",
   "auth.loadingAccount": "Loading your account...",
   "auth.welcome": "Welcome to SkillPost 👋",
   "auth.login": "Sign in",

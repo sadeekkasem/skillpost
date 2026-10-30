@@ -45,7 +45,6 @@ export default function HeaderNav() {
       <AuthNavLink />
       <span className="nav-item"><AdminNavLink /></span>
       <NotificationBell />
-      <span className="nav-item"><Link href="/setup">{t("nav.setup")}</Link></span>
       </nav>
     </>
   );
