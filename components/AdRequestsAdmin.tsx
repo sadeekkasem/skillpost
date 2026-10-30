@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { getClient } from "@/lib/supabase";
 import { safeLink } from "@/lib/safeLink";
+import { Filters, PAGE_SIZE, Pager, sinceIso, type Period } from "@/components/admin/shared";
 
 type AdRequest = {
   id: string;
@@ -32,6 +33,11 @@ export default function AdRequestsAdmin() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("pending");
+  const [period, setPeriod] = useState<Period>("all");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,16 +46,22 @@ export default function AdRequestsAdmin() {
       try {
         if (!db) throw new Error("قاعدة البيانات غير متصلة.");
 
-        const { data, error } = await db
+        setLoading(true);
+        let req = db
           .from("ad_requests")
-          .select("*")
+          .select("*", { count: "exact" })
           .order("created_at", { ascending: false })
-          .limit(100);
+          .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+        if (status) req = req.eq("status", status);
+        const since = sinceIso(period);
+        if (since) req = req.gte("created_at", since);
+        const { data, error, count } = await req;
 
         if (error) throw new Error(error.message);
 
         if (!cancelled) {
           setRequests((data ?? []) as AdRequest[]);
+          setTotal(count ?? 0);
         }
       } catch (error) {
         if (!cancelled) {
@@ -69,7 +81,22 @@ export default function AdRequestsAdmin() {
     return () => {
       cancelled = true;
     };
-  }, [db]);
+  }, [db, status, period, page, reload]);
+
+  async function deleteRequest(request: AdRequest) {
+    if (!db || busyId) return;
+    if (!window.confirm(`حذف طلب الإعلان «${request.title}» نهائيًا؟`)) return;
+    setBusyId(request.id);
+    setMessage("");
+    const { error } = await db.from("ad_requests").delete().eq("id", request.id);
+    setBusyId("");
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setMessage("تم حذف الطلب.");
+    setReload((n) => n + 1);
+  }
 
   async function updateRequest(
     id: string,
@@ -161,9 +188,15 @@ export default function AdRequestsAdmin() {
       <h2>إدارة طلبات الإعلانات</h2>
 
       <p className="muted">
-        أحدث 100 طلب. لا تفعّل الإعلان قبل الاتفاق
-        وتأكيد استلام الدفع.
+        لا تفعّل الإعلان قبل الاتفاق وتأكيد استلام الدفع.
       </p>
+
+      <Filters period={period} onPeriod={(p) => { setPeriod(p); setPage(0); }}>
+        <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(0); }} aria-label="الحالة">
+          <option value="">كل الحالات</option>
+          {Object.entries(statusLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+      </Filters>
 
       {message && (
         <p className="notice" role="status">
@@ -299,6 +332,16 @@ export default function AdRequestsAdmin() {
                     </button>
                   )}
 
+                  {request.status !== "approved" && (
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => void deleteRequest(request)}
+                    >
+                      حذف الطلب
+                    </button>
+                  )}
+
                   {busyId === request.id && <p>جار الحفظ...</p>}
                 </fieldset>
               </form>
@@ -306,6 +349,8 @@ export default function AdRequestsAdmin() {
           );
         })}
       </div>
+
+      <Pager page={page} total={total} onPage={setPage} />
     </section>
   );
 }

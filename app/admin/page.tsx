@@ -1,259 +1,133 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getClient } from "@/lib/supabase";
-import type { Project } from "@/lib/types";
 import AdRequestsAdmin from "@/components/AdRequestsAdmin";
-import ReportsAdmin from "@/components/ReportsAdmin";
 import ExcelQuotaAdmin from "@/components/ExcelQuotaAdmin";
+import StatsCards, { type AdminStats } from "@/components/admin/StatsCards";
+import ReportsTab from "@/components/admin/ReportsTab";
+import ContentList from "@/components/admin/ContentList";
+import UsersTab from "@/components/admin/UsersTab";
+
+type Tab = "reports" | "today" | "projects" | "ads" | "users" | "tools";
+
+const tabs: { id: Tab; label: string; badge?: (s: AdminStats) => number }[] = [
+  { id: "reports", label: "البلاغات", badge: (s) => s.reports_open },
+  {
+    id: "today",
+    label: "جديد اليوم",
+    badge: (s) => (s.projects_24h ?? 0) + (s.posts_24h ?? 0) + (s.comments_24h ?? 0) + (s.post_comments_24h ?? 0),
+  },
+  { id: "projects", label: "المشاريع", badge: (s) => s.projects_total },
+  { id: "ads", label: "الإعلانات والطلبات", badge: (s) => s.ads_pending },
+  { id: "users", label: "المشتركون", badge: (s) => s.profiles_total },
+  { id: "tools", label: "أدوات" },
+];
 
 export default function AdminPage() {
   const [db] = useState(() => getClient());
-
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [message, setMessage] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [busyId, setBusyId] = useState("");
+  const [tab, setTab] = useState<Tab>("reports");
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [statsMissing, setStatsMissing] = useState(false);
+
+  const loadStats = useCallback(async (client: SupabaseClient) => {
+    const { data, error } = await client.rpc("admin_stats");
+    if (error) {
+      setStatsMissing(true);
+      return;
+    }
+    setStatsMissing(false);
+    setStats((data ?? {}) as AdminStats);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
-      setLoading(true);
-      setMessage("");
-
       if (!db) {
         setMessage("قاعدة البيانات غير متصلة");
         setLoading(false);
         return;
       }
-
       try {
-        const authResult = await db.auth.getUser();
-        const user = authResult.data.user;
-
-        if (cancelled) return;
-
-        if (authResult.error) {
-          throw authResult.error;
-        }
-
-        if (!user) {
-          setMessage("سجّل الدخول بحساب المدير أولًا.");
+        const { data: auth, error: authError } = await db.auth.getUser();
+        if (authError) throw authError;
+        if (!auth.user) {
+          if (!cancelled) setMessage("سجّل الدخول بحساب المدير أولًا.");
           return;
         }
-
-        const profileResult = await db
-          .from("profiles")
-          .select("is_admin")
-          .eq("id", user.id)
-          .single();
-
+        const { data, error } = await db.from("profiles").select("is_admin").eq("id", auth.user.id).single();
+        if (error) throw error;
         if (cancelled) return;
-
-        if (profileResult.error) {
-          throw profileResult.error;
-        }
-
-        const isAdminProfile =
-          profileResult.data?.is_admin === true;
-
-        if (!isAdminProfile) {
+        if (data?.is_admin !== true) {
           setMessage("هذه الصفحة للمدير فقط.");
           return;
         }
-
         setIsAdmin(true);
-
-        const projectsResult = await db
-          .from("projects")
-          .select(
-            "*,profiles!projects_user_id_fkey(id,username,full_name),attachments(*)"
-          )
-          .order("created_at", { ascending: false })
-          .limit(100);
-
-        if (cancelled) return;
-
-        if (projectsResult.error) {
-          throw projectsResult.error;
-        }
-
-        setProjects(
-          (projectsResult.data ?? []) as unknown as Project[]
-        );
+        await loadStats(db);
       } catch (error) {
-        if (cancelled) return;
-
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : "تعذر تحميل لوحة الإدارة"
-        );
+        if (!cancelled) setMessage(error instanceof Error ? error.message : "تعذر تحميل لوحة الإدارة");
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
-
     void load();
-
     return () => {
       cancelled = true;
     };
-  }, [db]);
+  }, [db, loadStats]);
 
-  async function deleteProject(project: Project) {
-    if (!db || busyId) return;
-
-    const confirmed = window.confirm(
-      `هل تريد حذف مشروع «${project.title}» نهائيًا؟`
-    );
-
-    if (!confirmed) return;
-
-    setBusyId(project.id);
-    setMessage("");
-
-    try {
-      const attachments = project.attachments ?? [];
-
-      if (attachments.length > 0) {
-        const storagePaths = attachments.map(
-          (file) => file.path
-        );
-
-        const storageResult = await db.storage
-          .from("project-files")
-          .remove(storagePaths);
-
-        if (storageResult.error) {
-          setMessage(
-            "تعذر حذف ملفات المشروع من التخزين؛ لن نحذف سجل المشروع."
-          );
-          return;
-        }
-      }
-
-      const { error } = await db
-        .from("projects")
-        .delete()
-        .eq("id", project.id);
-
-      if (error) throw error;
-
-      setProjects((current) =>
-        current.filter((item) => item.id !== project.id)
-      );
-
-      setMessage("تم حذف المشروع");
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "تعذر حذف المشروع"
-      );
-    } finally {
-      setBusyId("");
-    }
-  }
+  const refresh = useCallback(() => {
+    if (db) void loadStats(db);
+  }, [db, loadStats]);
 
   return (
     <div className="narrow admin-page">
       <h1>لوحة الإدارة</h1>
 
-      {message && (
-        <p className="notice" aria-live="polite">
-          {message}
-        </p>
-      )}
+      {message && <p className="notice" aria-live="polite">{message}</p>}
+      {loading && <p className="notice">جار التحميل...</p>}
+      {!loading && !isAdmin && !message && <p className="notice">هذه الصفحة متاحة لحساب المدير فقط.</p>}
 
-      {loading && (
-        <p className="notice">جار التحميل...</p>
-      )}
-
-      {!loading && !isAdmin && (
-        <p className="notice">
-          هذه الصفحة متاحة لحساب المدير فقط.
-        </p>
-      )}
-
-      {isAdmin && (
+      {isAdmin && db && (
         <>
-          <ReportsAdmin />
-
-          <AdRequestsAdmin />
-
-
-          <ExcelQuotaAdmin />
-
-          <h2>إدارة المشاريع</h2>
-
-          <p className="muted">
-            عدد المشاريع المعروضة: {projects.length}
-          </p>
-
-          <div className="grid">
-            {projects.map((project) => (
-              <article
-                key={project.id}
-                className="card"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                <span className="badge">
-                  {project.category}
-                </span>
-
-                <h2 style={{ margin: 0 }}>
-                  <Link href={`/projects/${project.id}`}>
-                    {project.title}
-                  </Link>
-                </h2>
-
-                <p
-                  className="muted"
-                  style={{ margin: 0 }}
-                >
-                  {project.profiles?.full_name ||
-                    project.profiles?.username ||
-                    "عضو"}
-                </p>
-
-                {project.description && (
-                  <p style={{ margin: 0 }}>
-                    {project.description.slice(0, 120)}
-                    {project.description.length > 120
-                      ? "…"
-                      : ""}
-                  </p>
-                )}
-
-                <button
-                  type="button"
-                  className="secondary"
-                  disabled={Boolean(busyId)}
-                  onClick={() => deleteProject(project)}
-                >
-                  {busyId === project.id
-                    ? "جار الحذف..."
-                    : "حذف المشروع"}
-                </button>
-              </article>
-            ))}
-          </div>
-
-          {!loading && projects.length === 0 && (
-            <p className="notice">
-              لا توجد مشاريع لعرضها في لوحة الإدارة.
-            </p>
+          {statsMissing && (
+            <p className="notice">الإحصائيات والحظر غير مفعّلة بعد: شغّل ملف التحديث في Supabase.</p>
           )}
+          {stats && <StatsCards stats={stats} />}
+
+          <nav className="admin-tabs" role="tablist" aria-label="أقسام لوحة الإدارة">
+            {tabs.map((t) => {
+              const count = stats && t.badge ? Number(t.badge(stats) ?? 0) : null;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === t.id}
+                  className={tab === t.id ? "active" : ""}
+                  onClick={() => setTab(t.id)}
+                >
+                  {t.label}
+                  {count !== null && <span className="admin-tab-count">{count.toLocaleString("ar")}</span>}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div role="tabpanel" className="admin-panel">
+            {tab === "reports" && <ReportsTab db={db} onChanged={refresh} />}
+            {tab === "today" && (
+              <ContentList db={db} kinds={["projects", "posts", "comments", "post_comments"]} defaultPeriod="day" onChanged={refresh} />
+            )}
+            {tab === "projects" && <ContentList db={db} kinds={["projects"]} onChanged={refresh} />}
+            {tab === "ads" && <AdRequestsAdmin />}
+            {tab === "users" && <UsersTab db={db} onChanged={refresh} />}
+            {tab === "tools" && <ExcelQuotaAdmin />}
+          </div>
         </>
       )}
     </div>

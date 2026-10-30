@@ -10,6 +10,7 @@ import type {
 } from "@/lib/types";
 import Card from "./ProjectCard";
 import PostsSection from "./PostsSection";
+import ReportButton from "./ReportButton";
 
 function safeWebUrl(
   value: string | null | undefined,
@@ -494,6 +495,19 @@ export default function UserProfile({
                     </button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {viewerId && !isOwner && (
+              <div style={{ marginTop: "12px" }}>
+                <ReportButton
+                  db={db}
+                  viewerId={viewerId}
+                  ownerId={id}
+                  targetType="profile"
+                  targetId={id}
+                  label="إبلاغ عن الحساب"
+                />
               </div>
             )}
 
