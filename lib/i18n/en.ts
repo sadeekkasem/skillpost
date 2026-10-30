@@ -181,4 +181,7 @@ export const en: Dict = {
   "admin.modConfirmRevoke": "Remove moderator access from “{name}”?",
   "admin.modGranted": "Moderator added.",
   "admin.modRevoked": "Moderator removed.",
+  "post.youtubeTitle": "YouTube video",
+  "post.youtubePlay": "Play video",
+  "composer.youtubeHint": "Paste a YouTube link to show a player",
 };

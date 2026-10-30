@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useT } from "@/components/LanguageProvider";
 import { compressImage, MAX_RAW_IMAGE_BYTES } from "@/lib/upload";
 
 const MAX_LENGTH = 3000;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default function PostComposer({ db, userId, onPublished }: Props) {
+  const t = useT();
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -116,6 +118,7 @@ export default function PostComposer({ db, userId, onPublished }: Props) {
         disabled={busy}
         style={{ width: "100%", resize: "vertical" }}
       />
+      <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85em" }}>{t("composer.youtubeHint")}</p>
 
       <p className="muted" style={{ margin: "4px 0 12px" }}>
         {content.length} / {MAX_LENGTH}

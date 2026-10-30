@@ -180,6 +180,9 @@ export const ar = {
   "admin.modConfirmRevoke": "إزالة صلاحية الإشراف من «{name}»؟",
   "admin.modGranted": "تم تعيين المشرف.",
   "admin.modRevoked": "تمت إزالة المشرف.",
+  "post.youtubeTitle": "فيديو يوتيوب",
+  "post.youtubePlay": "تشغيل الفيديو",
+  "composer.youtubeHint": "الصق رابط يوتيوب وبيطلع كمشغل",
 } as const;
 
 export type DictKey = keyof typeof ar;

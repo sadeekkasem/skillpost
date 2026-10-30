@@ -6,6 +6,8 @@ import TierBadge from "./TierBadge";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Post, PostComment } from "@/lib/types";
 import ReportButton from "@/components/ReportButton";
+import YouTubeEmbed from "@/components/YouTubeEmbed";
+import { extractYouTube } from "@/lib/youtube";
 
 type Props = {
   db: SupabaseClient;
@@ -233,7 +235,15 @@ export default function PostCard({ db, post, viewerId, isAdmin, onDeleted }: Pro
           </div>
         </div>
       ) : (
-        <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: "0 0 12px" }}>{content}</p>
+        (() => {
+          const yt = extractYouTube(content);
+          return (
+            <>
+              {yt.text && <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: "0 0 12px" }}>{yt.text}</p>}
+              {yt.match && <YouTubeEmbed id={yt.match.id} start={yt.match.start} />}
+            </>
+          );
+        })()
       )}
 
       {imageUrl && (
