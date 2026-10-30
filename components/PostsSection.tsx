@@ -5,11 +5,16 @@ import { useT } from "@/components/LanguageProvider";
 import { useEffect, useState } from "react";
 import { getClient } from "@/lib/supabase";
 import type { Post } from "@/lib/types";
+
+const PROJECT_SELECT =
+  "*,profiles!projects_user_id_fkey(username,full_name,avatar_path,specialty),attachments(*)";
 import PostComposer from "./PostComposer";
 import PostCard from "./PostCard";
 import VideoPostCard from "./VideoPostCard";
 import type { ChannelVideo } from "@/lib/youtube/feed";
-import { interleaveVideos } from "@/lib/youtube/interleave";
+import { buildHomeFeed } from "@/lib/youtube/interleave";
+import ProjectCard from "./ProjectCard";
+import type { Project } from "@/lib/types";
 
 const POST_SELECT =
   "*,profiles!posts_user_id_fkey(id,username,full_name,avatar_path),post_likes(user_id),post_comments(*,profiles!post_comments_user_id_fkey(id,username,full_name,avatar_path))";
@@ -19,9 +24,11 @@ type Props = {
   userId?: string;
   /** Channel videos to interleave into the feed (homepage only). */
   videos?: ChannelVideo[];
+  /** Homepage only: also merge public projects into the timeline. */
+  withProjects?: boolean;
 };
 
-export default function PostsSection({ userId, videos = [] }: Props) {
+export default function PostsSection({ userId, videos = [], withProjects = false }: Props) {
   const t = useT();
   const [db] = useState(() => getClient());
   const [posts, setPosts] = useState<Post[]>([]);
@@ -30,6 +37,27 @@ export default function PostsSection({ userId, videos = [] }: Props) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    if (!db || !withProjects || userId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { data, error } = await db
+          .from("projects")
+          .select(PROJECT_SELECT)
+          .order("created_at", { ascending: false })
+          .limit(100);
+        if (!cancelled && !error) setProjects((data ?? []) as unknown as Project[]);
+      } catch {
+        // Projects are optional here; posts and videos still render.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [db, withProjects, userId, reloadKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,11 +144,15 @@ export default function PostsSection({ userId, videos = [] }: Props) {
         </p>
       )}
 
-      {!loading && !message && posts.length === 0 && (userId || videos.length === 0) && <p className="muted">{t("posts.empty")}</p>}
+      {!loading && !message && posts.length === 0 && (userId || (videos.length === 0 && projects.length === 0)) && <p className="muted">{t("posts.empty")}</p>}
 
-      {(loading ? [] : interleaveVideos(posts, userId ? [] : videos)).map((item) =>
+      {(loading ? [] : buildHomeFeed(posts, userId ? [] : projects, userId ? [] : videos)).map((item) =>
         item.kind === "video" ? (
           <VideoPostCard key={`yt-${item.video.id}`} video={item.video} />
+        ) : item.kind === "project" ? (
+          <div key={`pr-${item.project.id}`} className="feed-project">
+            <ProjectCard project={item.project} />
+          </div>
         ) : (
           <PostCard
             key={item.post.id}

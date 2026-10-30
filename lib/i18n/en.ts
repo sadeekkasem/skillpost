@@ -46,6 +46,7 @@ export const en: Dict = {
   "posts.videoLabel": "Video",
   "posts.videoBrand": "SkillPost · مهاراتي",
   "posts.watchOnYoutube": "Watch on YouTube",
+  "feed.inTimelineHint": "Latest projects appear in the feed above. Search or filter to browse all projects.",
 
   "feed.demoMode": "Demo mode: the database isn't connected, so sample projects are shown.",
   "feed.loadError": "We couldn't load projects. Please try again.",

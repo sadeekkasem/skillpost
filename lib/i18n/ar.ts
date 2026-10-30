@@ -45,6 +45,7 @@ export const ar = {
   "posts.videoLabel": "فيديو",
   "posts.videoBrand": "SkillPost · مهاراتي",
   "posts.watchOnYoutube": "شاهد على يوتيوب",
+  "feed.inTimelineHint": "أحدث المشاريع تظهر في المنشورات أعلاه. استخدم البحث أو التصفية لتصفّح كل المشاريع.",
 
   "feed.demoMode": "وضع العرض: قاعدة البيانات غير متصلة، لذلك تظهر مشاريع توضيحية.",
   "feed.loadError": "تعذر تحميل المشاريع. حاول مرة أخرى.",

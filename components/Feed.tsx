@@ -40,7 +40,7 @@ function getTimestamp(value: string): number {
   return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
-export default function Feed() {
+export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = {}) {
   const t = useT();
   const [db] = useState(() => getClient());
 
@@ -449,11 +449,15 @@ export default function Feed() {
         </button>
       ) : (
         <>
+          {inTimeline && !hasFilters ? (
+            <p className="muted">{t("feed.inTimelineHint")}</p>
+          ) : (
           <div className="grid">
             {filtered.map((project) => (
               <Card key={project.id} project={project} />
             ))}
           </div>
+          )}
 
           {filtered.length === 0 && (
             <section className="card">

@@ -373,3 +373,5 @@ input[type=file]{max-width:100%}
 .video-post-title{margin:0 0 6px;font-size:17px;line-height:1.4;overflow-wrap:anywhere}
 .video-post-desc{margin:0 0 10px;font-size:14px;opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-line}
 .video-post-link{display:inline-block;margin-top:10px;font-weight:600}
+.feed-project{margin-bottom:16px;min-width:0;max-width:100%}
+.feed-project>*{width:100%;max-width:100%;box-sizing:border-box}
