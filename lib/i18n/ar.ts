@@ -42,6 +42,9 @@ export const ar = {
   "posts.loading": "جارٍ تحميل المنشورات...",
   "posts.loadError": "تعذر تحميل المنشورات.",
   "posts.empty": "لا توجد منشورات بعد.",
+  "posts.videoLabel": "فيديو",
+  "posts.videoBrand": "SkillPost · مهاراتي",
+  "posts.watchOnYoutube": "شاهد على يوتيوب",
 
   "feed.demoMode": "وضع العرض: قاعدة البيانات غير متصلة، لذلك تظهر مشاريع توضيحية.",
   "feed.loadError": "تعذر تحميل المشاريع. حاول مرة أخرى.",

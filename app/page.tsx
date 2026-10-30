@@ -1,4 +1,11 @@
 import Feed from '@/components/Feed';
 import Hero from '@/components/Hero';
 import PostsSection from '@/components/PostsSection';
-export default function Home(){return <><Hero/><PostsSection/><Feed/></>}
+import { getChannelVideos } from '@/lib/youtube/feed';
+
+export const revalidate = 3600;
+
+export default async function Home(){
+  const videos = (await getChannelVideos()).slice(0, 15);
+  return <><Hero/><PostsSection videos={videos}/><Feed/></>;
+}

@@ -7,6 +7,9 @@ import { getClient } from "@/lib/supabase";
 import type { Post } from "@/lib/types";
 import PostComposer from "./PostComposer";
 import PostCard from "./PostCard";
+import VideoPostCard from "./VideoPostCard";
+import type { ChannelVideo } from "@/lib/youtube/feed";
+import { interleaveVideos } from "@/lib/youtube/interleave";
 
 const POST_SELECT =
   "*,profiles!posts_user_id_fkey(id,username,full_name,avatar_path),post_likes(user_id),post_comments(*,profiles!post_comments_user_id_fkey(id,username,full_name,avatar_path))";
@@ -14,9 +17,11 @@ const POST_SELECT =
 type Props = {
   /** When set, only this user's posts are shown and the composer is hidden unless it is the viewer. */
   userId?: string;
+  /** Channel videos to interleave into the feed (homepage only). */
+  videos?: ChannelVideo[];
 };
 
-export default function PostsSection({ userId }: Props) {
+export default function PostsSection({ userId, videos = [] }: Props) {
   const t = useT();
   const [db] = useState(() => getClient());
   const [posts, setPosts] = useState<Post[]>([]);
@@ -111,18 +116,22 @@ export default function PostsSection({ userId }: Props) {
         </p>
       )}
 
-      {!loading && !message && posts.length === 0 && <p className="muted">{t("posts.empty")}</p>}
+      {!loading && !message && posts.length === 0 && (userId || videos.length === 0) && <p className="muted">{t("posts.empty")}</p>}
 
-      {posts.map((post) => (
-        <PostCard
-          key={post.id}
-          db={db}
-          post={post}
-          viewerId={viewerId}
-          isAdmin={isAdmin}
-          onDeleted={(id) => setPosts((current) => current.filter((item) => item.id !== id))}
-        />
-      ))}
+      {(loading ? [] : interleaveVideos(posts, userId ? [] : videos)).map((item) =>
+        item.kind === "video" ? (
+          <VideoPostCard key={`yt-${item.video.id}`} video={item.video} />
+        ) : (
+          <PostCard
+            key={item.post.id}
+            db={db}
+            post={item.post}
+            viewerId={viewerId}
+            isAdmin={isAdmin}
+            onDeleted={(id) => setPosts((current) => current.filter((x) => x.id !== id))}
+          />
+        )
+      )}
     </section>
   );
 }

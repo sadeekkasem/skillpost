@@ -43,6 +43,9 @@ export const en: Dict = {
   "posts.loading": "Loading posts...",
   "posts.loadError": "We couldn't load posts.",
   "posts.empty": "No posts yet.",
+  "posts.videoLabel": "Video",
+  "posts.videoBrand": "SkillPost · مهاراتي",
+  "posts.watchOnYoutube": "Watch on YouTube",
 
   "feed.demoMode": "Demo mode: the database isn't connected, so sample projects are shown.",
   "feed.loadError": "We couldn't load projects. Please try again.",
