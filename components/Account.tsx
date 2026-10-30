@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ComponentProps } from "react";
 import { getClient } from "@/lib/supabase";
+import { compressImage, MAX_RAW_IMAGE_BYTES } from "@/lib/upload";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -308,22 +309,23 @@ export default function Account() {
           "image/webp": "webp",
         };
 
-        const extension = extensions[avatarFile.type];
-
-        if (!extension) {
+        if (!extensions[avatarFile.type]) {
           throw new Error("الصورة يجب أن تكون JPG أو PNG أو WebP");
         }
 
-        if (avatarFile.size > 2 * 1024 * 1024) {
-          throw new Error("الحد الأقصى للصورة 2 ميغابايت");
+        const small = await compressImage(avatarFile, 512, 150 * 1024);
+        const extension = extensions[small.type];
+
+        if (!extension) {
+          throw new Error("الصورة يجب أن تكون JPG أو PNG أو WebP");
         }
 
         const path = `${uid}/${crypto.randomUUID()}.${extension}`;
 
         const uploadResult = await db.storage
           .from("avatars")
-          .upload(path, avatarFile, {
-            contentType: avatarFile.type,
+          .upload(path, small, {
+            contentType: small.type,
             upsert: false,
           });
 
@@ -670,8 +672,8 @@ export default function Account() {
                         return;
                       }
 
-                      if (file.size > 2 * 1024 * 1024) {
-                        setMsg("الحد الأقصى للصورة 2 ميغابايت");
+                      if (file.size > MAX_RAW_IMAGE_BYTES) {
+                        setMsg("الحد الأقصى للصورة 15 ميغابايت");
                         e.target.value = "";
                         return;
                       }
@@ -683,7 +685,7 @@ export default function Account() {
                 </label>
 
                 <p className="muted">
-                  JPG أو PNG أو WebP، حتى 2 ميغابايت. الصورة
+                  JPG أو PNG أو WebP. تُضغط الصورة تلقائيًا. الصورة
                   المحفوظة عامة، لذا لا ترفع صورة خاصة أو حساسة.
                 </p>
 

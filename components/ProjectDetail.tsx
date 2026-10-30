@@ -6,6 +6,7 @@ import { getClient } from "@/lib/supabase";
 import { categories, demoProjects } from "@/lib/demo";
 import type { Project, Comment } from "@/lib/types";
 import ReportButton from "@/components/ReportButton";
+import { prepareUpload, assertExcelQuota, isExcel } from "@/lib/upload";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -173,16 +174,14 @@ export default function Detail({
       }
 
       for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) {
-          throw new Error(
-            `الملف "${file.name}" يتجاوز الحد الأقصى: 10 ميغابايت`
-          );
-        }
-
         if (!/\.(csv|xlsx|pdf|png|jpg|jpeg|webp)$/i.test(file.name)) {
           throw new Error(`نوع الملف غير مسموح: ${file.name}`);
         }
       }
+
+      const ready: File[] = [];
+      for (const file of files) ready.push(await prepareUpload(file));
+      await assertExcelQuota(db, uid, ready.filter((f) => isExcel(f.name)).length);
 
       const updateResult = await db
         .from("projects")
@@ -201,7 +200,7 @@ export default function Detail({
       let uploadedCount = 0;
 
       try {
-        for (const file of files) {
+        for (const file of ready) {
           const extension = file.name.split(".").pop()?.toLowerCase();
           const path = `${uid}/${id}/${crypto.randomUUID()}.${extension}`;
 
@@ -515,7 +514,7 @@ export default function Detail({
               </label>
 
               <p className="muted">
-                10 ميغابايت لكل ملف. المرفقات الجديدة تُضاف إلى
+                حتى 2 ميغابايت لكل ملف، و3 ملفات Excel كحد أقصى لكل حساب. الصور تُضغط تلقائيًا. المرفقات الجديدة تُضاف إلى
                 المرفقات الحالية ولا تستبدلها. لا ترفع بيانات
                 شخصية أو مالية حقيقية.
               </p>

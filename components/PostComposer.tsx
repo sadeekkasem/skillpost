@@ -2,9 +2,10 @@
 
 import { useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { compressImage, MAX_RAW_IMAGE_BYTES } from "@/lib/upload";
 
 const MAX_LENGTH = 3000;
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_IMAGE_SIZE = MAX_RAW_IMAGE_BYTES;
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 type Props = {
@@ -34,7 +35,7 @@ export default function PostComposer({ db, userId, onPublished }: Props) {
       return;
     }
     if (file.size > MAX_IMAGE_SIZE) {
-      setMessage("حجم الصورة يجب ألا يتجاوز 5 ميغابايت.");
+      setMessage("حجم الصورة يجب ألا يتجاوز 15 ميغابايت.");
       setImage(null);
       if (fileRef.current) fileRef.current.value = "";
       return;
@@ -64,12 +65,13 @@ export default function PostComposer({ db, userId, onPublished }: Props) {
 
     try {
       if (image) {
+        const small = await compressImage(image);
         const ext =
-          image.type === "image/png" ? "png" : image.type === "image/webp" ? "webp" : "jpg";
+          small.type === "image/png" ? "png" : small.type === "image/webp" ? "webp" : "jpg";
         const path = `${userId}/${crypto.randomUUID()}.${ext}`;
         const { error: uploadError } = await db.storage
           .from("post-images")
-          .upload(path, image, { contentType: image.type, upsert: false });
+          .upload(path, small, { contentType: small.type, upsert: false });
         if (uploadError) throw uploadError;
         uploadedPath = path;
       }
