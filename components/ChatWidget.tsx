@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { hasContactInfo, CONTACT_BLOCKED_MESSAGE } from "@/lib/contactFilter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getClient } from "@/lib/supabase";
 
@@ -225,6 +226,10 @@ export default function ChatWidget() {
       setError("الرسالة طويلة، الحد الأقصى 2000 حرف.");
       return;
     }
+    if (hasContactInfo(body)) {
+      setError(CONTACT_BLOCKED_MESSAGE);
+      return;
+    }
     setSending(true);
     setError("");
     const { data, error: err } = await db
@@ -235,7 +240,9 @@ export default function ChatWidget() {
     setSending(false);
     if (err) {
       setError(
-        err.message.includes("rate_limit")
+        err.message.includes("contact_blocked")
+          ? CONTACT_BLOCKED_MESSAGE
+          : err.message.includes("rate_limit")
           ? "أرسلت رسائل كثيرة بسرعة، انتظر دقيقة."
           : "تعذّر إرسال الرسالة. تأكد أنكما صديقان."
       );
