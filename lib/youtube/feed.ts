@@ -36,11 +36,28 @@ export function parseFeed(xml: string): ChannelVideo[] {
   return out.sort((a, b) => (Date.parse(b.published) || 0) - (Date.parse(a.published) || 0));
 }
 
+const dayKey = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Helsinki", year: "numeric", month: "2-digit", day: "2-digit" });
+
+/** Keep at most `max` videos per Europe/Helsinki calendar day; input must be newest first. */
+export function capPerDay(videos: ChannelVideo[], max: number): ChannelVideo[] {
+  const counts = new Map<string, number>();
+  return videos.filter((v) => {
+    const t = Date.parse(v.published);
+    const key = Number.isNaN(t) ? "unknown" : dayKey.format(t);
+    const n = counts.get(key) ?? 0;
+    if (n >= max) return false;
+    counts.set(key, n + 1);
+    return true;
+  });
+}
+
 async function fetchChannel(ch: YouTubeChannel): Promise<ChannelVideo[]> {
   const res = await fetch(feedUrl(ch.id), { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`feed ${ch.id}: ${res.status}`);
   const channel: VideoChannel = { id: ch.id, name: ch.name, url: ch.url, isOwn: Boolean(ch.isOwn) };
-  return parseFeed(await res.text()).map((v) => ({ ...v, channel }));
+  let videos = parseFeed(await res.text());
+  if (!ch.isOwn && ch.maxPerDay && ch.maxPerDay > 0) videos = capPerDay(videos, ch.maxPerDay);
+  return videos.map((v) => ({ ...v, channel }));
 }
 
 /** All configured channels in parallel; a failing feed is skipped. Merged, deduped by video ID, newest first. */

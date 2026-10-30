@@ -6,6 +6,8 @@ export type YouTubeChannel = {
   url: string;
   /** Our own channel: keeps SkillPost branding on cards. */
   isOwn?: boolean;
+  /** Max videos shown per calendar day (Europe/Helsinki publish date; newest kept). Unset = unlimited. */
+  maxPerDay?: number;
 };
 
 export const YOUTUBE_CHANNELS: YouTubeChannel[] = [
@@ -15,6 +17,13 @@ export const YOUTUBE_CHANNELS: YouTubeChannel[] = [
     name: "SadeekShop",
     url: "https://www.youtube.com/@SadeekShopExcel",
     isOwn: true,
+  },
+  {
+    id: "UC0qQvvv2qinPDAksk6gCAvQ",
+    handle: "@Omar.shaaban88",
+    name: "مدرسة تحليل البيانات",
+    url: "https://www.youtube.com/@Omar.shaaban88",
+    maxPerDay: 2,
   },
 ];
 
