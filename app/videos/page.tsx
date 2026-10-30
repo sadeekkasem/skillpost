@@ -31,6 +31,11 @@ export default async function VideosPage() {
               <article className="card video-card" key={v.id}>
                 <YouTubeEmbed id={v.id} />
                 <h2 className="video-title" dir="auto">{v.title}</h2>
+                {v.channel && (
+                  <a className="video-channel muted" href={v.channel.url} target="_blank" rel="noopener noreferrer" dir="auto">
+                    <span className="post-head-badge video-post-label">{t("posts.videoLabel")}</span> {v.channel.name}
+                  </a>
+                )}
                 {!Number.isNaN(d) && <time className="muted" dateTime={v.published}>{fmt.format(d)}</time>}
                 {v.description && <p className="video-desc muted" dir="auto">{v.description}</p>}
               </article>

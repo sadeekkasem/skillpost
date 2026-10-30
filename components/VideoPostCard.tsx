@@ -129,10 +129,24 @@ export default function VideoPostCard({
           </div>
           <div className="post-head-info">
             <div className="post-head-name-row">
-              <span className="post-head-name" dir="auto">{t("posts.videoBrand")}</span>
+              {video.channel && !video.channel.isOwn ? (
+                <a className="post-head-name" dir="auto" href={video.channel.url} target="_blank" rel="noopener noreferrer">
+                  {video.channel.name}
+                </a>
+              ) : (
+                <span className="post-head-name" dir="auto">{t("posts.videoBrand")}</span>
+              )}
               <span className="post-head-badge video-post-label">{t("posts.videoLabel")}</span>
             </div>
-            {date && <div className="post-head-meta">{date}</div>}
+            <div className="post-head-meta">
+              {video.channel && (
+                <a href={video.channel.url} target="_blank" rel="noopener noreferrer" dir="auto">
+                  {video.channel.name}
+                </a>
+              )}
+              {video.channel && date && " · "}
+              {date}
+            </div>
           </div>
         </div>
       </header>

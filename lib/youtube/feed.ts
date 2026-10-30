@@ -1,6 +1,7 @@
-import { YOUTUBE_FEED_URL } from "./config";
+import { YOUTUBE_CHANNELS, feedUrl, type YouTubeChannel } from "./config";
 
-export type ChannelVideo = { id: string; title: string; published: string; description: string };
+export type VideoChannel = Pick<YouTubeChannel, "id" | "name" | "url"> & { isOwn: boolean };
+export type ChannelVideo = { id: string; title: string; published: string; description: string; channel?: VideoChannel };
 
 const ID_RE = /^[A-Za-z0-9_-]{11}$/;
 
@@ -35,12 +36,25 @@ export function parseFeed(xml: string): ChannelVideo[] {
   return out.sort((a, b) => (Date.parse(b.published) || 0) - (Date.parse(a.published) || 0));
 }
 
+async function fetchChannel(ch: YouTubeChannel): Promise<ChannelVideo[]> {
+  const res = await fetch(feedUrl(ch.id), { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`feed ${ch.id}: ${res.status}`);
+  const channel: VideoChannel = { id: ch.id, name: ch.name, url: ch.url, isOwn: Boolean(ch.isOwn) };
+  return parseFeed(await res.text()).map((v) => ({ ...v, channel }));
+}
+
+/** All configured channels in parallel; a failing feed is skipped. Merged, deduped by video ID, newest first. */
 export async function getChannelVideos(): Promise<ChannelVideo[]> {
-  try {
-    const res = await fetch(YOUTUBE_FEED_URL, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return [];
-    return parseFeed(await res.text());
-  } catch {
-    return [];
+  const results = await Promise.allSettled(YOUTUBE_CHANNELS.map(fetchChannel));
+  const seen = new Set<string>();
+  const out: ChannelVideo[] = [];
+  for (const r of results) {
+    if (r.status !== "fulfilled") continue;
+    for (const v of r.value) {
+      if (seen.has(v.id)) continue;
+      seen.add(v.id);
+      out.push(v);
+    }
   }
+  return out.sort((a, b) => (Date.parse(b.published) || 0) - (Date.parse(a.published) || 0));
 }
