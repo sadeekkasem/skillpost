@@ -93,6 +93,7 @@ export default function Account() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [confirmAge, setConfirmAge] = useState(false);
   const [signupMarketing, setSignupMarketing] = useState(false);
+  const [signupName, setSignupName] = useState("");
   const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const [name, setName] = useState("");
@@ -220,6 +221,11 @@ export default function Account() {
 
     try {
       if (mode === "signup") {
+        const fullName = signupName.trim();
+        if (fullName.length < 2 || fullName.length > 50) {
+          throw new Error(t("auth.nameInvalid"));
+        }
+
         if (!confirmAge) {
           throw new Error(t("auth.ageRequired"));
         }
@@ -234,6 +240,7 @@ export default function Account() {
           options: {
             emailRedirectTo: `${window.location.origin}/account`,
             data: {
+              full_name: signupName.trim(),
               terms_accepted: true,
               age_confirmed: true,
               marketing_opt_in: signupMarketing,
@@ -796,6 +803,22 @@ export default function Account() {
             <h1 className="auth-title">
               {mode === "signup" ? t("auth.signup") : t("auth.login")}
             </h1>
+
+            {mode === "signup" && (
+              <label>
+                {t("auth.name")}
+                <input
+                  type="text"
+                  required
+                  minLength={2}
+                  maxLength={50}
+                  autoComplete="name"
+                  value={signupName}
+                  disabled={busy}
+                  onChange={(e) => setSignupName(e.target.value)}
+                />
+              </label>
+            )}
 
             <label>
               {t("auth.email")}

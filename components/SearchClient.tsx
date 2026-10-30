@@ -1,4 +1,5 @@
 "use client";
+import { confirmedOnly } from "@/lib/confirmed";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -80,11 +81,14 @@ export default function SearchClient() {
       setLoading(true);
       setMessage("");
       void Promise.all([
-        db
-          .from("profiles")
-          .select("id,username,full_name,specialty")
-          .or(`username.ilike.${pattern},full_name.ilike.${pattern},specialty.ilike.${pattern}`)
-          .limit(20),
+        confirmedOnly((filter) => {
+          let q = db
+            .from("profiles")
+            .select("id,username,full_name,specialty")
+            .or(`username.ilike.${pattern},full_name.ilike.${pattern},specialty.ilike.${pattern}`);
+          if (filter) q = q.eq("email_confirmed", true);
+          return q.limit(20);
+        }),
         db
           .from("projects")
           .select("id,user_id,title,description,category")

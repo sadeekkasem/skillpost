@@ -1,4 +1,5 @@
 "use client";
+import { confirmedOnly } from "@/lib/confirmed";
 
 import { useT } from "@/components/LanguageProvider";
 
@@ -112,13 +113,13 @@ export default function Feed() {
         setDiamonds(diamondIds);
         setItems([...featured, ...recent.filter((p) => !seen.has(p.id))]);
 
-        const membersResult = await db
-          .from("profiles")
-          .select(
-            "id,username,full_name,specialty,bio,avatar_path"
-          )
-          .order("full_name", { ascending: true, nullsFirst: false })
-          .limit(24);
+        const membersResult = await confirmedOnly((filter) => {
+          let q = db
+            .from("profiles")
+            .select("id,username,full_name,specialty,bio,avatar_path");
+          if (filter) q = q.eq("email_confirmed", true);
+          return q.order("full_name", { ascending: true, nullsFirst: false }).limit(24);
+        });
 
         if (cancelled) return;
 

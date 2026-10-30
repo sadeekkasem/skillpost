@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useT } from "@/components/LanguageProvider";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import TierBadge from "@/components/TierBadge";
 import type { Tier } from "@/lib/tiers";
@@ -14,6 +15,7 @@ type Member = {
   created_at: string;
   is_admin: boolean;
   is_banned?: boolean;
+  email_confirmed?: boolean;
 };
 
 type TierRow = { id: string; tier: Tier; diamond_until: string | null };
@@ -26,6 +28,7 @@ function plusMonth(from?: string | null): string {
 }
 
 export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChanged?: () => void }) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState<Period>("all");
   const [bannedOnly, setBannedOnly] = useState(false);
@@ -58,8 +61,11 @@ export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChan
           if (withBan && bannedOnly) req = req.eq("is_banned", true);
           return req;
         };
-        let res = await build("id,username,full_name,created_at,is_admin,is_banned", true);
+        let res = await build("id,username,full_name,created_at,is_admin,is_banned,email_confirmed", true);
         let withBan = true;
+        if (res.error && /email_confirmed/.test(res.error.message)) {
+          res = await build("id,username,full_name,created_at,is_admin,is_banned", true);
+        }
         if (res.error && /is_banned/.test(res.error.message)) {
           withBan = false;
           res = await build("id,username,full_name,created_at,is_admin", false);
@@ -154,6 +160,7 @@ export default function UsersTab({ db, onChanged }: { db: SupabaseClient; onChan
               </span>
               <span>
                 {m.is_admin && <span className="badge">مدير</span>}{" "}
+                {m.email_confirmed === false && <span className="badge admin-badge-danger">{t("admin.unconfirmed")}</span>}{" "}
                 {m.is_banned && <span className="badge admin-badge-danger">محظور</span>}{" "}
                 {tiers?.[m.id] && <TierBadge tier={tiers[m.id].tier} />}
                 {tiers?.[m.id]?.diamond_until && (
