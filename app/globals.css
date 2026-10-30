@@ -321,3 +321,24 @@ input[type=file]{max-width:100%}
 .tier-stats{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
 .membership-upgrade{border:1px solid #7dd3fc;background:linear-gradient(180deg,#f0f9ff,#fff)}
 .admin-diamond input[type=date]{width:auto}
+
+/* ---- i18n: language toggle, first-visit picker, LTR overrides ---- */
+.lang-toggle{background:rgba(255,255,255,.18)!important;color:#fff!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:999px!important;padding:4px 14px!important;font-size:14px;font-weight:600;line-height:1.6;box-shadow:none!important}
+.lang-toggle:hover{background:rgba(255,255,255,.28)!important}
+.lang-picker-backdrop{position:fixed;inset:0;z-index:200;background:rgba(15,23,42,.45);display:grid;place-items:center;padding:20px}
+.lang-picker{background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(15,23,42,.3);padding:28px 26px 20px;width:100%;max-width:380px;text-align:center}
+.lang-picker h2{margin:0;font-size:22px}
+.lang-picker-sub{margin:2px 0 18px;color:#667085}
+.lang-picker-actions{display:flex;gap:12px}
+.lang-picker-actions button{flex:1;padding:12px 10px;font-size:17px;font-weight:700}
+.lang-picker-actions button.suggested{box-shadow:0 0 0 3px rgba(31,157,92,.25)}
+.lang-picker-hint{font-size:13px;margin:14px 0 0}
+[dir=ltr] input[type=search]{padding:0 20px 0 52px;background-position:left 18px center}
+[dir=ltr] .switch::after{right:auto;left:3px;transition:left .15s ease}
+[dir=ltr] .switch:checked::after{right:auto;left:23px}
+[dir=ltr] .chat-bubble,[dir=ltr] .chat-panel{left:auto;right:24px}
+[dir=ltr] .chat-row{text-align:left}
+[dir=ltr] .chat-msg.mine{align-self:flex-end;border-bottom-right-radius:4px}
+[dir=ltr] .chat-msg.theirs{align-self:flex-start}
+@media(max-width:640px){[dir=ltr] .chat-bubble{left:auto;right:16px}[dir=ltr] .chat-panel{right:0;left:0}}
+.lang-toggle-short{display:none}@media(max-width:767px){.lang-toggle{order:3;padding:3px 10px!important;font-size:12px;line-height:1.5}}@media(max-width:480px){.lang-toggle-full{display:none}.lang-toggle-short{display:inline}.lang-toggle{min-width:36px;font-size:14px}header.site-header nav>a{white-space:nowrap}}

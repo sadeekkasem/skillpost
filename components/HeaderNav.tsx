@@ -1,13 +1,17 @@
 "use client";
 
+
+import { useT } from "@/components/LanguageProvider";
 import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import AuthNavLink from "@/components/AuthNavLink";
 import AdminNavLink from "@/components/AdminNavLink";
 import NotificationBell from "@/components/NotificationBell";
+import LanguageToggle from "@/components/LanguageToggle";
 
 export default function HeaderNav() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -21,10 +25,11 @@ export default function HeaderNav() {
 
   return (
     <>
+      <LanguageToggle />
       <button
         type="button"
         className="menu-toggle"
-        aria-label={"\u0627\u0644\u0642\u0627\u0626\u0645\u0629"}
+        aria-label={t("nav.menu")}
         aria-expanded={open}
         aria-controls="site-nav"
         onClick={() => setOpen((value) => !value)}
@@ -32,15 +37,15 @@ export default function HeaderNav() {
         {open ? "\u2715" : "\u2630"}
       </button>
       <nav id="site-nav" className={open ? "open" : undefined} onClick={closeOnLink}>
-      <span className="nav-item"><Link href="/">المشاريع</Link></span>
-      <span className="nav-item"><Link href="/projects/new">نشر مشروع</Link></span>
-      <span className="nav-item"><Link href="/challenges">التحديات</Link></span>
-      <span className="nav-item"><Link href="/search" aria-label="البحث">🔍 بحث</Link></span>
-      <span className="nav-item"><Link href="/friends">الأصدقاء</Link></span>
+      <span className="nav-item"><Link href="/">{t("nav.projects")}</Link></span>
+      <span className="nav-item"><Link href="/projects/new">{t("nav.newProject")}</Link></span>
+      <span className="nav-item"><Link href="/challenges">{t("nav.challenges")}</Link></span>
+      <span className="nav-item"><Link href="/search" aria-label={t("nav.searchLabel")}>{t("nav.search")}</Link></span>
+      <span className="nav-item"><Link href="/friends">{t("nav.friends")}</Link></span>
       <AuthNavLink />
       <span className="nav-item"><AdminNavLink /></span>
       <NotificationBell />
-      <span className="nav-item"><Link href="/setup">التجهيز</Link></span>
+      <span className="nav-item"><Link href="/setup">{t("nav.setup")}</Link></span>
       </nav>
     </>
   );

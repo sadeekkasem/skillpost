@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getClient } from "@/lib/supabase";
+import { useLanguage } from "@/components/LanguageProvider";
+import type { DictKey, Lang } from "@/lib/i18n";
 
 type NotificationType = "post_like" | "post_comment" | "project_like" | "project_comment" | "friend_request" | "friend_accept";
 
@@ -18,19 +20,19 @@ type NotificationRow = {
   actor?: { username: string | null; full_name: string | null } | null;
 };
 
-const TEXT: Record<NotificationType, string> = {
-  post_like: "أعجب بمنشورك",
-  post_comment: "علّق على منشورك",
-  project_like: "أعجب بمشروعك",
-  project_comment: "علّق على مشروعك",
-  friend_request: "أرسل لك طلب صداقة",
-  friend_accept: "قبل طلب صداقتك",
+const TEXT_KEY: Record<NotificationType, DictKey> = {
+  post_like: "notif.post_like",
+  post_comment: "notif.post_comment",
+  project_like: "notif.project_like",
+  project_comment: "notif.project_comment",
+  friend_request: "notif.friend_request",
+  friend_accept: "notif.friend_accept",
 };
 
-function relativeTime(value: string): string {
+function relativeTime(value: string, lang: Lang): string {
   const diff = (new Date(value).getTime() - Date.now()) / 1000;
   if (Number.isNaN(diff)) return "";
-  const rtf = new Intl.RelativeTimeFormat("ar", { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
   const abs = Math.abs(diff);
   if (abs < 60) return rtf.format(Math.round(diff), "second");
   if (abs < 3600) return rtf.format(Math.round(diff / 60), "minute");
@@ -40,6 +42,7 @@ function relativeTime(value: string): string {
 }
 
 export default function NotificationBell() {
+  const { t, lang } = useLanguage();
   const [db] = useState(() => getClient());
   const router = useRouter();
   const [userId, setUserId] = useState("");
@@ -129,7 +132,7 @@ export default function NotificationBell() {
       <button
         type="button"
         className="secondary"
-        aria-label={unread > 0 ? `الإشعارات (${unread} غير مقروء)` : "الإشعارات"}
+        aria-label={unread > 0 ? t("notif.unread", { count: unread }) : t("notif.title")}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         style={{ position: "relative", padding: "4px 10px", lineHeight: 1 }}
@@ -177,24 +180,24 @@ export default function NotificationBell() {
             borderRadius: "10px",
             boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
             zIndex: 50,
-            textAlign: "right",
+            textAlign: "start",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderBottom: "1px solid #e2e8f0" }}>
-            <strong>الإشعارات</strong>
+            <strong>{t("notif.title")}</strong>
             {unread > 0 && (
               <button type="button" className="secondary" onClick={() => void markAllRead()} style={{ fontSize: "13px", padding: "2px 8px" }}>
-                تعليم الكل كمقروء
+                {t("notif.markAll")}
               </button>
             )}
           </div>
           {items.length === 0 ? (
             <p className="muted" style={{ padding: "12px", margin: 0 }}>
-              لا توجد إشعارات.
+              {t("notif.empty")}
             </p>
           ) : (
             items.map((item) => {
-              const name = item.actor?.full_name || item.actor?.username || "مستخدم";
+              const name = item.actor?.full_name || item.actor?.username || t("notif.someone");
               return (
                 <button
                   key={item.id}
@@ -204,7 +207,7 @@ export default function NotificationBell() {
                   style={{
                     display: "block",
                     width: "100%",
-                    textAlign: "right",
+                    textAlign: "start",
                     padding: "10px 12px",
                     border: "none",
                     borderBottom: "1px solid #f1f5f9",
@@ -216,10 +219,10 @@ export default function NotificationBell() {
                   }}
                 >
                   <div style={{ overflowWrap: "anywhere" }}>
-                    {name} {TEXT[item.type] ?? ""}
+                    {name} {TEXT_KEY[item.type] ? t(TEXT_KEY[item.type]) : ""}
                   </div>
                   <div className="muted" style={{ fontSize: "12px", marginTop: "2px" }}>
-                    {relativeTime(item.created_at)}
+                    {relativeTime(item.created_at, lang)}
                   </div>
                 </button>
               );

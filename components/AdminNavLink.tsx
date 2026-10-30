@@ -1,10 +1,13 @@
 "use client";
 
+
+import { useT } from "@/components/LanguageProvider";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getClient } from "@/lib/supabase";
 
 export default function AdminNavLink() {
+  const t = useT();
   const [db] = useState(() => getClient());
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -48,5 +51,5 @@ export default function AdminNavLink() {
 
   if (!isAdmin) return null;
 
-  return <Link href="/admin">لوحة الإدارة</Link>;
+  return <Link href="/admin">{t("nav.admin")}</Link>;
 }

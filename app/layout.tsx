@@ -1,9 +1,14 @@
 import "./globals.css";
-import Link from "next/link";
 import { Cairo } from "next/font/google";
 import HeaderNav from "@/components/HeaderNav";
 import CookieBanner from "@/components/CookieBanner";
 import ChatWidget from "@/components/ChatWidget";
+import Brand from "@/components/Brand";
+import SiteFooter from "@/components/SiteFooter";
+import LanguageProvider from "@/components/LanguageProvider";
+import LanguagePicker from "@/components/LanguagePicker";
+import { dirOf } from "@/lib/i18n";
+import { getLang, getT } from "@/lib/i18n/server";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -12,42 +17,36 @@ const cairo = Cairo({
   variable: "--font-cairo",
 });
 
-export const metadata = {
-  title: "مهاراتي | SkillPost",
-  description: "مجتمع مشاركة المشاريع والمهارات",
-};
+export async function generateMetadata() {
+  const t = await getT();
+  return {
+    title: t("meta.title"),
+    description: t("meta.description"),
+  };
+}
 
-export default function Layout({
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { lang, chosen } = await getLang();
   return (
-    <html lang="ar" dir="rtl" className={cairo.variable} suppressHydrationWarning>
+    <html lang={lang} dir={dirOf(lang)} className={cairo.variable} suppressHydrationWarning>
       <body>
-        <header className="site-header">
-          <Link href="/" className="brand">
-            <svg className="brand-mark" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
-              <rect width="32" height="32" rx="9" fill="#ffffff" fillOpacity="0.18" />
-              <path d="M16 6l2.6 6.4L25 15l-6.4 2.6L16 24l-2.6-6.4L7 15l6.4-2.6z" fill="#ffffff" />
-            </svg>
-            مهاراتي · SkillPost
-          </Link>
+        <LanguageProvider initialLang={lang} initialChosen={chosen}>
+          <header className="site-header">
+            <Brand />
+            <HeaderNav />
+          </header>
 
-          <HeaderNav />
-        </header>
+          <main>{children}</main>
 
-        <main>{children}</main>
-
-        <footer>
-        نسخة تطوير أولية ·{" "}
-        <Link href="/about">عن المنصة</Link> ·{" "}
-        <Link href="/privacy">الخصوصية</Link> ·{" "}
-        <Link href="/terms">الشروط</Link> ·{" "}
-        <Link href="/advertise">أعلن معنا</Link>
-      </footer>   
-        <ChatWidget />
-        <CookieBanner />   
+          <SiteFooter />
+          <ChatWidget />
+          <CookieBanner />
+          <LanguagePicker />
+        </LanguageProvider>
       </body>
     </html>
   );

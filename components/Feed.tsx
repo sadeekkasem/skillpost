@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/LanguageProvider";
+
 import { useEffect, useMemo, useState } from "react";
 import { getClient } from "@/lib/supabase";
 import { demoProjects, categories } from "@/lib/demo";
@@ -38,6 +40,7 @@ function getTimestamp(value: string): number {
 }
 
 export default function Feed() {
+  const t = useT();
   const [db] = useState(() => getClient());
 
   const [items, setItems] = useState<Project[]>([]);
@@ -65,7 +68,7 @@ export default function Feed() {
           setItems(demoProjects);
           setMembers([]);
           setMessage(
-            "وضع العرض: قاعدة البيانات غير متصلة، لذلك تظهر مشاريع توضيحية."
+            t("feed.demoMode")
           );
           setLoading(false);
         }
@@ -134,7 +137,7 @@ export default function Feed() {
         setMessage(
           error instanceof Error
             ? error.message
-            : "تعذر تحميل المشاريع. حاول مرة أخرى."
+            : t("feed.loadError")
         );
       } finally {
         if (!cancelled) {
@@ -206,7 +209,7 @@ export default function Feed() {
   }
 
   function memberName(member: PublicMember): string {
-    return member.full_name || member.username || "عضو";
+    return member.full_name || member.username || t("feed.member");
   }
 
   function memberAvatar(member: PublicMember): string {
@@ -231,13 +234,13 @@ export default function Feed() {
       {!loading && !failed && members.length > 0 && (
         <section
           className="card"
-          aria-label="المشتركون في المنصة"
+          aria-label={t("feed.membersLabel")}
           style={{ marginBottom: "24px" }}
         >
-          <h2>المشتركون</h2>
+          <h2>{t("feed.members")}</h2>
 
           <p className="muted">
-            اضغط على أي مشترك لعرض ملفه العام ومشاريعه.
+            {t("feed.membersHint")}
           </p>
 
           <div
@@ -272,7 +275,7 @@ export default function Feed() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatar}
-                      alt={`الصورة الشخصية لـ ${name}`}
+                      alt={t("feed.avatarAlt", { name })}
                       width={88}
                       height={88}
                       onError={() =>
@@ -289,7 +292,7 @@ export default function Feed() {
                     />
                   ) : (
                     <div
-                      aria-label="لا توجد صورة شخصية"
+                      aria-label={t("feed.noAvatar")}
                       style={{
                         width: "88px",
                         height: "88px",
@@ -330,7 +333,7 @@ export default function Feed() {
                     className="button"
                     style={{ marginTop: "auto" }}
                   >
-                    عرض الملف
+                    {t("feed.viewProfile")}
                   </a>
                 </article>
               );
@@ -339,7 +342,7 @@ export default function Feed() {
 
           {members.length === 24 && (
             <p className="muted">
-              يظهر هنا حتى 24 مشتركًا في الصفحة الرئيسية.
+              {t("feed.membersLimit")}
             </p>
           )}
         </section>
@@ -347,7 +350,7 @@ export default function Feed() {
 
       <section
         className="card"
-        aria-label="البحث وتصفية المشاريع"
+        aria-label={t("feed.filtersLabel")}
       >
         <div
           className="row"
@@ -360,10 +363,10 @@ export default function Feed() {
           <label
             style={{ flex: "2 1 240px", minWidth: 0 }}
           >
-            البحث عن مشروع
+            {t("feed.searchLabel")}
             <input
               type="search"
-              placeholder="ابحث في العنوان أو الوصف"
+              placeholder={t("feed.searchPlaceholder")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               style={{
@@ -376,13 +379,13 @@ export default function Feed() {
           <label
             style={{ flex: "1 1 180px", minWidth: 0 }}
           >
-            التخصص
+            {t("feed.specialty")}
             <select
               value={cat}
               onChange={(e) => setCat(e.target.value)}
               style={{ width: "100%" }}
             >
-              <option value="">كل التخصصات</option>
+              <option value="">{t("feed.allSpecialties")}</option>
 
               {availableCategories.map((category) => (
                 <option key={category} value={category}>
@@ -395,7 +398,7 @@ export default function Feed() {
           <label
             style={{ flex: "1 1 180px", minWidth: 0 }}
           >
-            ترتيب المشاريع
+            {t("feed.sort")}
             <select
               value={sort}
               onChange={(e) =>
@@ -403,9 +406,9 @@ export default function Feed() {
               }
               style={{ width: "100%" }}
             >
-              <option value="newest">الأحدث أولًا</option>
-              <option value="oldest">الأقدم أولًا</option>
-              <option value="title">حسب العنوان</option>
+              <option value="newest">{t("feed.newest")}</option>
+              <option value="oldest">{t("feed.oldest")}</option>
+              <option value="title">{t("feed.byTitle")}</option>
             </select>
           </label>
 
@@ -415,35 +418,33 @@ export default function Feed() {
             disabled={!hasFilters}
             onClick={resetFilters}
           >
-            مسح الفلاتر
+            {t("feed.clearFilters")}
           </button>
         </div>
 
         {!loading && !failed && (
           <p className="muted" aria-live="polite">
-            عدد النتائج: {filtered.length} من أصل{" "}
-            {items.length} مشروع محمّل
+            {t("feed.resultCount", { shown: filtered.length, total: items.length })}
           </p>
         )}
 
         {!loading && !failed && items.length === 100 && (
           <p className="muted">
-            البحث والتصفية يعملان ضمن أحدث 100 مشروع محمّل
-            فقط.
+            {t("feed.searchScope")}
           </p>
         )}
       </section>
 
       {loading ? (
         <p className="notice" aria-live="polite">
-          جار تحميل المشاريع...
+          {t("feed.loading")}
         </p>
       ) : failed ? (
         <button
           type="button"
           onClick={() => setReloadKey((key) => key + 1)}
         >
-          إعادة المحاولة
+          {t("feed.retry")}
         </button>
       ) : (
         <>
@@ -457,14 +458,14 @@ export default function Feed() {
             <section className="card">
               <h2>
                 {items.length === 0
-                  ? "لا توجد مشاريع منشورة بعد"
-                  : "لا توجد مشاريع مطابقة"}
+                  ? t("feed.noProjects")
+                  : t("feed.noMatches")}
               </h2>
 
               <p>
                 {items.length === 0
-                  ? "ستظهر المشاريع هنا بعد نشرها."
-                  : "جرّب كلمة بحث أخرى أو اختر تخصصًا مختلفًا."}
+                  ? t("feed.noProjectsHint")
+                  : t("feed.noMatchesHint")}
               </p>
 
               {hasFilters && (
@@ -472,7 +473,7 @@ export default function Feed() {
                   type="button"
                   onClick={resetFilters}
                 >
-                  مسح الفلاتر
+                  {t("feed.clearFilters")}
                 </button>
               )}
             </section>

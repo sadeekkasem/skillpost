@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/LanguageProvider";
+
 import { useEffect, useState } from "react";
 import { getClient } from "@/lib/supabase";
 import type { Post } from "@/lib/types";
@@ -15,6 +17,7 @@ type Props = {
 };
 
 export default function PostsSection({ userId }: Props) {
+  const t = useT();
   const [db] = useState(() => getClient());
   const [posts, setPosts] = useState<Post[]>([]);
   const [viewerId, setViewerId] = useState("");
@@ -71,7 +74,7 @@ export default function PostsSection({ userId }: Props) {
       } catch (error) {
         if (!cancelled) {
           setPosts([]);
-          setMessage(error instanceof Error ? error.message : "تعذر تحميل المنشورات.");
+          setMessage(error instanceof Error ? error.message : t("posts.loadError"));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -89,8 +92,8 @@ export default function PostsSection({ userId }: Props) {
   const showComposer = Boolean(viewerId && (!userId || userId === viewerId));
 
   return (
-    <section aria-label="المنشورات" style={{ marginBottom: "24px" }}>
-      <h2>المنشورات</h2>
+    <section aria-label={t("posts.title")} style={{ marginBottom: "24px" }}>
+      <h2>{t("posts.title")}</h2>
 
       {showComposer && (
         <PostComposer db={db} userId={viewerId} onPublished={() => setReloadKey((key) => key + 1)} />
@@ -98,7 +101,7 @@ export default function PostsSection({ userId }: Props) {
 
       {loading && (
         <p className="notice" aria-live="polite">
-          جارٍ تحميل المنشورات...
+          {t("posts.loading")}
         </p>
       )}
 
@@ -108,7 +111,7 @@ export default function PostsSection({ userId }: Props) {
         </p>
       )}
 
-      {!loading && !message && posts.length === 0 && <p className="muted">لا توجد منشورات بعد.</p>}
+      {!loading && !message && posts.length === 0 && <p className="muted">{t("posts.empty")}</p>}
 
       {posts.map((post) => (
         <PostCard

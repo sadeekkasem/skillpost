@@ -1,1 +1,12 @@
-import Link from 'next/link';export default function NotFound(){return <section className="card"><h1>الصفحة غير موجودة</h1><Link href="/">العودة للرئيسية</Link></section>}
+import Link from "next/link";
+import { getT } from "@/lib/i18n/server";
+
+export default async function NotFound() {
+  const t = await getT();
+  return (
+    <section className="card">
+      <h1>{t("notFound.title")}</h1>
+      <Link href="/">{t("notFound.back")}</Link>
+    </section>
+  );
+}

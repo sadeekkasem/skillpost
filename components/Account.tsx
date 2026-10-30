@@ -6,12 +6,14 @@ import { getClient } from "@/lib/supabase";
 import { compressImage, MAX_RAW_IMAGE_BYTES } from "@/lib/upload";
 import { applyStoredReferral, storedReferral, touchActivity } from "@/lib/tiers";
 import MembershipPanel from "./MembershipPanel";
+import { useT } from "@/components/LanguageProvider";
+import type { TFunction } from "@/lib/i18n";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
 >[0];
 
-function errorMessage(error: unknown): string {
+function rawErrorMessage(error: unknown): string | null {
   if (error instanceof Error) return error.message;
 
   if (
@@ -22,7 +24,21 @@ function errorMessage(error: unknown): string {
     return String(error.message);
   }
 
-  return "حدث خطأ غير متوقع";
+  return null;
+}
+
+/** Turns known Supabase auth errors into friendly text in the current language. */
+function authErrorMessage(error: unknown, t: TFunction): string {
+  const raw = rawErrorMessage(error);
+  if (!raw) return t("auth.unexpected");
+  const lower = raw.toLowerCase();
+  if (lower.includes("invalid login credentials")) return t("auth.err.invalidCredentials");
+  if (lower.includes("email not confirmed")) return t("auth.err.emailNotConfirmed");
+  if (lower.includes("already registered") || lower.includes("already been registered")) return t("auth.err.alreadyRegistered");
+  if (lower.includes("password should be") || lower.includes("weak password")) return t("auth.err.weakPassword");
+  if (lower.includes("rate limit") || lower.includes("too many requests")) return t("auth.err.rateLimit");
+  if (lower.includes("failed to fetch") || lower.includes("network")) return t("auth.err.network");
+  return raw;
 }
 
 function validateWebsite(value: string): string | null {
@@ -66,6 +82,8 @@ function validateLinkedIn(value: string): string | null {
 }
 
 export default function Account() {
+  const t = useT();
+  const errorMessage = (error: unknown) => rawErrorMessage(error) ?? t("auth.unexpected");
   const [db] = useState(() => getClient());
 
   const [uid, setUid] = useState("");
@@ -203,11 +221,11 @@ export default function Account() {
     try {
       if (mode === "signup") {
         if (!confirmAge) {
-          throw new Error("التسجيل متاح لمن هم في سن 18 عامًا فأكثر فقط");
+          throw new Error(t("auth.ageRequired"));
         }
 
         if (!acceptTerms) {
-          throw new Error("يجب الموافقة على الشروط وسياسة الخصوصية لإنشاء حساب");
+          throw new Error(t("auth.termsRequired"));
         }
 
         const { data, error } = await db.auth.signUp({
@@ -233,11 +251,9 @@ export default function Account() {
           setUid(data.user.id);
           await applyStoredReferral(db);
           await loadProfile(data.user.id);
-          setMsg("تم إنشاء الحساب وتسجيل الدخول");
+          setMsg(t("auth.signedUpIn"));
         } else {
-          setMsg(
-            "تم إرسال طلب التسجيل. إذا كان تأكيد البريد مفعّلًا، أكّد بريدك ثم سجّل الدخول."
-          );
+          setMsg(t("auth.signupSent"));
         }
       } else {
         const { data, error } = await db.auth.signInWithPassword({
@@ -253,10 +269,10 @@ export default function Account() {
         void touchActivity(db, data.user.id);
         await applyStoredReferral(db);
         await loadProfile(data.user.id);
-        setMsg("تم تسجيل الدخول");
+        setMsg(t("auth.signedIn"));
       }
     } catch (error) {
-      setMsg(errorMessage(error));
+      setMsg(authErrorMessage(error, t));
     } finally {
       setBusy(false);
     }
@@ -449,7 +465,7 @@ export default function Account() {
       setUid("");
       setPassword("");
       clearProfile();
-      setMsg("تم تسجيل الخروج");
+      setMsg(t("auth.signedOut"));
     } catch (error) {
       setMsg(errorMessage(error));
     } finally {
@@ -475,13 +491,13 @@ export default function Account() {
   if (!db) {
     return (
       <div className="notice">
-        أنشئ ملف الإعدادات واربط Supabase أولًا. راجع صفحة التجهيز.
+        {t("auth.notConfigured")}
       </div>
     );
   }
 
   if (loading) {
-    return <p className="notice">جار تحميل الحساب...</p>;
+    return <p className="notice">{t("auth.loadingAccount")}</p>;
   }
 
   return (
@@ -723,8 +739,7 @@ export default function Account() {
                     onChange={(e) => void toggleMarketing(e.target.checked)}
                   />
                   <span>
-                    أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
-                    الإلغاء في أي وقت). يُحفظ هذا الخيار فورًا.
+                    {t("auth.marketing")}. يُحفظ هذا الخيار فورًا.
                   </span>
                 </label>
               </section>
@@ -741,7 +756,7 @@ export default function Account() {
       ) : (
         <form className="card auth-card" onSubmit={auth}>
           <div className="auth-strip">
-            <span className="auth-welcome">أهلًا بك في مهاراتي 👋</span>
+            <span className="auth-welcome">{t("auth.welcome")}</span>
           </div>
 
           <div className="auth-body">
@@ -759,7 +774,7 @@ export default function Account() {
                   setMsg("");
                 }}
               >
-                تسجيل الدخول
+                {t("auth.login")}
               </button>
               <button
                 type="button"
@@ -774,16 +789,16 @@ export default function Account() {
                   setMsg("");
                 }}
               >
-                إنشاء حساب
+                {t("auth.signup")}
               </button>
             </div>
 
             <h1 className="auth-title">
-              {mode === "signup" ? "إنشاء حساب" : "تسجيل الدخول"}
+              {mode === "signup" ? t("auth.signup") : t("auth.login")}
             </h1>
 
             <label>
-              بريد تسجيل الدخول
+              {t("auth.email")}
               <input
                 type="email"
                 required
@@ -795,7 +810,7 @@ export default function Account() {
             </label>
 
             <label>
-              كلمة المرور
+              {t("auth.password")}
               <input
                 type="password"
                 minLength={8}
@@ -819,7 +834,7 @@ export default function Account() {
                     disabled={busy}
                     onChange={(e) => setConfirmAge(e.target.checked)}
                   />
-                  <span>أؤكد أن عمري 18 سنة أو أكثر</span>
+                  <span>{t("auth.confirmAge")}</span>
                 </label>
                 <label className="check-row">
                   <input
@@ -830,8 +845,8 @@ export default function Account() {
                     onChange={(e) => setAcceptTerms(e.target.checked)}
                   />
                   <span>
-                    أوافق على <a href="/terms" target="_blank">الشروط</a> و
-                    <a href="/privacy" target="_blank">سياسة الخصوصية</a>
+                    {t("auth.agreePrefix")}<a href="/terms" target="_blank">{t("auth.terms")}</a>{t("auth.and")}
+                    <a href="/privacy" target="_blank">{t("auth.privacy")}</a>
                   </span>
                 </label>
 
@@ -843,8 +858,7 @@ export default function Account() {
                     onChange={(e) => setSignupMarketing(e.target.checked)}
                   />
                   <span>
-                    أرغب باستلام أخبار وعروض الموقع على بريدي الإلكتروني (يمكنك
-                    الإلغاء في أي وقت)
+                    {t("auth.marketing")}
                   </span>
                 </label>
               </div>
@@ -855,7 +869,7 @@ export default function Account() {
               className="auth-submit"
               disabled={busy || (mode === "signup" && (!acceptTerms || !confirmAge))}
             >
-              {busy ? "جار التنفيذ..." : "متابعة"}
+              {busy ? t("auth.working") : t("auth.continue")}
             </button>
           </div>
         </form>

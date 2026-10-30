@@ -1,11 +1,14 @@
 "use client";
 
+
+import { useT } from "@/components/LanguageProvider";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getClient } from "@/lib/supabase";
 import { applyStoredReferral, rememberReferral, touchActivity } from "@/lib/tiers";
 
 export default function AuthNavLink() {
+  const t = useT();
   const [db] = useState(() => getClient());
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
@@ -53,7 +56,7 @@ export default function AuthNavLink() {
   }
 
   if (userId) {
-    return <Link href="/account">حسابي</Link>;
+    return <Link href="/account">{t("nav.myAccount")}</Link>;
   }
 
   return (
@@ -63,7 +66,7 @@ export default function AuthNavLink() {
         fontWeight: 700,
       }}
     >
-      تسجيل الدخول
+      {t("nav.login")}
     </Link>
   );
 }
