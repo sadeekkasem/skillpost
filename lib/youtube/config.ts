@@ -6,8 +6,9 @@ export type YouTubeChannel = {
   url: string;
   /** Our own channel: keeps SkillPost branding on cards. */
   isOwn?: boolean;
-  /** Max videos shown per calendar day (Europe/Helsinki publish date; newest kept). Unset = unlimited. */
-  maxPerDay?: number;
+  /** Drip: visible = perDay * (Europe/Helsinki days since startDate + 1), newest first. Unset = unlimited. */
+  startDate?: string;
+  perDay?: number;
 };
 
 export const YOUTUBE_CHANNELS: YouTubeChannel[] = [
@@ -23,7 +24,8 @@ export const YOUTUBE_CHANNELS: YouTubeChannel[] = [
     handle: "@Omar.shaaban88",
     name: "مدرسة تحليل البيانات",
     url: "https://www.youtube.com/@Omar.shaaban88",
-    maxPerDay: 2,
+    startDate: "2026-10-30",
+    perDay: 2,
   },
 ];
 
