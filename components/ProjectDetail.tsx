@@ -650,7 +650,8 @@ export default function Detail({
                 <div className="row" key={attachment.id}>
                   <button
                     type="button"
-                    className="secondary"
+                    className="secondary attachment-name"
+                    dir="auto"
                     disabled={
                       busy ||
                       ((attachment.scan_status ?? "pending") !== "clean" &&

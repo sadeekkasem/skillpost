@@ -252,3 +252,8 @@ header.site-header nav.open>a{color:#fff!important}
 .chat-form button{border-radius:14px!important;padding:0 16px!important;font-weight:700}
 @media(max-width:640px){.chat-panel{inset:0;width:auto;height:auto;max-height:none;border-radius:0}.chat-bubble{left:16px;bottom:16px}}
 /* END Chat widget */
+
+/* long file names must wrap inside their card on small screens */
+.attachment-name{max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;text-align:start;height:auto;line-height:1.5}
+.row:has(.attachment-name){flex-wrap:wrap;min-width:0}
+input[type=file]{max-width:100%}
