@@ -183,6 +183,13 @@ export const ar = {
   "post.youtubeTitle": "فيديو يوتيوب",
   "post.youtubePlay": "تشغيل الفيديو",
   "composer.youtubeHint": "الصق رابط يوتيوب وبيطلع كمشغل",
+  "nav.videos": "فيديوهات",
+  "videos.metaTitle": "فيديوهات | SkillPost",
+  "videos.metaDescription": "أحدث فيديوهات قناة SadeekShop على يوتيوب: شروحات Excel وأنظمة عملية.",
+  "videos.title": "فيديوهات",
+  "videos.subtitle": "أحدث الشروحات والمشاريع من قناتنا على يوتيوب.",
+  "videos.subscribe": "اشترك بالقناة",
+  "videos.empty": "لا توجد فيديوهات لعرضها حاليًا. تفضّل بزيارة القناة على يوتيوب.",
 } as const;
 
 export type DictKey = keyof typeof ar;

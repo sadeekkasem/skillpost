@@ -184,4 +184,11 @@ export const en: Dict = {
   "post.youtubeTitle": "YouTube video",
   "post.youtubePlay": "Play video",
   "composer.youtubeHint": "Paste a YouTube link to show a player",
+  "nav.videos": "Videos",
+  "videos.metaTitle": "Videos | SkillPost",
+  "videos.metaDescription": "The latest videos from the SadeekShop YouTube channel: Excel tutorials and practical systems.",
+  "videos.title": "Videos",
+  "videos.subtitle": "The latest tutorials and projects from our YouTube channel.",
+  "videos.subscribe": "Subscribe on YouTube",
+  "videos.empty": "No videos to show right now. Visit the channel on YouTube.",
 };
