@@ -114,14 +114,19 @@ export function checkFile(name: string, b: Uint8Array): CheckResult {
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-region, x-supabase-api-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
 async function handle(req: Request): Promise<Response> {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") {
+    const asked = req.headers.get("Access-Control-Request-Headers");
+    return new Response("ok", {
+      headers: { ...cors, "Access-Control-Allow-Headers": asked || cors["Access-Control-Allow-Headers"], "Access-Control-Max-Age": "86400" },
+    });
+  }
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   if (!token) return json({ error: "unauthorized" }, 401);
