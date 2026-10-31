@@ -123,7 +123,7 @@ export const en: Dict = {
   "auth.err.rateLimit": "Too many attempts. Please wait a moment and try again.",
   "auth.err.network": "We couldn't reach the server. Check your internet connection.",
   "auth.captchaRequired": "Please complete the security check.",
-  "auth.err.captcha": "Security check failed. Please try again.",
+  "auth.err.captcha": "Please confirm the security check again, then try once more.",
 
   "cookie.label": "Cookies",
   "cookie.text": "We use essential cookies to keep you signed in. We'd also like to use optional cookies for analytics and ads.",
