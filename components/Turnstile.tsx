@@ -74,9 +74,24 @@ const Turnstile = forwardRef<TurnstileHandle, Props>(function Turnstile(
         widgetId.current = ts.render(box.current, {
           sitekey: TURNSTILE_SITE_KEY,
           language: language || "auto",
+          "refresh-expired": "auto",
+          "refresh-timeout": "auto",
+          retry: "auto",
           callback: (token: string) => cb.current(token),
-          "expired-callback": () => cb.current(""),
-          "error-callback": () => cb.current(""),
+          // Token expired (~300s): clear it and fetch a fresh one right away.
+          "expired-callback": () => {
+            cb.current("");
+            if (widgetId.current) window.turnstile?.reset(widgetId.current);
+          },
+          "timeout-callback": () => {
+            cb.current("");
+            if (widgetId.current) window.turnstile?.reset(widgetId.current);
+          },
+          // Returning true tells Turnstile we handled it; its own retry continues.
+          "error-callback": () => {
+            cb.current("");
+            return true;
+          },
         });
       })
       .catch(() => cb.current(""));
