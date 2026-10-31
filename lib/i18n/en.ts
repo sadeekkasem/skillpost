@@ -30,11 +30,6 @@ export const en: Dict = {
   "notif.project_comment": "commented on your project",
   "notif.friend_request": "sent you a friend request",
   "notif.friend_accept": "accepted your friend request",
-  "notif.message": "sent you a message",
-  "notif.viewAll": "View all notifications",
-  "notif.loadMore": "Load more",
-  "notif.unavailable": "Notifications are unavailable right now.",
-  "notif.signIn": "Sign in to see your notifications",
 
   "footer.about": "About",
   "footer.privacy": "Privacy",
