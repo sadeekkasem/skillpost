@@ -378,3 +378,9 @@ input[type=file]{max-width:100%}
 .members-strip .grid{display:grid;grid-auto-flow:column;grid-template-columns:none!important;grid-auto-columns:220px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding-bottom:8px;-webkit-overflow-scrolling:touch}
 .members-strip .grid>*{scroll-snap-align:start;min-width:0}
 @media(max-width:520px){.members-strip .grid{grid-auto-columns:72%}}
+
+/* Weather strip */
+.weather-strip{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;min-height:2rem;font-size:.85rem;color:#475569;margin:.5rem 0}
+.weather-strip select{font-size:.85rem;padding:.15rem .35rem;border:1px solid #e2e8f0;border-radius:8px;background:#fff;width:auto}
+.weather-credit{font-size:.7rem;color:#94a3b8;margin-inline-start:auto}
+
