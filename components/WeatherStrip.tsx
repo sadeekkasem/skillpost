@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useT } from "@/components/LanguageProvider";
-import { CITIES, DEFAULT_CITY, type Weather } from "@/lib/weather";
+import { useLanguage, useT } from "@/components/LanguageProvider";
+import { CITIES, DEFAULT_CITY, REGIONS, type Weather } from "@/lib/weather";
 import type { DictKey } from "@/lib/i18n";
 
 const KEY = "skillpost_weather_city";
@@ -16,12 +16,14 @@ function condKey(symbol: string): DictKey {
   if (s.includes("rain")) return "weather.cond.rain";
   if (s === "fog") return "weather.cond.fog";
   if (s === "cloudy") return "weather.cond.cloudy";
-  if (s === "partlycloudy" || s === "fair") return "weather.cond.partly";
+  if (s === "partlycloudy") return "weather.cond.partly";
+  if (s === "fair") return "weather.cond.fair";
   return "weather.cond.clear";
 }
 
 export default function WeatherStrip() {
   const t = useT();
+  const { lang } = useLanguage();
   const [city, setCity] = useState<string | null>(null);
   const [data, setData] = useState<Weather | null>(null);
 
@@ -53,8 +55,15 @@ export default function WeatherStrip() {
           setCity(e.target.value);
         }}
       >
-        {CITIES.map((c) => (
-          <option key={c.id} value={c.id}>{t(`weather.city.${c.id}` as DictKey)}</option>
+        {REGIONS.map((r) => (
+          <optgroup key={r} label={t(`weather.region.${r}` as DictKey)}>
+            {CITIES.filter((c) => c.region === r)
+              .map((c) => ({ id: c.id, name: t(`weather.city.${c.id}` as DictKey) }))
+              .sort((a, b) => a.name.localeCompare(b.name, lang))
+              .map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+          </optgroup>
         ))}
       </select>
       <span className="weather-now">
