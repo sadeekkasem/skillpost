@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ComponentProps } from "react";
 import { getClient } from "@/lib/supabase";
 import { compressImage, MAX_RAW_IMAGE_BYTES } from "@/lib/upload";
 import { applyStoredReferral, storedReferral, touchActivity } from "@/lib/tiers";
 import MembershipPanel from "./MembershipPanel";
-import { useT } from "@/components/LanguageProvider";
+import { useLanguage, useT } from "@/components/LanguageProvider";
+import Turnstile, { type TurnstileHandle } from "./Turnstile";
 import type { TFunction } from "@/lib/i18n";
 
 type SubmitEvent = Parameters<
@@ -37,6 +38,7 @@ function authErrorMessage(error: unknown, t: TFunction): string {
   if (lower.includes("already registered") || lower.includes("already been registered")) return t("auth.err.alreadyRegistered");
   if (lower.includes("password should be") || lower.includes("weak password")) return t("auth.err.weakPassword");
   if (lower.includes("rate limit") || lower.includes("too many requests")) return t("auth.err.rateLimit");
+  if (lower.includes("captcha")) return t("auth.err.captcha");
   if (lower.includes("failed to fetch") || lower.includes("network")) return t("auth.err.network");
   return raw;
 }
@@ -83,6 +85,9 @@ function validateLinkedIn(value: string): string | null {
 
 export default function Account() {
   const t = useT();
+  const { lang } = useLanguage();
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef<TurnstileHandle>(null);
   const errorMessage = (error: unknown) => rawErrorMessage(error) ?? t("auth.unexpected");
   const [db] = useState(() => getClient());
 
@@ -216,6 +221,11 @@ export default function Account() {
     e.preventDefault();
     if (!db || busy) return;
 
+    if (!captchaToken) {
+      setMsg(t("auth.captchaRequired"));
+      return;
+    }
+
     setBusy(true);
     setMsg("");
 
@@ -239,6 +249,7 @@ export default function Account() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/account`,
+            captchaToken,
             data: {
               full_name: signupName.trim(),
               terms_accepted: true,
@@ -266,6 +277,7 @@ export default function Account() {
         const { data, error } = await db.auth.signInWithPassword({
           email: email.trim(),
           password,
+          options: { captchaToken },
         });
 
         if (error) throw error;
@@ -281,6 +293,8 @@ export default function Account() {
     } catch (error) {
       setMsg(authErrorMessage(error, t));
     } finally {
+      // Tokens are single-use: always get a fresh one after an attempt.
+      captchaRef.current?.reset();
       setBusy(false);
     }
   }
@@ -887,10 +901,12 @@ export default function Account() {
               </div>
             )}
 
+            <Turnstile ref={captchaRef} onToken={setCaptchaToken} language={lang} />
+
             <button
               type="submit"
               className="auth-submit"
-              disabled={busy || (mode === "signup" && (!acceptTerms || !confirmAge))}
+              disabled={busy || !captchaToken || (mode === "signup" && (!acceptTerms || !confirmAge))}
             >
               {busy ? t("auth.working") : t("auth.continue")}
             </button>
