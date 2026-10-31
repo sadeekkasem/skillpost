@@ -27,6 +27,7 @@ export default function HeaderNav() {
   return (
     <>
       <LanguageToggle />
+      <NotificationBell />
       <button
         type="button"
         className="menu-toggle"
@@ -47,7 +48,6 @@ export default function HeaderNav() {
       <AuthNavLink />
       <span className="nav-item"><AdminNavLink /></span>
       <span className="nav-item"><ModerationNavLink /></span>
-      <NotificationBell />
       </nav>
     </>
   );

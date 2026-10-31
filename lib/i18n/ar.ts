@@ -29,6 +29,11 @@ export const ar = {
   "notif.project_comment": "علّق على مشروعك",
   "notif.friend_request": "أرسل لك طلب صداقة",
   "notif.friend_accept": "قبل طلب صداقتك",
+  "notif.message": "أرسل لك رسالة",
+  "notif.viewAll": "عرض كل الإشعارات",
+  "notif.loadMore": "عرض المزيد",
+  "notif.unavailable": "الإشعارات غير متاحة حاليًا.",
+  "notif.signIn": "سجّل الدخول لعرض إشعاراتك",
 
   "footer.about": "عن المنصة",
   "footer.privacy": "الخصوصية",
