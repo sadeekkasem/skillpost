@@ -26,6 +26,19 @@ export default function WeatherStrip() {
   const { lang } = useLanguage();
   const [city, setCity] = useState<string | null>(null);
   const [data, setData] = useState<Weather | null>(null);
+  const [now, setNow] = useState<Date | null>(null);
+
+  // Local clock: set after mount (no hydration mismatch), tick on each minute.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const d = new Date();
+      setNow(d);
+      timer = setTimeout(tick, 60_000 - (d.getTime() % 60_000) + 50);
+    };
+    tick();
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem(KEY);
@@ -33,7 +46,9 @@ export default function WeatherStrip() {
   }, []);
 
   useEffect(() => {
-    if (!city) return;
+    const tz = CITIES.find((c) => c.id === city)?.timeZone;
+
+  if (!city) return;
     let off = false;
     fetch(`/api/weather?city=${city}`)
       .then((r) => (r.ok ? r.json() : null))
@@ -41,6 +56,8 @@ export default function WeatherStrip() {
       .catch(() => { if (!off) setData(null); });
     return () => { off = true; };
   }, [city]);
+
+  const tz = CITIES.find((c) => c.id === city)?.timeZone;
 
   if (!city) return <div className="weather-strip" aria-hidden />;
 
@@ -68,6 +85,9 @@ export default function WeatherStrip() {
       </select>
       <span className="weather-now">
         {data ? <><b dir="ltr">{data.temp}°C</b> · {t(condKey(data.symbol))}</> : "…"}
+        {now && tz && (
+          <> · <time>{new Intl.DateTimeFormat(lang === "ar" ? "ar-u-nu-latn" : "en", { hour: "numeric", minute: "2-digit", timeZone: tz }).format(now)}</time></>
+        )}
       </span>
       <a className="weather-credit" href="https://api.met.no/" target="_blank" rel="noopener noreferrer">
         {t("weather.credit")}
