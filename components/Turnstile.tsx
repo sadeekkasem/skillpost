@@ -12,6 +12,7 @@ const SCRIPT_SRC =
 type TurnstileApi = {
   render: (el: HTMLElement, opts: Record<string, unknown>) => string;
   reset: (id?: string) => void;
+  execute: (id?: string) => void;
   remove: (id?: string) => void;
 };
 
@@ -30,7 +31,6 @@ function loadTurnstile(): Promise<TurnstileApi> {
     const s = document.createElement("script");
     s.src = SCRIPT_SRC;
     s.async = true;
-    s.defer = true;
     s.onload = () =>
       window.turnstile ? resolve(window.turnstile) : reject(new Error("turnstile"));
     s.onerror = () => {
@@ -42,85 +42,90 @@ function loadTurnstile(): Promise<TurnstileApi> {
   return scriptPromise;
 }
 
-export type TurnstileHandle = { reset: () => void };
-
-type Props = {
-  onToken: (token: string) => void;
-  language?: string;
+export type TurnstileHandle = {
+  /** Runs the check now and resolves with a fresh single-use token. */
+  getToken: () => Promise<string>;
+  /** Clears the used token so the next getToken() runs a new check. */
+  reset: () => void;
 };
 
-/** Cloudflare Turnstile widget; calls onToken("") when the token expires or errors. */
+type Props = { language?: string };
+
+type Pending = { resolve: (t: string) => void; reject: (e: Error) => void };
+
+/**
+ * Cloudflare Turnstile in execute mode: nothing runs on page load. The check
+ * runs when the user submits; Cloudflare only shows its checkbox if it needs
+ * interaction.
+ */
 const Turnstile = forwardRef<TurnstileHandle, Props>(function Turnstile(
-  { onToken, language },
+  { language },
   ref
 ) {
   const box = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
-  const cb = useRef(onToken);
-  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const errorReset = useRef(false);
-  cb.current = onToken;
+  const pending = useRef<Pending | null>(null);
+  const lang = useRef(language);
 
   useImperativeHandle(ref, () => ({
+    async getToken() {
+      const ts = await loadTurnstile();
+      for (let i = 0; i < 50 && !widgetId.current; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      const id = widgetId.current;
+      if (!id) throw new Error("captcha unavailable");
+      pending.current?.reject(new Error("captcha superseded"));
+      return new Promise<string>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          pending.current = null;
+          ts.reset(id);
+          reject(new Error("captcha timeout"));
+        }, 120_000);
+        pending.current = {
+          resolve: (t) => { clearTimeout(timer); resolve(t); },
+          reject: (e) => { clearTimeout(timer); reject(e); },
+        };
+        ts.execute(id);
+      });
+    },
     reset() {
-      cb.current("");
-      errorReset.current = false;
       if (window.turnstile && widgetId.current) window.turnstile.reset(widgetId.current);
     },
-  }));
+  }), []);
 
   useEffect(() => {
     let cancelled = false;
-    // Clear the token and run one fresh challenge shortly after, so the
-    // widget never stays stuck in a failed/expired state.
-    const recover = () => {
-      cb.current("");
-      if (errorReset.current) return;
-      errorReset.current = true;
-      setTimeout(() => {
-        errorReset.current = false;
-        if (!cancelled && widgetId.current) window.turnstile?.reset(widgetId.current);
-      }, 1500);
+    const settle = (fn: (p: Pending) => void) => {
+      const p = pending.current;
+      pending.current = null;
+      if (p) fn(p);
     };
     loadTurnstile()
       .then((ts) => {
         if (cancelled || !box.current || widgetId.current) return;
         widgetId.current = ts.render(box.current, {
           sitekey: TURNSTILE_SITE_KEY,
-          language: language || "auto",
-          // We own recovery (recover() + 4-min pre-emptive reset); "manual"
-          // stops Cloudflare's own auto-refresh from racing our reset.
-          "refresh-expired": "manual",
-          "refresh-timeout": "manual",
-          callback: (token: string) => {
-            errorReset.current = false;
-            cb.current(token);
-            // Tokens live ~300s. Swap in a fresh one before expiry so an idle
-            // form never hits Cloudflare's expiry/refresh path.
-            if (refreshTimer.current) clearTimeout(refreshTimer.current);
-            refreshTimer.current = setTimeout(() => {
-              cb.current("");
-              if (widgetId.current) window.turnstile?.reset(widgetId.current);
-            }, 240_000);
-          },
-          "expired-callback": recover,
-          "timeout-callback": recover,
+          language: lang.current || "auto",
+          execution: "execute",
+          appearance: "interaction-only",
+          callback: (token: string) => settle((p) => p.resolve(token)),
           "error-callback": () => {
-            recover();
+            settle((p) => p.reject(new Error("captcha failed")));
             return true;
           },
         });
       })
-      .catch(() => cb.current(""));
+      .catch(() => {});
     return () => {
       cancelled = true;
-      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+      settle((p) => p.reject(new Error("captcha unmounted")));
       if (window.turnstile && widgetId.current) window.turnstile.remove(widgetId.current);
       widgetId.current = null;
     };
-  }, [language]);
+  }, []);
 
-  return <div ref={box} className="turnstile-box" style={{ minHeight: 65 }} />;
+  return <div ref={box} className="turnstile-box" />;
 });
 
 export default Turnstile;

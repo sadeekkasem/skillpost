@@ -86,7 +86,6 @@ function validateLinkedIn(value: string): string | null {
 export default function Account() {
   const t = useT();
   const { lang } = useLanguage();
-  const [captchaToken, setCaptchaToken] = useState("");
   const captchaRef = useRef<TurnstileHandle>(null);
   const errorMessage = (error: unknown) => rawErrorMessage(error) ?? t("auth.unexpected");
   const [db] = useState(() => getClient());
@@ -221,11 +220,6 @@ export default function Account() {
     e.preventDefault();
     if (!db || busy) return;
 
-    if (!captchaToken) {
-      setMsg(t("auth.captchaRequired"));
-      return;
-    }
-
     setBusy(true);
     setMsg("");
 
@@ -244,6 +238,7 @@ export default function Account() {
           throw new Error(t("auth.termsRequired"));
         }
 
+        const captchaToken = await captchaRef.current!.getToken();
         const { data, error } = await db.auth.signUp({
           email: email.trim(),
           password,
@@ -274,6 +269,7 @@ export default function Account() {
           setMsg(t("auth.signupSent"));
         }
       } else {
+        const captchaToken = await captchaRef.current!.getToken();
         const { data, error } = await db.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -901,12 +897,12 @@ export default function Account() {
               </div>
             )}
 
-            <Turnstile ref={captchaRef} onToken={setCaptchaToken} language={lang} />
+            <Turnstile ref={captchaRef} language={lang} />
 
             <button
               type="submit"
               className="auth-submit"
-              disabled={busy || !captchaToken || (mode === "signup" && (!acceptTerms || !confirmAge))}
+              disabled={busy || (mode === "signup" && (!acceptTerms || !confirmAge))}
             >
               {busy ? t("auth.working") : t("auth.continue")}
             </button>

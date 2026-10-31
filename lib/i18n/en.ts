@@ -122,7 +122,6 @@ export const en: Dict = {
   "auth.err.weakPassword": "That password is too weak. Use at least 8 characters.",
   "auth.err.rateLimit": "Too many attempts. Please wait a moment and try again.",
   "auth.err.network": "We couldn't reach the server. Check your internet connection.",
-  "auth.captchaRequired": "Please complete the security check.",
   "auth.err.captcha": "Please confirm the security check again, then try once more.",
 
   "cookie.label": "Cookies",
