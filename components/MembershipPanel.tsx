@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   DAYS_FOR_GOLD,
-  DIAMOND_CONTACT,
-  DIAMOND_PRICE,
   REFERRALS_FOR_SILVER,
   SITE_URL,
   TIERS,
@@ -69,7 +68,6 @@ export default function MembershipPanel({ db, uid }: { db: SupabaseClient; uid: 
 
   const link = `${SITE_URL}/?ref=${info.referral_code}`;
   const isDiamond = info.tier === "diamond";
-  const mailto = `mailto:${DIAMOND_CONTACT}?subject=${encodeURIComponent("اشتراك ماسي في مهاراتي")}`;
 
   async function copy() {
     try {
@@ -171,23 +169,12 @@ export default function MembershipPanel({ db, uid }: { db: SupabaseClient; uid: 
       ) : (
         <section className="card account-section membership membership-upgrade">
           <h2>
-            <span aria-hidden="true">💎</span> ترقية إلى ماسي — {DIAMOND_PRICE}
+            <span aria-hidden="true">⭐</span> ترقية الحساب
           </h2>
-          <ul className="tier-benefits">
-            {BENEFITS.diamond.map((b) => (
-              <li key={b}>{b}</li>
-            ))}
-          </ul>
-          <p>
-            للاشتراك حاليًا راسلنا على البريد{" "}
-            <a href={mailto} dir="ltr">
-              {DIAMOND_CONTACT}
-            </a>{" "}
-            وسنفعّل اشتراكك.
-          </p>
-          <a className="button" href={mailto}>
-            راسلنا للاشتراك
-          </a>
+          <p>المنصة مجانية حاليًا للجميع. اطّلع على الباقات القادمة وميزاتها.</p>
+          <Link className="button" href="/pricing">
+            عرض الباقات
+          </Link>
         </section>
       )}
     </>

@@ -1,4 +1,4 @@
-export const metadata = { title: "سياسة الخصوصية | مهاراتي" };
+export const metadata = { title: "سياسة الخصوصية | SkillPost" };
 
 export default function Page() {
   return (
@@ -8,7 +8,7 @@ export default function Page() {
 
       <h2>من نحن وكيف تتواصل معنا</h2>
       <p>
-        يدير موقع مهاراتي (SkillPost) صاحبه بصفته المسؤول عن بياناتك. لأي سؤال
+        يدير موقع SkillPost صاحبه بصفته المسؤول عن بياناتك. لأي سؤال
         أو طلب يخص بياناتك راسلنا على{" "}
         <a href="mailto:sadeekkasem@gmail.com">sadeekkasem@gmail.com</a>.
       </p>

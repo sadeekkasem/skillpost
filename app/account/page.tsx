@@ -1,7 +1,7 @@
 import Account from "@/components/Account";
 
 export const metadata = {
-  title: "حسابي | مهاراتي",
+  title: "حسابي | SkillPost",
 };
 
 export default function AccountPage() {

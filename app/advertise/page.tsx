@@ -2,8 +2,8 @@ import Link from "next/link";
 import AdRequestForm from "@/components/AdRequestForm";
 
 export const metadata = {
-  title: "أعلن معنا | مهاراتي",
-  description: "قدّم طلب إعلان على منصة مهاراتي",
+  title: "أعلن معنا | SkillPost",
+  description: "قدّم طلب إعلان على منصة SkillPost",
 };
 
 export default function AdvertisePage() {
@@ -19,7 +19,7 @@ export default function AdvertisePage() {
       <h1>أعلن معنا</h1>
 
       <p>
-        عرّف زوار منصة مهاراتي بخدمتك أو دورتك أو نشاطك.
+        عرّف زوار منصة SkillPost بخدمتك أو دورتك أو نشاطك.
         عبّئ النموذج، وسنتواصل معك لمراجعة التفاصيل
         وتحديد السعر ومكان العرض.
       </p>

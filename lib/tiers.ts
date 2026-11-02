@@ -14,7 +14,6 @@ export const tierLabel = (t: Tier) => `${TIERS[t].name} ${TIERS[t].icon}`;
 export const SITE_URL = "https://www.skillpostapp.com";
 export const REFERRALS_FOR_SILVER = 10;
 export const DAYS_FOR_GOLD = 50;
-export const DIAMOND_PRICE = "4€ شهريًا";
 export const DIAMOND_CONTACT = "sadeekkasem@gmail.com";
 
 export type TierInfo = {

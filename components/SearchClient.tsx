@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getClient } from "@/lib/supabase";
 import { diamondFirst, getDiamondMembers } from "@/lib/tiers";
 import TierBadge from "./TierBadge";
+import { useT } from "@/components/LanguageProvider";
 
 type MemberHit = { id: string; username: string; full_name: string; specialty: string | null };
 type ProjectHit = { id: string; user_id: string; title: string; description: string; category: string };
@@ -53,19 +54,47 @@ export default function SearchClient() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [searched, setSearched] = useState("");
+  const t = useT();
+  const [specialty, setSpecialty] = useState(() => params.get("specialty") ?? "");
+  const [specialties, setSpecialties] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!db) return;
+    let alive = true;
+    void db
+      .from("profiles")
+      .select("specialty")
+      .not("specialty", "is", null)
+      .limit(1000)
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        const set = new Set<string>();
+        for (const row of data as { specialty: string | null }[]) {
+          const v = row.specialty?.trim();
+          if (v) set.add(v);
+        }
+        setSpecialties([...set].sort((a, b) => a.localeCompare(b, "ar")));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [db]);
 
   useEffect(() => {
     const term = query.trim();
     let cancelled = false;
 
     const timer = window.setTimeout(() => {
-      const current = params.get("q") ?? "";
-      if (term !== current) {
-        router.replace(term ? `${pathname}?q=${encodeURIComponent(term)}` : pathname, { scroll: false });
+      const qs = new URLSearchParams();
+      if (term) qs.set("q", term);
+      if (specialty) qs.set("specialty", specialty);
+      const next = qs.toString();
+      if (next !== params.toString()) {
+        router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
       }
 
-      const pattern = toPattern(term);
-      if (term.length < 2 || !pattern) {
+      const pattern = toPattern(term) || (specialty ? "%" : "");
+      if ((term.length < 2 && !specialty) || !pattern) {
         setMembers([]);
         setProjects([]);
         setPosts([]);
@@ -87,11 +116,16 @@ export default function SearchClient() {
             .select("id,username,full_name,specialty")
             .or(`username.ilike.${pattern},full_name.ilike.${pattern},specialty.ilike.${pattern}`);
           if (filter) q = q.eq("email_confirmed", true);
+          if (specialty) q = q.eq("specialty", specialty);
           return q.limit(20);
         }),
-        db
-          .from("projects")
-          .select("id,user_id,title,description,category")
+        (specialty
+          ? db
+              .from("projects")
+              .select("id,user_id,title,description,category,profiles!projects_user_id_fkey!inner(specialty)")
+              .eq("profiles.specialty", specialty)
+          : db.from("projects").select("id,user_id,title,description,category")
+        )
           .or(`title.ilike.${pattern},description.ilike.${pattern},category.ilike.${pattern}`)
           .order("created_at", { ascending: false })
           .limit(20),
@@ -125,7 +159,7 @@ export default function SearchClient() {
       window.clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, db]);
+  }, [query, specialty, db]);
 
   const counts: Record<Tab, number> = { members: members.length, projects: projects.length, posts: posts.length };
 
@@ -143,7 +177,20 @@ export default function SearchClient() {
         style={{ width: "100%", boxSizing: "border-box" }}
       />
 
-      {query.trim().length > 0 && query.trim().length < 2 && (
+      <label style={{ fontWeight: 400 }}>
+        {t("search.specialty")}
+        <select value={specialty} onChange={(event) => setSpecialty(event.target.value)}>
+          <option value="">{t("search.allSpecialties")}</option>
+          {specialty && !specialties.includes(specialty) && <option value={specialty}>{specialty}</option>}
+          {specialties.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {!specialty && query.trim().length > 0 && query.trim().length < 2 && (
         <p className="muted">اكتب حرفين على الأقل.</p>
       )}
       {message && (
