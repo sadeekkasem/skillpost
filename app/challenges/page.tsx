@@ -1,21 +1,34 @@
 import Link from "next/link";
-import { getT } from "@/lib/i18n/server";
-import type { DictKey } from "@/lib/i18n";
+import { getLang, getT } from "@/lib/i18n/server";
+import { getClient } from "@/lib/supabase";
+import type { Challenge } from "@/lib/types";
+import {
+  challengeDescription,
+  challengeIcon,
+  challengeIsOpen,
+  challengeTitle,
+  levelKey,
+} from "@/lib/challenges";
 
 export async function generateMetadata() {
   const t = await getT();
   return { title: `${t("challenges.title")} | SkillPost`, description: t("challenges.subtitle") };
 }
 
-const CHALLENGES: { icon: string; title: DictKey; desc: DictKey; level: DictKey }[] = [
-  { icon: "🧹", title: "challenges.c1t", desc: "challenges.c1d", level: "challenges.easy" },
-  { icon: "🧾", title: "challenges.c2t", desc: "challenges.c2d", level: "challenges.easy" },
-  { icon: "🌐", title: "challenges.c3t", desc: "challenges.c3d", level: "challenges.mid" },
-  { icon: "📊", title: "challenges.c4t", desc: "challenges.c4d", level: "challenges.mid" },
-];
-
 export default async function ChallengesPage() {
   const t = await getT();
+  const { lang } = await getLang();
+  const db = getClient();
+
+  let challenges: Challenge[] = [];
+  if (db) {
+    const { data } = await db
+      .from("challenges")
+      .select("*")
+      .order("starts_at", { ascending: false });
+    challenges = (data ?? []) as Challenge[];
+  }
+
   return (
     <section>
       <div className="hero feed-hero page-hero">
@@ -23,19 +36,42 @@ export default async function ChallengesPage() {
         <p>{t("challenges.subtitle")}</p>
       </div>
       <p className="notice">{t("challenges.note")}</p>
-      <div className="grid">
-        {CHALLENGES.map((c) => (
-          <article className="card challenge-card" key={c.title}>
-            <span className="challenge-icon" aria-hidden="true">{c.icon}</span>
-            <h2>{t(c.title)}</h2>
-            <span className="badge" style={{ alignSelf: "flex-start" }}>
-              {t("challenges.level", { level: t(c.level) })}
-            </span>
-            <p>{t(c.desc)}</p>
-            <Link className="button" href="/projects/new">{t("challenges.cta")}</Link>
-          </article>
-        ))}
-      </div>
+      {!challenges.length ? (
+        <p className="muted">{t("challenges.noEntries")}</p>
+      ) : (
+        <div className="grid">
+          {challenges.map((c) => {
+            const open = challengeIsOpen(c);
+            return (
+              <article className="card challenge-card" key={c.id}>
+                <span className="challenge-icon" aria-hidden="true">
+                  {challengeIcon(c.slug)}
+                </span>
+                <h2>{challengeTitle(c, lang)}</h2>
+                <div className="row" style={{ gap: 8 }}>
+                  <span className="badge" style={{ alignSelf: "flex-start" }}>
+                    {t("challenges.level", { level: t(levelKey(c.level)) })}
+                  </span>
+                  <span
+                    className="badge"
+                    style={{
+                      alignSelf: "flex-start",
+                      background: open ? "#dcfce7" : "#e2e8f0",
+                      color: open ? "#166534" : "#475569",
+                    }}
+                  >
+                    {open ? t("challenges.open") : t("challenges.closed")}
+                  </span>
+                </div>
+                <p>{challengeDescription(c, lang)}</p>
+                <Link className="button" href={`/challenges/${c.slug}`}>
+                  {t("challenges.view")}
+                </Link>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

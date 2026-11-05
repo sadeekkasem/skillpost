@@ -1,6 +1,9 @@
+"use client";
 import Link from "next/link";
 import { getClient } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
+import { formatAvgStars, type RatingStats } from "@/lib/ratings";
+import { useT } from "@/components/LanguageProvider";
 import TierBadge from "./TierBadge";
 
 type ProjectWithOwner = Project & {
@@ -16,7 +19,9 @@ type ProjectWithOwner = Project & {
 export default function ProjectCard({
   project,
   pinned = false,
-}: Readonly<{ project: Project; pinned?: boolean }>) {
+  rating,
+}: Readonly<{ project: Project; pinned?: boolean; rating?: RatingStats | null }>) {
+  const t = useT();
   const p = project as ProjectWithOwner;
   const owner = p.profiles ?? null;
 
@@ -238,6 +243,14 @@ export default function ProjectCard({
         >
           {description.slice(0, 160)}
           {description.length > 160 ? "…" : ""}
+        </p>
+      )}
+
+      {rating && rating.ratings_count > 0 && (
+        <p className="muted featured-likes" style={{ margin: 0 }} aria-label={t("rating.average", { avg: formatAvgStars(rating.avg_stars), count: rating.ratings_count })}>
+          {"★".repeat(Math.max(1, Math.round(rating.avg_stars)))}
+          {"☆".repeat(Math.max(0, 5 - Math.max(1, Math.round(rating.avg_stars))))}{" "}
+          {formatAvgStars(rating.avg_stars)} · {t("rating.count", { count: rating.ratings_count })}
         </p>
       )}
 

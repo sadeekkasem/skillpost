@@ -16,6 +16,8 @@ import {
   MAX_FILE_BYTES,
 } from "@/lib/upload";
 import TierBadge from "@/components/TierBadge";
+import { useT } from "@/components/LanguageProvider";
+import { formatAvgStars } from "@/lib/ratings";
 
 type SubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -44,10 +46,14 @@ export default function Detail({
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [msg, setMsg] = useState("جار التحميل");
+  const t = useT();
   const [likes, setLikes] = useState(0);
   const [uid, setUid] = useState("");
   const [liked, setLiked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [avgStars, setAvgStars] = useState(0);
+  const [ratingsCount, setRatingsCount] = useState(0);
+  const [myStars, setMyStars] = useState<number | null>(null);
 
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
@@ -148,6 +154,41 @@ export default function Detail({
       setLiked(Boolean(likedResult.data));
     } else {
       setLiked(false);
+    }
+
+    try {
+      const statsRes = await db
+        .from("project_rating_stats")
+        .select("avg_stars,ratings_count")
+        .eq("project_id", id)
+        .maybeSingle();
+      if (!statsRes.error && statsRes.data) {
+        const row = statsRes.data as { avg_stars: number | string; ratings_count: number };
+        setAvgStars(Number(row.avg_stars) || 0);
+        setRatingsCount(row.ratings_count ?? 0);
+      } else {
+        setAvgStars(0);
+        setRatingsCount(0);
+      }
+    } catch {
+      setAvgStars(0);
+      setRatingsCount(0);
+    }
+
+    if (user) {
+      const mine = await db
+        .from("project_ratings")
+        .select("stars")
+        .eq("project_id", id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!mine.error) {
+        setMyStars((mine.data as { stars?: number } | null)?.stars ?? null);
+      } else {
+        setMyStars(null);
+      }
+    } else {
+      setMyStars(null);
     }
   }, [db, id, isDemo]);
 
@@ -421,6 +462,59 @@ export default function Detail({
     });
   }
 
+  function ratingErrorMessage(error: unknown): string {
+    const raw = errorMessage(error);
+    if (/لا يمكنك تقييم مشروعك|P0001|own project|evaluate your/i.test(raw)) {
+      return t("rating.self");
+    }
+    if (/banned|محظور|block_banned/i.test(raw)) {
+      return t("rating.banned");
+    }
+    return t("rating.error") + (raw ? `: ${raw}` : "");
+  }
+
+  async function rate(stars: number) {
+    await runAction(async () => {
+      if (!db || !uid) throw new Error(t("rating.login"));
+      if (isOwner) throw new Error(t("rating.self"));
+      if (stars < 1 || stars > 5) throw new Error(t("rating.error"));
+
+      try {
+        if (myStars != null) {
+          const result = await db
+            .from("project_ratings")
+            .update({ stars })
+            .eq("project_id", id)
+            .eq("user_id", uid);
+          if (result.error) throw result.error;
+        } else {
+          const result = await db
+            .from("project_ratings")
+            .insert({ project_id: id, user_id: uid, stars });
+          if (result.error) throw result.error;
+        }
+        await load();
+        setMsg(t("rating.thanks"));
+      } catch (error) {
+        throw new Error(ratingErrorMessage(error));
+      }
+    });
+  }
+
+  async function removeRating() {
+    await runAction(async () => {
+      if (!db || !uid) throw new Error(t("rating.login"));
+      const result = await db
+        .from("project_ratings")
+        .delete()
+        .eq("project_id", id)
+        .eq("user_id", uid);
+      if (result.error) throw new Error(ratingErrorMessage(result.error));
+      await load();
+      setMsg(t("rating.removed"));
+    });
+  }
+
   async function download(path: string, attachmentId: string) {
     await runAction(async () => {
       if (!db || !uid) {
@@ -525,6 +619,51 @@ export default function Detail({
                       حذف مشروعي
                     </button>
                   </>
+                )}
+              </div>
+            )}
+
+            {!isDemo && (
+              <div className="rating-block" style={{ marginTop: 12 }}>
+                <p className="muted" style={{ margin: "0 0 8px" }}>
+                  {ratingsCount > 0
+                    ? t("rating.average", {
+                        avg: formatAvgStars(avgStars),
+                        count: ratingsCount,
+                      })
+                    : t("rating.count", { count: 0 })}
+                </p>
+                {!uid ? (
+                  <p className="muted" style={{ margin: 0 }}>{t("rating.login")}</p>
+                ) : isOwner ? (
+                  <p className="muted" style={{ margin: 0 }}>{t("rating.self")}</p>
+                ) : (
+                  <div className="row" role="group" aria-label={t("rating.rate")}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        className="secondary"
+                        disabled={busy}
+                        aria-label={t("rating.stars", { n })}
+                        aria-pressed={myStars === n}
+                        onClick={() => rate(n)}
+                        style={{
+                          fontSize: 20,
+                          lineHeight: 1,
+                          padding: "6px 10px",
+                          background: myStars != null && n <= myStars ? "#fef3c7" : undefined,
+                        }}
+                      >
+                        {myStars != null && n <= myStars ? "★" : "☆"}
+                      </button>
+                    ))}
+                    {myStars != null && (
+                      <button type="button" className="secondary" disabled={busy} onClick={removeRating}>
+                        {t("rating.remove")}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             )}

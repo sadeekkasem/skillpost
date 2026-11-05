@@ -85,3 +85,30 @@ export type Post = {
   post_likes?: { user_id: string }[];
   post_comments?: PostComment[];
 };
+
+export type ProjectRatingStats = {
+  avg_stars: number;
+  ratings_count: number;
+};
+
+export type Challenge = {
+  id: string;
+  slug: string;
+  title_ar: string;
+  title_en: string | null;
+  description_ar: string;
+  description_en: string | null;
+  level: string;
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+  winner_entry_id: string | null;
+};
+
+export type ChallengeEntry = {
+  id: string;
+  challenge_id: string;
+  project_id: string;
+  user_id: string;
+  created_at: string;
+};

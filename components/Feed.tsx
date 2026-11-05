@@ -10,6 +10,7 @@ import type { Project } from "@/lib/types";
 import Card from "./ProjectCard";
 import { diamondFirst, getDiamondMembers } from "@/lib/tiers";
 import ActiveAds from "./ActiveAds";
+import { fetchRatingStats, type RatingStats } from "@/lib/ratings";
 
 
 type SortOrder = "newest" | "oldest" | "title";
@@ -55,6 +56,7 @@ export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = 
   const [reloadKey, setReloadKey] = useState(0);
   const [diamonds, setDiamonds] = useState<string[]>([]);
   const [failedAvatars, setFailedAvatars] = useState<string[]>([]);
+  const [ratings, setRatings] = useState<Record<string, RatingStats>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -111,7 +113,14 @@ export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = 
         if (cancelled) return;
         const seen = new Set(featured.map((p) => p.id));
         setDiamonds(diamondIds);
-        setItems([...featured, ...recent.filter((p) => !seen.has(p.id))]);
+        const merged = [...featured, ...recent.filter((p) => !seen.has(p.id))];
+        setItems(merged);
+        try {
+          const stats = await fetchRatingStats(db, merged.map((p) => p.id));
+          if (!cancelled) setRatings(stats);
+        } catch {
+          if (!cancelled) setRatings({});
+        }
 
         const membersResult = await confirmedOnly((filter) => {
           let q = db
@@ -339,7 +348,7 @@ export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = 
           ) : (
           <div className="grid">
             {filtered.map((project) => (
-              <Card key={project.id} project={project} />
+              <Card key={project.id} project={project} rating={ratings[project.id]} />
             ))}
           </div>
           )}
@@ -712,7 +721,7 @@ export default function Feed({ inTimeline = false }: { inTimeline?: boolean } = 
           ) : (
           <div className="grid">
             {filtered.map((project) => (
-              <Card key={project.id} project={project} />
+              <Card key={project.id} project={project} rating={ratings[project.id]} />
             ))}
           </div>
           )}

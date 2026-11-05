@@ -14,6 +14,7 @@ import VideoPostCard from "./VideoPostCard";
 import type { ChannelVideo } from "@/lib/youtube/feed";
 import { buildHomeFeed } from "@/lib/youtube/interleave";
 import ProjectCard from "./ProjectCard";
+import { fetchRatingStats, type RatingStats } from "@/lib/ratings";
 import { loadVideoReactions, type VideoReactions } from "@/lib/youtube/reactions";
 import type { Project } from "@/lib/types";
 
@@ -39,6 +40,7 @@ export default function PostsSection({ userId, videos = [], withProjects = false
   const [message, setMessage] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [ratings, setRatings] = useState<Record<string, RatingStats>>({});
   const [reactions, setReactions] = useState<VideoReactions | null>(null);
   const videoKey = userId ? "" : videos.map((v) => v.id).join(",");
 
@@ -63,7 +65,16 @@ export default function PostsSection({ userId, videos = [], withProjects = false
           .select(PROJECT_SELECT)
           .order("created_at", { ascending: false })
           .limit(100);
-        if (!cancelled && !error) setProjects((data ?? []) as unknown as Project[]);
+        if (!cancelled && !error) {
+          const loaded = (data ?? []) as unknown as Project[];
+          setProjects(loaded);
+          try {
+            const stats = await fetchRatingStats(db, loaded.map((p) => p.id));
+            if (!cancelled) setRatings(stats);
+          } catch {
+            if (!cancelled) setRatings({});
+          }
+        }
       } catch {
         // Projects are optional here; posts and videos still render.
       }
@@ -174,7 +185,7 @@ export default function PostsSection({ userId, videos = [], withProjects = false
           />
         ) : item.kind === "project" ? (
           <div key={`pr-${item.project.id}`} className="feed-project">
-            <ProjectCard project={item.project} />
+            <ProjectCard project={item.project} rating={ratings[item.project.id]} />
           </div>
         ) : (
           <PostCard

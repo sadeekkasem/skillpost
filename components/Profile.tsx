@@ -9,6 +9,7 @@ import type {
   Project,
 } from "@/lib/types";
 import Card from "./ProjectCard";
+import { fetchRatingStats, type RatingStats } from "@/lib/ratings";
 import PostsSection from "./PostsSection";
 import ReportButton from "./ReportButton";
 import TierBadge from "./TierBadge";
@@ -69,6 +70,7 @@ export default function UserProfile({
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [ratings, setRatings] = useState<Record<string, RatingStats>>({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [viewerId, setViewerId] = useState("");
@@ -90,6 +92,7 @@ export default function UserProfile({
       setMessage("");
       setProfile(null);
       setProjects([]);
+      setRatings({});
       setViewerId("");
       setFailedAvatar("");
       setFriendship(null);
@@ -135,9 +138,14 @@ export default function UserProfile({
           throw projectsResult.error;
         }
 
-        setProjects(
-          (projectsResult.data ?? []) as unknown as Project[]
-        );
+        const loaded = (projectsResult.data ?? []) as unknown as Project[];
+        setProjects(loaded);
+        try {
+          const stats = await fetchRatingStats(db, loaded.map((p) => p.id));
+          if (!cancelled) setRatings(stats);
+        } catch {
+          if (!cancelled) setRatings({});
+        }
 
         const authResult = await db.auth.getUser();
         const currentUserId = authResult.data.user?.id ?? "";
@@ -611,7 +619,7 @@ export default function UserProfile({
 
           <div className="grid">
             {orderedProjects.map((project) => (
-              <Card key={project.id} project={project} pinned={project.id === pinnedId} />
+              <Card key={project.id} project={project} pinned={project.id === pinnedId} rating={ratings[project.id]} />
             ))}
           </div>
 
