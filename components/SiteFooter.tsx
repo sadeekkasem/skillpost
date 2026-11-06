@@ -8,6 +8,7 @@ export default function SiteFooter() {
   return (
     <footer>
       <Link href="/about">{t("footer.about")}</Link> ·{" "}
+      <Link href="/news">{t("footer.news")}</Link> ·{" "}
       <Link href="/privacy">{t("footer.privacy")}</Link> ·{" "}
       <Link href="/terms">{t("footer.terms")}</Link> ·{" "}
       <Link href="/advertise">{t("footer.advertise")}</Link>

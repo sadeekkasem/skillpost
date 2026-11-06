@@ -41,6 +41,7 @@ export default function HeaderNav() {
       <span className="nav-item"><Link href="/">{t("nav.projects")}</Link></span>
       <span className="nav-item"><Link href="/projects/new">{t("nav.newProject")}</Link></span>
       <span className="nav-item"><Link href="/challenges">{t("nav.challenges")}</Link></span>
+      <span className="nav-item"><Link href="/news">{t("nav.news")}</Link></span>
       <span className="nav-item"><Link href="/search" aria-label={t("nav.searchLabel")}>{t("nav.search")}</Link></span>
       <span className="nav-item"><Link href="/videos">{t("nav.videos")}</Link></span>
       <span className="nav-item"><Link href="/friends">{t("nav.friends")}</Link></span>
