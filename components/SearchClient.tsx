@@ -1,71 +1,23 @@
 "use client";
-import { confirmedOnly } from "@/lib/confirmed";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getClient } from "@/lib/supabase";
 import { diamondFirst, getDiamondMembers } from "@/lib/tiers";
 import TierBadge from "./TierBadge";
 import { useT } from "@/components/LanguageProvider";
-
-type MemberHit = { id: string; username: string; full_name: string; specialty: string | null };
-type ProjectHit = { id: string; user_id: string; title: string; description: string; category: string };
-type PostHit = {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  profiles?: { username: string; full_name: string } | null;
-};
-
-type Tab = "members" | "projects" | "posts";
-
-const TABS: Tab[] = ["members", "projects", "posts"];
-
-function isTab(value: string | null): value is Tab {
-  return value === "members" || value === "projects" || value === "posts";
-}
-
-/** Make a term safe for a PostgREST or()/ilike filter value (unquoted). */
-function toPattern(term: string): string {
-  const cleaned = term
-    .replace(/[,()"'\\:*]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/[%_]/g, (match) => `\\${match}`);
-  return cleaned ? `%${cleaned}%` : "";
-}
-
-/** Quote a pattern for PostgREST `.or()` filters that contain % or spaces. */
-function quoteFilterValue(value: string): string {
-  return `"${value.replace(/"/g, "")}"`;
-}
-
-function snippet(text: string, max = 160): string {
-  return text.length > max ? `${text.slice(0, max)}…` : text;
-}
-
-function rankProjects(items: ProjectHit[], term: string): ProjectHit[] {
-  const q = term.trim().toLowerCase();
-  if (!q) return items;
-  return [...items].sort((a, b) => {
-    const aTitle = a.title.toLowerCase();
-    const bTitle = b.title.toLowerCase();
-    const score = (title: string, description: string, category: string) => {
-      if (title === q) return 0;
-      if (title.startsWith(q)) return 1;
-      if (title.includes(q)) return 2;
-      if (category.toLowerCase().includes(q)) return 3;
-      if (description.toLowerCase().includes(q)) return 4;
-      return 5;
-    };
-    return (
-      score(aTitle, a.description, a.category) - score(bTitle, b.description, b.category) ||
-      aTitle.localeCompare(bTitle, "ar")
-    );
-  });
-}
+import {
+  isSearchSort,
+  isSearchTab,
+  SEARCH_PAGE_SIZE,
+  SEARCH_TABS,
+  searchPage,
+  snippet,
+  type SearchHit,
+  type SearchSort,
+  type SearchTab,
+} from "@/lib/search";
 
 export default function SearchClient() {
   const router = useRouter();
@@ -73,275 +25,179 @@ export default function SearchClient() {
   const params = useSearchParams();
   const [db] = useState(() => getClient());
   const [query, setQuery] = useState(() => params.get("q") ?? "");
-  const [tab, setTab] = useState<Tab>(() => {
-    const initial = params.get("tab");
-    return isTab(initial) ? initial : "members";
-  });
-  const [members, setMembers] = useState<MemberHit[]>([]);
-  const [projects, setProjects] = useState<ProjectHit[]>([]);
-  const [posts, setPosts] = useState<PostHit[]>([]);
+  const [category, setCategory] = useState(() => params.get("category") ?? "");
+  const tab = (isSearchTab(params.get("tab")) ? params.get("tab") : "projects") as SearchTab;
+  const specialty = params.get("specialty") ?? "";
+  const sort = (isSearchSort(params.get("sort")) ? params.get("sort") : "relevance") as SearchSort;
+  const page = searchPage(params.get("page"));
+  const [hits, setHits] = useState<SearchHit[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [specialties, setSpecialties] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [searched, setSearched] = useState("");
+  const [total, setTotal] = useState(0);
+  const [diamonds, setDiamonds] = useState<string[]>([]);
+  const requestId = useRef(0);
   const t = useT();
-  const [specialty, setSpecialty] = useState(() => params.get("specialty") ?? "");
-  const [specialties, setSpecialties] = useState<string[]>([]);
 
   const tabLabels = useMemo(
-    () =>
-      ({
-        members: t("search.tabMembers"),
-        projects: t("search.tabProjects"),
-        posts: t("search.tabPosts"),
-      }) satisfies Record<Tab, string>,
+    () => ({
+      members: t("search.tabMembers"),
+      projects: t("search.tabProjects"),
+      posts: t("search.tabPosts"),
+    }) satisfies Record<SearchTab, string>,
     [t]
   );
 
-  useEffect(() => {
-    if (!db) return;
-    let alive = true;
-    void db
-      .from("profiles")
-      .select("specialty")
-      .not("specialty", "is", null)
-      .limit(1000)
-      .then(({ data }) => {
-        if (!alive || !data) return;
-        const set = new Set<string>();
-        for (const row of data as { specialty: string | null }[]) {
-          const v = row.specialty?.trim();
-          if (v) set.add(v);
-        }
-        setSpecialties([...set].sort((a, b) => a.localeCompare(b, "ar")));
-      });
-    return () => {
-      alive = false;
-    };
-  }, [db]);
+  function updateUrl(changes: Record<string, string | null>) {
+    const next = new URLSearchParams(params.toString());
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    if (!("page" in changes)) next.delete("page");
+    if (next.get("tab") === "projects") next.delete("tab");
+    if (next.get("sort") === "relevance") next.delete("sort");
+    const serialized = next.toString();
+    router.replace(serialized ? `${pathname}?${serialized}` : pathname, { scroll: false });
+  }
 
-  // Keep local state in sync when the shareable URL changes (back/forward, pasted link).
   useEffect(() => {
-    const nextQ = params.get("q") ?? "";
-    const nextSpecialty = params.get("specialty") ?? "";
-    const nextTab = params.get("tab");
-    setQuery((prev) => (prev === nextQ ? prev : nextQ));
-    setSpecialty((prev) => (prev === nextSpecialty ? prev : nextSpecialty));
-    if (isTab(nextTab)) setTab((prev) => (prev === nextTab ? prev : nextTab));
+    setQuery(params.get("q") ?? "");
+    setCategory(params.get("category") ?? "");
   }, [params]);
 
-  // Keep the address bar shareable without re-fetching on every tab click.
   useEffect(() => {
-    const term = query.trim();
-    const qs = new URLSearchParams();
-    if (term) qs.set("q", term);
-    if (specialty) qs.set("specialty", specialty);
-    if (tab !== "members") qs.set("tab", tab);
-    const next = qs.toString();
-    const currentQ = params.get("q") ?? "";
-    const currentSpecialty = params.get("specialty") ?? "";
-    const currentTab = params.get("tab") ?? "members";
-    if (currentQ === term && currentSpecialty === specialty && currentTab === tab) return;
-    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
-  }, [query, specialty, tab, pathname, router, params]);
-
-  useEffect(() => {
-    const term = query.trim();
-    let cancelled = false;
-
     const timer = window.setTimeout(() => {
-      const pattern = toPattern(term) || (specialty ? "%" : "");
-      if ((term.length < 2 && !specialty) || !pattern) {
-        setMembers([]);
-        setProjects([]);
-        setPosts([]);
-        setSearched("");
-        setMessage("");
-        return;
+      const next = new URLSearchParams(params.toString());
+      const term = query.trim();
+      if (term) next.set("q", term);
+      else next.delete("q");
+      if (category) next.set("category", category);
+      else next.delete("category");
+      next.delete("page");
+      if (next.toString() !== params.toString()) {
+        router.replace(next.toString() ? `${pathname}?${next}` : pathname, { scroll: false });
       }
-      if (!db) {
-        setMessage(t("search.dbOffline"));
-        return;
-      }
+    }, 300);
+    return () => window.clearTimeout(timer);
+    // URL changes sync input in the preceding effect; avoid an immediate rewrite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, category]);
 
-      const quoted = quoteFilterValue(pattern);
+  useEffect(() => {
+    if (!db) return;
+    let active = true;
+    void Promise.all([
+      db.from("projects").select("category").limit(1000),
+      db.from("profiles").select("specialty").not("specialty", "is", null).limit(1000),
+      getDiamondMembers(db),
+    ]).then(([projectRows, memberRows, diamondIds]) => {
+      if (!active) return;
+      setCategories([...new Set((projectRows.data ?? []).map((row) => row.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar")));
+      setSpecialties([...new Set((memberRows.data ?? []).map((row) => row.specialty).filter((x): x is string => Boolean(x?.trim())))] .sort((a, b) => a.localeCompare(b, "ar")));
+      setDiamonds(diamondIds);
+    });
+    return () => { active = false; };
+  }, [db]);
+
+  useEffect(() => {
+    const id = ++requestId.current;
+    const term = params.get("q")?.trim() ?? "";
+    if (!db) {
+      setMessage(t("search.dbOffline"));
+      return;
+    }
+    if (term.length === 1 && !category && !specialty) {
+      setHits([]);
+      setTotal(0);
+      setMessage("");
+      return;
+    }
+    const timer = window.setTimeout(() => {
       setLoading(true);
       setMessage("");
-      void Promise.all([
-        confirmedOnly((filter) => {
-          let q = db
-            .from("profiles")
-            .select("id,username,full_name,specialty")
-            .or(`username.ilike.${quoted},full_name.ilike.${quoted},specialty.ilike.${quoted}`);
-          if (filter) q = q.eq("email_confirmed", true);
-          if (specialty) q = q.eq("specialty", specialty);
-          return q.limit(20);
-        }),
-        (specialty
-          ? db
-              .from("projects")
-              .select("id,user_id,title,description,category,profiles!projects_user_id_fkey!inner(specialty)")
-              .eq("profiles.specialty", specialty)
-          : db.from("projects").select("id,user_id,title,description,category")
-        )
-          .or(`title.ilike.${quoted},description.ilike.${quoted},category.ilike.${quoted}`)
-          .order("created_at", { ascending: false })
-          .limit(20),
-        db
-          .from("posts")
-          .select("id,user_id,content,created_at,profiles!posts_user_id_fkey(username,full_name)")
-          .ilike("content", pattern)
-          .order("created_at", { ascending: false })
-          .limit(20),
-        getDiamondMembers(db),
-      ])
-        .then(([m, pr, po, diamonds]) => {
-          if (cancelled) return;
-          const error = m.error || pr.error || po.error;
-          if (error) setMessage(error.message);
-          const nextMembers = diamondFirst((m.data ?? []) as MemberHit[], (x) => x.id, diamonds);
-          const nextProjects = diamondFirst(
-            rankProjects((pr.data ?? []) as ProjectHit[], term),
-            (x) => x.user_id,
-            diamonds
-          );
-          const nextPosts = (po.data ?? []) as unknown as PostHit[];
-          setMembers(nextMembers);
-          setProjects(nextProjects);
-          setPosts(nextPosts);
-          setSearched(term || specialty);
-          const counts: Record<Tab, number> = {
-            members: nextMembers.length,
-            projects: nextProjects.length,
-            posts: nextPosts.length,
-          };
-          setTab((current) => (counts[current] > 0 ? current : TABS.find((key) => counts[key] > 0) ?? current));
-        })
-        .catch((error: unknown) => {
-          if (!cancelled) setMessage(error instanceof Error ? error.message : t("search.failed"));
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
+      void Promise.resolve(db.rpc("search_content", {
+        p_tab: tab,
+        p_term: term,
+        p_category: category,
+        p_specialty: specialty,
+        p_sort: sort,
+        p_page: page,
+        p_page_size: SEARCH_PAGE_SIZE,
+      })).then(({ data, error }) => {
+        if (id !== requestId.current) return;
+        if (error) {
+          setMessage(error.message);
+          setHits([]);
+          setTotal(0);
+          return;
+        }
+        const rows = (data ?? []) as unknown as SearchHit[];
+        setHits(tab === "posts" ? rows : diamondFirst(rows, (row) => row.user_id, diamonds));
+        setTotal(rows[0]?.total_count ?? 0);
+      }).catch((error: unknown) => {
+        if (id === requestId.current) setMessage(error instanceof Error ? error.message : t("search.failed"));
+      }).finally(() => {
+        if (id === requestId.current) setLoading(false);
+      });
     }, 300);
+    return () => window.clearTimeout(timer);
+  }, [db, params, tab, category, specialty, sort, page, diamonds, t]);
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, specialty, db]);
-
-  const counts: Record<Tab, number> = { members: members.length, projects: projects.length, posts: posts.length };
+  const pages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
 
   return (
     <div>
       <h1>{t("search.title")}</h1>
-      <input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={t("search.placeholder")}
-        aria-label={t("search.queryLabel")}
-        maxLength={100}
-        autoFocus
-        style={{ width: "100%", boxSizing: "border-box" }}
-      />
-
-      <label style={{ fontWeight: 400 }}>
-        {t("search.specialty")}
-        <select value={specialty} onChange={(event) => setSpecialty(event.target.value)}>
-          <option value="">{t("search.allSpecialties")}</option>
-          {specialty && !specialties.includes(specialty) && <option value={specialty}>{specialty}</option>}
-          {specialties.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {!specialty && query.trim().length > 0 && query.trim().length < 2 && (
-        <p className="muted">{t("search.minChars")}</p>
-      )}
-      {message && (
-        <p className="notice" role="status">
-          {message}
-        </p>
-      )}
-
-      {searched && (
-        <>
-          <div className="row" role="tablist" style={{ gap: 8, margin: "16px 0", flexWrap: "wrap" }}>
-            {TABS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                role="tab"
-                aria-selected={tab === key}
-                className={tab === key ? undefined : "secondary"}
-                onClick={() => setTab(key)}
-              >
-                {tabLabels[key]} ({counts[key]})
-              </button>
-            ))}
-          </div>
-
-          {loading && <p className="muted">{t("search.loading")}</p>}
-
-          {tab === "members" && (
-            <div style={{ display: "grid", gap: 12 }}>
-              {members.length === 0 && <p className="notice">{t("search.noMembers")}</p>}
-              {members.map((member) => (
-                <article key={member.id} className="card">
-                  <Link href={`/profile/${member.id}`} style={{ fontWeight: 700 }}>
-                    {member.full_name || member.username}
-                  </Link>{" "}
-                  <TierBadge id={member.id} />{" "}
-                  <span className="muted">
-                    <bdi>@{member.username}</bdi>
-                  </span>
-                  {member.specialty && <p className="muted" style={{ margin: "4px 0 0" }}>{member.specialty}</p>}
-                </article>
-              ))}
-            </div>
-          )}
-
-          {tab === "projects" && (
-            <div style={{ display: "grid", gap: 12 }}>
-              {projects.length === 0 && <p className="notice">{t("search.noProjects")}</p>}
-              {projects.map((project) => (
-                <article key={project.id} className="card">
-                  <span className="badge">{project.category}</span>
-                  <h3 style={{ margin: "8px 0" }}>
-                    <Link href={`/projects/${project.id}`}>{project.title}</Link>
-                  </h3>
-                  <p style={{ margin: 0 }}>{snippet(project.description)}</p>
-                </article>
-              ))}
-            </div>
-          )}
-
-          {tab === "posts" && (
-            <div style={{ display: "grid", gap: 12 }}>
-              {posts.length === 0 && <p className="notice">{t("search.noPosts")}</p>}
-              {posts.map((post) => (
-                <article key={post.id} className="card">
-                  <Link href={`/profile/${post.user_id}`} style={{ fontWeight: 700 }}>
-                    {post.profiles?.full_name || post.profiles?.username || t("search.memberFallback")}
-                  </Link>{" "}
-                  <TierBadge id={post.user_id} />{" "}
-                  <span className="muted" style={{ fontSize: 14 }}>
-                    {new Date(post.created_at).toLocaleString("ar")}
-                  </span>
-                  <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: "8px 0 0" }}>
-                    {snippet(post.content, 300)}
-                  </p>
-                </article>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+      <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search.placeholder")} aria-label={t("search.queryLabel")} maxLength={100} autoFocus style={{ width: "100%", boxSizing: "border-box" }} />
+      <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", marginTop: 12 }}>
+        <label>{t("search.specialty")}
+          <select value={specialty} onChange={(event) => updateUrl({ specialty: event.target.value || null })}>
+            <option value="">{t("search.allSpecialties")}</option>
+            {specialty && !specialties.includes(specialty) && <option value={specialty}>{specialty}</option>}
+            {specialties.map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>
+        <label>{t("search.category")}
+          <select value={category} onChange={(event) => { setCategory(event.target.value); updateUrl({ category: event.target.value || null }); }}>
+            <option value="">{t("search.allCategories")}</option>
+            {category && !categories.includes(category) && <option value={category}>{category}</option>}
+            {categories.map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>
+        <label>{t("search.sort")}
+          <select value={sort} onChange={(event) => updateUrl({ sort: event.target.value })}>
+            {(["relevance", "newest", "oldest"] as const).map((value) => <option key={value} value={value}>{t(`search.sort_${value}`)}</option>)}
+          </select>
+        </label>
+      </div>
+      {params.get("q")?.trim().length === 1 && !category && !specialty && <p className="muted">{t("search.minChars")}</p>}
+      {message && <p className="notice" role="alert">{message}</p>}
+      <div className="row" role="tablist" style={{ gap: 8, margin: "16px 0", flexWrap: "wrap" }}>
+        {SEARCH_TABS.map((value) => <button key={value} type="button" role="tab" aria-selected={tab === value} className={tab === value ? undefined : "secondary"} onClick={() => updateUrl({ tab: value })}>{tabLabels[value]}</button>)}
+      </div>
+      {loading ? <p className="muted">{t("search.loading")}</p> : <p className="muted" role="status">{t("search.resultCount", { count: total })}</p>}
+      {!loading && hits.length === 0 && !message && <p className="notice">{t("search.noResults")}</p>}
+      <div style={{ display: "grid", gap: 12 }}>
+        {hits.map((hit) => (
+          <article key={`${hit.kind}-${hit.id}`} className="card">
+            <Link href={hit.kind === "members" ? `/profile/${hit.id}` : hit.kind === "projects" ? `/projects/${hit.id}` : `/profile/${hit.user_id}`} style={{ fontWeight: 700 }}>
+              {hit.kind === "members" ? `@${hit.body}` : hit.kind === "projects" ? hit.title : hit.author?.full_name || hit.author?.username || t("search.memberFallback")}
+            </Link>{" "}
+            <TierBadge id={hit.user_id} />
+            {hit.category && <span className="badge" style={{ marginInlineStart: 8 }}>{hit.category}</span>}
+            {hit.kind === "members" && <span className="muted">{hit.title}</span>}
+            {hit.kind !== "members" && hit.body && <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{snippet(hit.body, hit.kind === "posts" ? 300 : 200)}</p>}
+            {hit.created_at && <p className="muted" style={{ fontSize: 14 }}>{new Date(hit.created_at).toLocaleString("ar")}</p>}
+          </article>
+        ))}
+      </div>
+      {pages > 1 && <nav aria-label={t("search.pagination")} className="row" style={{ justifyContent: "center", marginTop: 20 }}>
+        <button type="button" disabled={page <= 1 || loading} onClick={() => updateUrl({ page: String(page - 1) })}>{t("search.previous")}</button>
+        <span>{t("search.pageOf", { page, total: pages })}</span>
+        <button type="button" disabled={page >= pages || loading} onClick={() => updateUrl({ page: String(page + 1) })}>{t("search.next")}</button>
+      </nav>}
     </div>
   );
 }
