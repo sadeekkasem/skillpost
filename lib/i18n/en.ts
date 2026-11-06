@@ -403,6 +403,7 @@ export const en: Dict = {
   "news.metaDescription": "Selected headlines from official sources with a link to the original.",
   "news.title": "News",
   "news.subtitle": "Headlines and a short line with a source link. Updated automatically.",
+  "news.heroAlt": "News — headlines and updates",
   "news.stripTitle": "Latest headlines",
   "news.more": "More",
   "news.tab.world": "News",

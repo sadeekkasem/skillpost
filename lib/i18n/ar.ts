@@ -397,6 +397,7 @@ export const ar = {
   "news.metaDescription": "عناوين مختارة من مصادر رسمية مع رابط المصدر.",
   "news.title": "الأخبار",
   "news.subtitle": "عناوين وسطر قصير مع رابط المصدر. نحدّث القائمة تلقائيًا.",
+  "news.heroAlt": "الأخبار — عناوين وتحديثات",
   "news.stripTitle": "أحدث العناوين",
   "news.more": "المزيد",
   "news.tab.world": "أخبار",
