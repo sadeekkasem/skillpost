@@ -88,6 +88,10 @@ input[type=search]::placeholder{color:#98a2b3}
 .auth-tab:hover:not(:disabled){filter:none}
 .auth-title{font-size:20px;margin:4px 0 10px}
 .auth-submit{width:100%;padding:12px}
+.auth-forgot-row{margin:6px 0 0;text-align:start}
+.auth-forgot-link{background:none;border:none;box-shadow:none;padding:0;color:var(--primary-dark);font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline}
+.auth-forgot-link:hover:not(:disabled){filter:none;opacity:.85}
+.auth-forgot-link:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:640px){.account-fields{grid-template-columns:1fr}.account-banner{height:96px}}
 /* Portfolio page */
 .profile-hero{padding:0!important;overflow:hidden;border:none!important;box-shadow:0 10px 30px rgba(14,90,53,.12)!important;border-radius:18px!important}

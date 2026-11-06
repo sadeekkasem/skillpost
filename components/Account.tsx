@@ -93,7 +93,8 @@ export default function Account() {
   const [uid, setUid] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot" | "reset">("login");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [confirmAge, setConfirmAge] = useState(false);
   const [signupMarketing, setSignupMarketing] = useState(false);
@@ -195,6 +196,46 @@ export default function Account() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
+  // Password-recovery link lands on /account?reset=1 (or #type=recovery).
+  useEffect(() => {
+    if (!db) return;
+
+    let active = true;
+    const params = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const resetIntent =
+      params.get("reset") === "1" || hash.get("type") === "recovery";
+
+    function enterReset(userId?: string) {
+      if (!active) return;
+      setMode("reset");
+      setPassword("");
+      setConfirmPassword("");
+      setMsg("");
+      if (userId) setUid(userId);
+      window.history.replaceState({}, "", "/account");
+    }
+
+    const {
+      data: { subscription },
+    } = db.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        enterReset(session?.user?.id);
+      }
+    });
+
+    if (resetIntent) {
+      void db.auth.getSession().then(({ data }) => {
+        if (data.session?.user) enterReset(data.session.user.id);
+      });
+    }
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [db]);
+
   useEffect(() => {
     if (!avatarFile) {
       setPreviewUrl("");
@@ -224,7 +265,32 @@ export default function Account() {
     setMsg("");
 
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const captchaToken = await captchaRef.current!.getToken();
+        const { error } = await db.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/account?reset=1`,
+          captchaToken,
+        });
+        if (error) throw error;
+        setMsg(t("auth.forgotSent"));
+      } else if (mode === "reset") {
+        if (password.length < 8) {
+          throw new Error(t("auth.err.weakPassword"));
+        }
+        if (password !== confirmPassword) {
+          throw new Error(t("auth.passwordMismatch"));
+        }
+        const { data, error } = await db.auth.updateUser({ password });
+        if (error) throw error;
+        setPassword("");
+        setConfirmPassword("");
+        setMode("login");
+        if (data.user) {
+          setUid(data.user.id);
+          await loadProfile(data.user.id);
+        }
+        setMsg(t("auth.passwordUpdated"));
+      } else if (mode === "signup") {
         const fullName = signupName.trim();
         if (fullName.length < 2 || fullName.length > 50) {
           throw new Error(t("auth.nameInvalid"));
@@ -525,7 +591,7 @@ export default function Account() {
         </p>
       )}
 
-      {uid ? (
+      {uid && mode !== "reset" ? (
         <>
           {!profileReady ? (
             <section className="card">
@@ -777,41 +843,51 @@ export default function Account() {
           </div>
 
           <div className="auth-body">
-            <div className="auth-tabs" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === "login"}
-                className={mode === "login" ? "auth-tab active" : "auth-tab"}
-                disabled={busy}
-                onClick={() => {
-                  if (mode === "login") return;
-                  setMode("login");
-                  setPassword("");
-                  setMsg("");
-                }}
-              >
-                {t("auth.login")}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === "signup"}
-                className={mode === "signup" ? "auth-tab active" : "auth-tab"}
-                disabled={busy}
-                onClick={() => {
-                  if (mode === "signup") return;
-                  setMode("signup");
-                  setPassword("");
-                  setMsg("");
-                }}
-              >
-                {t("auth.signup")}
-              </button>
-            </div>
+            {mode !== "forgot" && mode !== "reset" && (
+              <div className="auth-tabs" role="tablist">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === "login"}
+                  className={mode === "login" ? "auth-tab active" : "auth-tab"}
+                  disabled={busy}
+                  onClick={() => {
+                    if (mode === "login") return;
+                    setMode("login");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setMsg("");
+                  }}
+                >
+                  {t("auth.login")}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === "signup"}
+                  className={mode === "signup" ? "auth-tab active" : "auth-tab"}
+                  disabled={busy}
+                  onClick={() => {
+                    if (mode === "signup") return;
+                    setMode("signup");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setMsg("");
+                  }}
+                >
+                  {t("auth.signup")}
+                </button>
+              </div>
+            )}
 
             <h1 className="auth-title">
-              {mode === "signup" ? t("auth.signup") : t("auth.login")}
+              {mode === "signup"
+                ? t("auth.signup")
+                : mode === "forgot"
+                  ? t("auth.forgotTitle")
+                  : mode === "reset"
+                    ? t("auth.resetTitle")
+                    : t("auth.login")}
             </h1>
 
             {mode === "signup" && (
@@ -830,32 +906,83 @@ export default function Account() {
               </label>
             )}
 
-            <label>
-              {t("auth.email")}
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                disabled={busy}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </label>
+            {mode !== "reset" && (
+              <label>
+                {t("auth.email")}
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  disabled={busy}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
+            )}
 
-            <label>
-              {t("auth.password")}
-              <input
-                type="password"
-                minLength={8}
-                required
-                autoComplete={
-                  mode === "signup" ? "new-password" : "current-password"
-                }
-                value={password}
-                disabled={busy}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </label>
+            {(mode === "login" || mode === "signup") && (
+              <label>
+                {t("auth.password")}
+                <input
+                  type="password"
+                  minLength={8}
+                  required
+                  autoComplete={
+                    mode === "signup" ? "new-password" : "current-password"
+                  }
+                  value={password}
+                  disabled={busy}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </label>
+            )}
+
+            {mode === "login" && (
+              <p className="auth-forgot-row">
+                <button
+                  type="button"
+                  className="auth-forgot-link"
+                  disabled={busy}
+                  onClick={() => {
+                    setMode("forgot");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setMsg("");
+                  }}
+                >
+                  {t("auth.forgotPassword")}
+                </button>
+              </p>
+            )}
+
+            {mode === "reset" && (
+              <>
+                <label>
+                  {t("auth.newPassword")}
+                  <input
+                    type="password"
+                    minLength={8}
+                    required
+                    autoComplete="new-password"
+                    value={password}
+                    disabled={busy}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </label>
+                <label>
+                  {t("auth.confirmPassword")}
+                  <input
+                    type="password"
+                    minLength={8}
+                    required
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    disabled={busy}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </label>
+              </>
+            )}
 
             {mode === "signup" && (
               <div className="check-list">
@@ -897,15 +1024,39 @@ export default function Account() {
               </div>
             )}
 
-            <Turnstile ref={captchaRef} language={lang} />
+            {mode !== "reset" && <Turnstile ref={captchaRef} language={lang} />}
 
             <button
               type="submit"
               className="auth-submit"
               disabled={busy || (mode === "signup" && (!acceptTerms || !confirmAge))}
             >
-              {busy ? t("auth.working") : t("auth.continue")}
+              {busy
+                ? t("auth.working")
+                : mode === "forgot"
+                  ? t("auth.forgotSubmit")
+                  : mode === "reset"
+                    ? t("auth.resetSubmit")
+                    : t("auth.continue")}
             </button>
+
+            {(mode === "forgot" || mode === "reset") && (
+              <p className="auth-forgot-row">
+                <button
+                  type="button"
+                  className="auth-forgot-link"
+                  disabled={busy}
+                  onClick={() => {
+                    setMode("login");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setMsg("");
+                  }}
+                >
+                  {t("auth.backToLogin")}
+                </button>
+              </p>
+            )}
           </div>
         </form>
       )}
