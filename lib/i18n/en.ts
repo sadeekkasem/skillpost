@@ -37,6 +37,8 @@ export const en: Dict = {
   "footer.terms": "Terms",
   "footer.advertise": "Advertise with us",
   "footer.news": "News",
+  "footer.addToHome": "Add to Home Screen",
+  "footer.addToHomeIosTip": "In Safari: tap Share □↑ then “Add to Home Screen”.",
 
   "hero.title": "Show your skills. Get genuine feedback. Build your professional reputation.",
   "hero.ctaBrowse": "Browse projects",

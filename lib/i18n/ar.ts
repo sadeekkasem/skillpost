@@ -36,6 +36,8 @@ export const ar = {
   "footer.terms": "الشروط",
   "footer.advertise": "أعلن معنا",
   "footer.news": "الأخبار",
+  "footer.addToHome": "أضف للشاشة الرئيسية",
+  "footer.addToHomeIosTip": "على Safari: اضغط مشاركة □↑ ثم «إضافة إلى الشاشة الرئيسية».",
 
   "hero.title": "اعرض مهاراتك. احصل على تقييم حقيقي. ابنِ سمعتك المهنية",
   "hero.subtitle": "منصة عربية للمحاسبين، مصممي Excel، والمبدعين لعرض أعمالهم وجذب العملاء",

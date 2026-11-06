@@ -458,3 +458,7 @@ input[type=file]{max-width:100%}
 .home-challenge-card{margin:0;box-shadow:none}
 .home-challenge-card h3{margin:8px 0;font-size:1.05rem}
 .home-challenge-desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 12px}
+
+.add-home-btn{background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.add-home-btn:hover{color:var(--primary,#4338ca)}
+.add-home-tip{display:block;margin:8px auto 0;max-width:420px;font-size:13px;line-height:1.6;color:var(--muted,#667085)}
