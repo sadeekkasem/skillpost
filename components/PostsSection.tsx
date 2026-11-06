@@ -28,9 +28,11 @@ type Props = {
   videos?: ChannelVideo[];
   /** Homepage only: also merge public projects into the timeline. */
   withProjects?: boolean;
+  /** Homepage: recent posts without video embeds; featured projects have their own section. */
+  latest?: boolean;
 };
 
-export default function PostsSection({ userId, videos = [], withProjects = false }: Props) {
+export default function PostsSection({ userId, videos = [], withProjects = false, latest = false }: Props) {
   const t = useT();
   const [db] = useState(() => getClient());
   const [posts, setPosts] = useState<Post[]>([]);
@@ -42,7 +44,7 @@ export default function PostsSection({ userId, videos = [], withProjects = false
   const [projects, setProjects] = useState<Project[]>([]);
   const [ratings, setRatings] = useState<Record<string, RatingStats>>({});
   const [reactions, setReactions] = useState<VideoReactions | null>(null);
-  const videoKey = userId ? "" : videos.map((v) => v.id).join(",");
+  const videoKey = userId || latest ? "" : videos.map((v) => v.id).join(",");
 
   useEffect(() => {
     if (!db || !videoKey) return;
@@ -150,8 +152,8 @@ export default function PostsSection({ userId, videos = [], withProjects = false
   const showComposer = Boolean(viewerId && (!userId || userId === viewerId));
 
   return (
-    <section aria-label={t("posts.title")} style={{ marginBottom: "24px" }}>
-      <h2>{t("posts.title")}</h2>
+    <section aria-label={t(latest ? "posts.latestTitle" : "posts.title")} style={{ marginBottom: "24px" }}>
+      <h2>{t(latest ? "posts.latestTitle" : "posts.title")}</h2>
 
       {showComposer && (
         <PostComposer db={db} userId={viewerId} onPublished={() => setReloadKey((key) => key + 1)} />
@@ -171,7 +173,7 @@ export default function PostsSection({ userId, videos = [], withProjects = false
 
       {!loading && !message && posts.length === 0 && (userId || (videos.length === 0 && projects.length === 0)) && <p className="muted">{t("posts.empty")}</p>}
 
-      {(loading ? [] : buildHomeFeed(posts, userId ? [] : projects, userId ? [] : videos)).map((item) =>
+      {(loading ? [] : buildHomeFeed(posts, userId ? [] : projects, userId || latest ? [] : videos)).map((item) =>
         item.kind === "video" ? (
           <VideoPostCard
             key={`yt-${item.video.id}-${reactions ? "r" : "n"}`}

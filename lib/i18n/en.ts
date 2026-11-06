@@ -39,6 +39,18 @@ export const en: Dict = {
   "footer.news": "News",
 
   "hero.title": "Show your skills. Get genuine feedback. Build your professional reputation.",
+  "hero.ctaBrowse": "Browse projects",
+  "home.howTitle": "How it works",
+  "home.step1Title": "Showcase your work",
+  "home.step1Text": "Publish a real project with the details and files that demonstrate your skills.",
+  "home.step2Title": "Connect and grow",
+  "home.step2Text": "Explore other members' work, receive useful feedback, and join professional challenges.",
+  "home.step3Title": "Build your reputation",
+  "home.step3Text": "Turn your projects and ratings into a professional profile that attracts clients and opportunities.",
+  "home.challengesTitle": "Open challenges",
+  "home.allChallenges": "View all challenges →",
+  "home.noOpenChallenges": "There are no open challenges right now. Check back for upcoming opportunities.",
+  "posts.latestTitle": "Latest posts",
   "hero.subtitle": "An Arabic platform for accountants, Excel designers, and creators to showcase their work and attract clients.",
 
   "posts.title": "Posts",
