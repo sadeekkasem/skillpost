@@ -1,7 +1,7 @@
 // Arabic is the source dictionary: its keys define the shape every language must provide.
 export const ar = {
   "meta.title": "SkillPost | اعرض مهاراتك وابنِ سمعتك المهنية",
-  "meta.description": "مجتمع مشاركة المشاريع والمهارات",
+  "meta.description": "منصة عربية لعرض المشاريع والمهارات وبناء معرض أعمال مهني. انشر أعمالك، اكتشف مبدعين متخصصين، وشارك في تحديات مهنية مع مجتمع يقدّر العمل الحقيقي.",
   "brand.name": "SkillPost",
 
   "nav.menu": "القائمة",
@@ -79,6 +79,8 @@ export const ar = {
   "pricing.mailSubject": "طلب ترقية حساب SkillPost",
   "challenges.title": "تحديات مهنية",
   "challenges.subtitle": "اختر تحدياً، نفّذه بأسلوبك، وانشر النتيجة كمشروع ليراه المجتمع ويقيّمه.",
+  "challenges.homeTitle": "تحديات مفتوحة الآن",
+  "challenges.homeMore": "كل التحديات",
   "challenges.note": "شارك بمشروعك في تحدٍ مفتوح. يمكنك السحب قبل إغلاق التحدي.",
   "challenges.c1t": "تنظيف بيانات مبيعات",
   "challenges.c1d": "خذ جدول مبيعات فوضوياً (بيانات افتراضية)، وثّق المشكلات والتعديلات، ثم ارفع الملف النظيف.",

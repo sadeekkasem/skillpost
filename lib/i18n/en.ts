@@ -2,7 +2,7 @@ import type { Dict } from "./ar";
 
 export const en: Dict = {
   "meta.title": "SkillPost | Show your skills through your work",
-  "meta.description": "A community for sharing projects and skills",
+  "meta.description": "An Arabic platform to showcase projects and skills and build a trusted portfolio. Publish your work, discover specialists, and join professional challenges with a community that values real craft.",
   "brand.name": "SkillPost",
 
   "nav.menu": "Menu",
@@ -314,6 +314,8 @@ export const en: Dict = {
   "pricing.mailSubject": "SkillPost account upgrade request",
   "challenges.title": "Professional challenges",
   "challenges.subtitle": "Pick a challenge, solve it your way, and publish the result as a project for the community to see and review.",
+  "challenges.homeTitle": "Open challenges now",
+  "challenges.homeMore": "All challenges",
   "challenges.note": "Submit one of your projects to an open challenge. You can withdraw before it closes.",
   "challenges.c1t": "Clean up sales data",
   "challenges.c1d": "Take a messy sales sheet (sample data), document the issues and fixes, then upload the clean file.",

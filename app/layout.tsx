@@ -21,12 +21,28 @@ const cairo = Cairo({
 
 export async function generateMetadata() {
   const t = await getT();
+  const { lang } = await getLang();
+  const description = t("meta.description");
+  const title = t("meta.title");
   return {
     metadataBase: new URL("https://www.skillpostapp.com"),
-    title: t("meta.title"),
-    description: t("meta.description"),
+    title,
+    description,
     applicationName: "SkillPost",
     manifest: "/manifest.webmanifest",
+    openGraph: {
+      type: "website",
+      siteName: "SkillPost",
+      title,
+      description,
+      url: "/",
+      locale: lang === "ar" ? "ar_AR" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
     themeColor: [
       { media: "(prefers-color-scheme: light)", color: "#0e7a45" },
       { media: "(prefers-color-scheme: dark)", color: "#0e5a35" },

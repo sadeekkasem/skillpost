@@ -1,15 +1,23 @@
-import Feed from '@/components/Feed';
-import Hero from '@/components/Hero';
-import FeaturedProjects from '@/components/FeaturedProjects';
-import WeatherStrip from '@/components/WeatherStrip';
-import RatesStrip from '@/components/RatesStrip';
-import NewsStrip from '@/components/NewsStrip';
-import PostsSection from '@/components/PostsSection';
-import { getChannelVideos } from '@/lib/youtube/feed';
+import Feed from "@/components/Feed";
+import Hero from "@/components/Hero";
+import FeaturedProjects from "@/components/FeaturedProjects";
+import HomeUtilityStrips from "@/components/HomeUtilityStrips";
+import OpenChallengesStrip from "@/components/OpenChallengesStrip";
+import PostsSection from "@/components/PostsSection";
+import { getChannelVideos } from "@/lib/youtube/feed";
 
 export const revalidate = 3600;
 
-export default async function Home(){
+export default async function Home() {
   const videos = (await getChannelVideos()).slice(0, 15);
-  return <><WeatherStrip/><RatesStrip/><Hero/><NewsStrip/><FeaturedProjects/><Feed inTimeline/><PostsSection videos={videos} withProjects/></>;
+  return (
+    <>
+      <Hero />
+      <HomeUtilityStrips />
+      <FeaturedProjects />
+      <OpenChallengesStrip />
+      <Feed inTimeline />
+      <PostsSection videos={videos} withProjects />
+    </>
+  );
 }
