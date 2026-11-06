@@ -148,7 +148,9 @@ export const en: Dict = {
   "picker.hint": "You can change the language anytime from the top of the page.",
 
   "notFound.title": "Page not found",
+  "notFound.body": "We could not find this page. Return to projects and posts or try one of these links.",
   "notFound.back": "Back to home",
+  "notFound.search": "Browse projects and posts",
   "error.title": "Something went wrong while loading",
   "error.body": "Check your connection and database settings.",
   "error.retry": "Try again",
