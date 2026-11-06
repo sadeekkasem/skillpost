@@ -53,6 +53,7 @@ export default function ChatWidget() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
+  const markingReadIdsRef = useRef<Set<string>>(new Set());
 
   // Track the signed-in user
   useEffect(() => {
@@ -206,23 +207,46 @@ export default function ChatWidget() {
     [active, messages, uid]
   );
 
-  // Mark incoming messages as read while the conversation is open
+  // Persist read_at for unread incoming messages while the conversation is open.
+  // Only keep local read_at for ids the UPDATE actually returns; roll back on failure.
   useEffect(() => {
     if (!db || !open || !active) return;
-    const hasUnread = thread.some((m) => m.recipient_id === uid && !m.read_at);
-    if (!hasUnread) return;
+    const unreadIds = thread
+      .filter((m) => m.recipient_id === uid && m.sender_id === active.id && !m.read_at)
+      .map((m) => m.id)
+      .filter((id) => !markingReadIdsRef.current.has(id));
+    if (unreadIds.length === 0) return;
+
+    for (const id of unreadIds) markingReadIdsRef.current.add(id);
     const now = new Date().toISOString();
+    // Optimistic clear so the badge disappears immediately
     setMessages((cur) =>
-      cur.map((m) =>
-        m.sender_id === active.id && m.recipient_id === uid && !m.read_at ? { ...m, read_at: now } : m
-      )
+      cur.map((m) => (unreadIds.includes(m.id) ? { ...m, read_at: now } : m))
     );
-    void db
-      .from("messages")
-      .update({ read_at: now })
-      .eq("sender_id", active.id)
-      .eq("recipient_id", uid)
-      .is("read_at", null);
+
+    void (async () => {
+      try {
+        const { data, error } = await db
+          .from("messages")
+          .update({ read_at: now })
+          .in("id", unreadIds)
+          .eq("recipient_id", uid)
+          .select("id");
+
+        const persisted = new Set((data ?? []).map((row) => row.id as string));
+        const failed = unreadIds.filter((id) => !persisted.has(id));
+
+        if (error || failed.length > 0) {
+          // Roll back ids that did not persist so refresh behavior stays honest
+          setMessages((cur) =>
+            cur.map((m) => (failed.includes(m.id) && m.read_at === now ? { ...m, read_at: null } : m))
+          );
+        }
+      } finally {
+        for (const id of unreadIds) markingReadIdsRef.current.delete(id);
+      }
+    })();
+
   }, [db, open, active, thread, uid]);
 
   // Keep the newest message in view
