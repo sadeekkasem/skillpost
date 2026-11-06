@@ -1,23 +1,19 @@
-import Feed from "@/components/Feed";
 import Hero from "@/components/Hero";
+import HomeHowItWorks from "@/components/HomeHowItWorks";
 import FeaturedProjects from "@/components/FeaturedProjects";
-import HomeUtilityStrips from "@/components/HomeUtilityStrips";
-import OpenChallengesStrip from "@/components/OpenChallengesStrip";
+import HomeChallenges from "@/components/HomeChallenges";
 import PostsSection from "@/components/PostsSection";
-import { getChannelVideos } from "@/lib/youtube/feed";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export default async function Home() {
-  const videos = (await getChannelVideos()).slice(0, 15);
   return (
     <>
       <Hero />
-      <HomeUtilityStrips />
+      <HomeHowItWorks />
       <FeaturedProjects />
-      <OpenChallengesStrip />
-      <Feed inTimeline />
-      <PostsSection videos={videos} withProjects />
+      <HomeChallenges />
+      <PostsSection latest />
     </>
   );
 }
