@@ -11,6 +11,7 @@ import LanguageProvider from "@/components/LanguageProvider";
 import LanguagePicker from "@/components/LanguagePicker";
 import { dirOf } from "@/lib/i18n";
 import { getLang, getT } from "@/lib/i18n/server";
+import type { Metadata } from "next";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -19,14 +20,30 @@ const cairo = Cairo({
   variable: "--font-cairo",
 });
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
+  const { lang } = await getLang();
+  const description = t("meta.description");
+  const title = t("meta.title");
   return {
     metadataBase: new URL("https://www.skillpostapp.com"),
-    title: t("meta.title"),
-    description: t("meta.description"),
+    title,
+    description,
     applicationName: "SkillPost",
     manifest: "/manifest.webmanifest",
+    openGraph: {
+      type: "website",
+      siteName: "SkillPost",
+      title,
+      description,
+      url: "/",
+      locale: lang === "ar" ? "ar_AR" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
     themeColor: [
       { media: "(prefers-color-scheme: light)", color: "#0e7a45" },
       { media: "(prefers-color-scheme: dark)", color: "#0e5a35" },
@@ -58,6 +75,18 @@ export default async function Layout({
   return (
     <html lang={lang} dir={dirOf(lang)} className={cairo.variable} suppressHydrationWarning>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "SkillPost",
+              url: "https://skillpostapp.com",
+              inLanguage: lang,
+            }),
+          }}
+        />
         <LanguageProvider initialLang={lang} initialChosen={chosen}>
           <header className="site-header">
             <Brand />
