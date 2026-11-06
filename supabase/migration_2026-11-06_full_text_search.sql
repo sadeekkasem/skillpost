@@ -5,16 +5,16 @@ create extension if not exists pg_trgm;
 
 create or replace function public.search_document(value text)
 returns text language sql immutable strict parallel safe as $$
-  select lower(regexp_replace(coalesce(value, ''), '[\u064B-\u065F\u0670ـ]', '', 'g'));
+  select lower(regexp_replace(coalesce(value, ''), '[\u064B-\u065F\u0670ـ]', '', 'g') collate "C");
 $$;
 
 alter table public.projects
   add column if not exists search_vector tsvector
-  generated always as (to_tsvector('simple', public.search_document(concat_ws(' ', title, description, category)))) stored;
+  generated always as (to_tsvector('simple', public.search_document(title || E'\n' || description || E'\n' || category))) stored;
 create index if not exists projects_search_vector_idx on public.projects using gin(search_vector);
 create index if not exists projects_search_title_trgm_idx on public.projects using gin(public.search_document(title) gin_trgm_ops);
 create index if not exists projects_search_body_trgm_idx on public.projects using gin(public.search_document(description) gin_trgm_ops);
-create index if not exists profiles_search_trgm_idx on public.profiles using gin(public.search_document(concat_ws(' ', username, full_name, specialty)) gin_trgm_ops);
+create index if not exists profiles_search_trgm_idx on public.profiles using gin(public.search_document(username || E'\n' || full_name || E'\n' || specialty) gin_trgm_ops);
 create index if not exists posts_search_trgm_idx on public.posts using gin(public.search_document(content) gin_trgm_ops);
 
 -- Cap untrusted inputs and keep offsets bounded; callers can browse at most 100 pages.
@@ -108,7 +108,7 @@ language sql stable security invoker set search_path = public as $$
            case when input.sort = 'oldest' then extract(epoch from r.created_at) end asc nulls last,
            case when input.sort <> 'oldest' then extract(epoch from r.created_at) end desc nulls last,
            r.title asc nulls last, r.id
-  limit input.page_size offset input.page * input.page_size;
+  limit least(greatest(coalesce(p_page_size, 12), 1), 50) offset (least(greatest(coalesce(p_page, 1), 1), 100) - 1) * least(greatest(coalesce(p_page_size, 12), 1), 50);
 $$;
 
 revoke all on function public.search_document(text) from public, anon, authenticated;
