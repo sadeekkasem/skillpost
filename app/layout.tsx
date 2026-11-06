@@ -25,6 +25,27 @@ export async function generateMetadata() {
     metadataBase: new URL("https://www.skillpostapp.com"),
     title: t("meta.title"),
     description: t("meta.description"),
+    applicationName: "SkillPost",
+    manifest: "/manifest.webmanifest",
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: "#0e7a45" },
+      { media: "(prefers-color-scheme: dark)", color: "#0e5a35" },
+    ],
+    appleWebApp: {
+      capable: true,
+      title: "SkillPost",
+      statusBarStyle: "default",
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+      shortcut: ["/icon-192.png"],
+    },
   };
 }
 
