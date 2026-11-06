@@ -23,29 +23,25 @@ const cairo = Cairo({
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   const { lang } = await getLang();
-  const description =
-    "منصة عربية لعرض المشاريع والمهارات وبناء معرض أعمال مهني موثوق. شارك إنجازاتك، اكتشف مبدعين متخصصين، وتفاعل مع مجتمع يقدّر العمل الحقيقي والخبرة.";
-
+  const description = t("meta.description");
+  const title = t("meta.title");
   return {
-    metadataBase: new URL("https://skillpostapp.com"),
-    title: {
-      default: t("meta.title"),
-      template: "%s | SkillPost",
-    },
+    metadataBase: new URL("https://www.skillpostapp.com"),
+    title,
     description,
     applicationName: "SkillPost",
     manifest: "/manifest.webmanifest",
     openGraph: {
       type: "website",
       siteName: "SkillPost",
-      title: t("meta.title"),
+      title,
       description,
       url: "/",
       locale: lang === "ar" ? "ar_AR" : "en_US",
     },
     twitter: {
       card: "summary_large_image",
-      title: t("meta.title"),
+      title,
       description,
     },
     themeColor: [

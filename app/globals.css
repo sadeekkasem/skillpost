@@ -445,3 +445,14 @@ input[type=file]{max-width:100%}
 .news-card-title{margin:0;font-size:1.05rem;line-height:1.45}
 .news-card-summary{margin:0;font-size:.92rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .news-card-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:#667085}
+
+
+/* Homepage utility strips + open challenges */
+.home-utility-strips{display:grid;gap:0;margin:0 0 8px}
+.home-challenges{margin-bottom:18px}
+.home-challenges-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.home-challenges-head h2{margin:0;font-size:1.15rem}
+.home-challenges-grid{margin:0}
+.home-challenge-card{margin:0;box-shadow:none}
+.home-challenge-card h3{margin:8px 0;font-size:1.05rem}
+.home-challenge-desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 12px}

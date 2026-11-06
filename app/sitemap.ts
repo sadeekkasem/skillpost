@@ -2,12 +2,12 @@ import type { MetadataRoute } from "next";
 import { getClient } from "@/lib/supabase";
 import { confirmedOnly } from "@/lib/confirmed";
 
-const BASE = "https://skillpostapp.com";
+const BASE = "https://www.skillpostapp.com";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const statics = ["", "/videos", "/challenges", "/news", "/about", "/privacy", "/terms", "/advertise", "/search"];
+  const statics = ["", "/videos", "/challenges", "/news", "/pricing", "/about", "/privacy", "/terms", "/advertise", "/search"];
   const out: MetadataRoute.Sitemap = statics.map((p) => ({ url: BASE + p, lastModified: now }));
   try {
     const db = getClient();

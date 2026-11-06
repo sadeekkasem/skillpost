@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Profile from "@/components/Profile";
+import { absoluteUrl, clipMetaDescription } from "@/lib/seo";
 import { getClient } from "@/lib/supabase";
 import type { Profile as ProfileData } from "@/lib/types";
 
-const BASE_URL = "https://skillpostapp.com";
 type Props = { params: Promise<{ id: string }> };
-type ProfileMetadata = Pick<
-  ProfileData,
-  "id" | "username" | "full_name" | "bio" | "specialty"
->;
+type ProfileMetadata = Pick<ProfileData, "id" | "username" | "full_name" | "bio" | "specialty">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -25,22 +22,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   if (!profile) {
-    return { title: "الملف الشخصي", robots: { index: false, follow: false } };
+    return { title: "الملف الشخصي | SkillPost", robots: { index: false, follow: false } };
   }
 
   const name = profile.full_name || profile.username;
-  const bio = profile.bio?.trim().replace(/\s+/g, " ");
-  const description = bio
-    ? bio.length > 160
-      ? `${bio.slice(0, 157).trimEnd()}...`
-      : bio
-    : `تعرّف على ${name}${profile.specialty ? `، ${profile.specialty}` : ""}، واستعرض المشاريع والأعمال المنشورة على منصة SkillPost.`;
-  const url = `${BASE_URL}/profile/${profile.id}`;
+  const bio = clipMetaDescription(profile.bio || "");
+  const description =
+    bio ||
+    clipMetaDescription(
+      `تعرّف على ${name}${profile.specialty ? `، ${profile.specialty}` : ""}، واستعرض المشاريع والأعمال المنشورة على SkillPost.`
+    );
+  const url = absoluteUrl(`/profile/${profile.id}`);
   return {
-    title: name,
+    title: `${name} | SkillPost`,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "profile", title: name, description, url },
+    openGraph: {
+      type: "profile",
+      siteName: "SkillPost",
+      title: name,
+      description,
+      url,
+    },
     twitter: { card: "summary_large_image", title: name, description },
   };
 }

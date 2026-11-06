@@ -12,10 +12,12 @@ import {
   levelKey,
 } from "@/lib/challenges";
 import ChallengeDetail from "@/components/ChallengeDetail";
+import { absoluteUrl, clipMetaDescription } from "@/lib/seo";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const t = await getT();
   const { lang } = await getLang();
@@ -24,16 +26,21 @@ export async function generateMetadata({ params }: Props) {
   const { data } = await db.from("challenges").select("*").eq("slug", slug).maybeSingle();
   if (!data) return { title: `${t("challenges.title")} | SkillPost` };
   const c = data as Challenge;
-  const title = challengeTitle(c, lang);
-  const description = challengeDescription(c, lang).slice(0, 160);
-  const url = `https://skillpostapp.com/challenges/${c.slug}`;
-
+  const name = challengeTitle(c, lang);
+  const description = clipMetaDescription(challengeDescription(c, lang));
+  const url = absoluteUrl(`/challenges/${c.slug}`);
   return {
-    title,
+    title: `${name} | SkillPost`,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "website", title, description, url },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      type: "website",
+      siteName: "SkillPost",
+      title: name,
+      description,
+      url,
+    },
+    twitter: { card: "summary_large_image", title: name, description },
   };
 }
 
