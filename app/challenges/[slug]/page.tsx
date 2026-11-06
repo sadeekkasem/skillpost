@@ -12,10 +12,12 @@ import {
   levelKey,
 } from "@/lib/challenges";
 import ChallengeDetail from "@/components/ChallengeDetail";
+import { absoluteUrl, clipMetaDescription } from "@/lib/seo";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const t = await getT();
   const { lang } = await getLang();
@@ -24,9 +26,21 @@ export async function generateMetadata({ params }: Props) {
   const { data } = await db.from("challenges").select("*").eq("slug", slug).maybeSingle();
   if (!data) return { title: `${t("challenges.title")} | SkillPost` };
   const c = data as Challenge;
+  const name = challengeTitle(c, lang);
+  const description = clipMetaDescription(challengeDescription(c, lang));
+  const url = absoluteUrl(`/challenges/${c.slug}`);
   return {
-    title: `${challengeTitle(c, lang)} | SkillPost`,
-    description: challengeDescription(c, lang).slice(0, 160),
+    title: `${name} | SkillPost`,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      siteName: "SkillPost",
+      title: name,
+      description,
+      url,
+    },
+    twitter: { card: "summary_large_image", title: name, description },
   };
 }
 
