@@ -36,6 +36,8 @@ export const ar = {
   "footer.terms": "الشروط",
   "footer.advertise": "أعلن معنا",
   "footer.news": "الأخبار",
+  "footer.addToHome": "أضف للشاشة الرئيسية",
+  "footer.addToHomeIosTip": "على Safari: اضغط مشاركة □↑ ثم «إضافة إلى الشاشة الرئيسية».",
 
   "hero.title": "اعرض مهاراتك. احصل على تقييم حقيقي. ابنِ سمعتك المهنية",
   "hero.subtitle": "منصة عربية للمحاسبين، مصممي Excel، والمبدعين لعرض أعمالهم وجذب العملاء",
@@ -407,6 +409,7 @@ export const ar = {
   "news.metaDescription": "عناوين مختارة من مصادر رسمية مع رابط المصدر.",
   "news.title": "الأخبار",
   "news.subtitle": "عناوين وسطر قصير مع رابط المصدر. نحدّث القائمة تلقائيًا.",
+  "news.heroAlt": "الأخبار — عناوين وتحديثات",
   "news.stripTitle": "أحدث العناوين",
   "news.more": "المزيد",
   "news.tab.world": "أخبار",

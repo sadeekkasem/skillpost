@@ -458,3 +458,15 @@ input[type=file]{max-width:100%}
 .home-challenge-card{margin:0;box-shadow:none}
 .home-challenge-card h3{margin:8px 0;font-size:1.05rem}
 .home-challenge-desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 12px}
+
+.add-home-btn{background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.add-home-btn:hover{color:var(--primary,#4338ca)}
+.add-home-tip{display:block;margin:8px auto 0;max-width:420px;font-size:13px;line-height:1.6;color:var(--muted,#667085)}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.news-hero{margin:0 0 16px;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px rgba(14,90,53,.18);background:linear-gradient(135deg,#0e5a35 0%,#1f9d5c 100%)}
+.news-hero-img{display:block;width:100%;height:auto;aspect-ratio:1200/320;object-fit:cover}
+.news-context-strips{display:grid;gap:0;margin:0 0 18px}
+.news-context-strips .weather-strip{margin-top:0}
+.news-page .news-tabs{margin-top:4px}
+@media(max-width:640px){.news-hero{border-radius:16px;margin-bottom:12px}}

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage, useT } from "@/components/LanguageProvider";
+import WeatherStrip from "@/components/WeatherStrip";
+import RatesStrip from "@/components/RatesStrip";
 import type { NewsItem, NewsTab } from "@/lib/news";
 
 type Payload = {
@@ -52,9 +54,21 @@ export default function NewsClient() {
 
   return (
     <section className="news-page">
-      <div className="hero feed-hero page-hero">
-        <h1>{t("news.title")}</h1>
-        <p>{t("news.subtitle")}</p>
+      <header className="news-hero">
+        <h1 className="sr-only">{t("news.title")}</h1>
+        <img
+          className="news-hero-img"
+          src="/news-hero.svg"
+          alt={t("news.heroAlt")}
+          width={1200}
+          height={320}
+          decoding="async"
+        />
+      </header>
+
+      <div className="news-context-strips">
+        <WeatherStrip />
+        <RatesStrip />
       </div>
 
       <div className="news-tabs" role="tablist" aria-label={t("news.title")}>
