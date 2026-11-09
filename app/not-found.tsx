@@ -1,19 +1,29 @@
-import Link from "next/link";
-import { getT } from "@/lib/i18n/server";
-
-export default async function NotFound() {
-  const t = await getT();
+export default function NotFound() {
   return (
-    <section className="card narrow">
-      <span className="badge">404</span>
-      <h1>{t("notFound.title")}</h1>
-      <p className="muted">{t("notFound.body")}</p>
-      <div className="row">
-        <Link className="button" href="/">{t("notFound.back")}</Link>
-        <Link className="button secondary" href="/search">{t("notFound.search")}</Link>
-        <Link className="button secondary" href="/challenges">{t("nav.challenges")}</Link>
-        <Link className="button secondary" href="/pricing">{t("pricing.title")}</Link>
-      </div>
-    </section>
+    <>
+      <header>
+        <a className="brand" href="/#home" aria-label="سكل بوست، الرئيسية">
+          <span className="brand-icon" aria-hidden="true">✧</span>
+          <span>سِكِل بوست<small>القرآن والذكر</small></span>
+        </a>
+      </header>
+      <main id="main" className="static-page">
+        <div className="page-top">
+          <span className="eyebrow">404</span>
+          <h1>الصفحة غير موجودة</h1>
+          <p>ربما نُقلت الصفحة أو لم تعد موجودة.</p>
+          <div className="actions">
+            <a className="button" href="/">العودة إلى الرئيسية ←</a>
+          </div>
+        </div>
+      </main>
+      <footer>
+        <span>سِكِل بوست · موقع غير تجاري</span>
+        <div className="footer-links">
+          <a href="/sources">المصادر والترخيص</a>
+          <a href="/privacy">الخصوصية</a>
+        </div>
+      </footer>
+    </>
   );
 }

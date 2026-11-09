@@ -1,0 +1,1 @@
+document.getElementById('menu-toggle').addEventListener('click',()=>{const b=document.getElementById('menu-toggle');const o=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(o));document.getElementById('primary-nav').classList.toggle('is-open',o);});
