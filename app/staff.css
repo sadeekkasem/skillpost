@@ -1,0 +1,11 @@
+
+.staff-banner{background:#5c3a12;color:#f6e5bf;padding:10px 16px;border-radius:10px;margin:0 0 18px;font-size:13px}
+.staff-form{display:grid;gap:12px;margin:12px 0}
+.staff-form label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.staff-form input,.staff-form select{width:100%}
+.staff-actions{display:flex;flex-wrap:wrap;gap:8px}
+.staff-list{list-style:none;padding:0;margin:0}
+.staff-list li{border-bottom:1px solid var(--line);padding:14px 0}
+.staff-msg{font-size:13px;margin:10px 0}
+.yt-facade{border:1px dashed #8e7b48;border-radius:12px;padding:18px;margin-top:12px}
+.yt-frame{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}

@@ -1,11 +1,20 @@
-// Root layout only used by the Next.js 404 page; the site itself is static HTML in /public.
-export const metadata = { title: "الصفحة غير موجودة | سِكِل بوست", robots: { index: false } };
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import "./staff.css";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const metadata: Metadata = {
+  title: "سِكِل بوست",
+  description: "موقع غير تجاري للقرآن والذكر",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
         <link rel="stylesheet" href="/style.css" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <script src="/analytics.js" defer />
+        <script src="/_vercel/insights/script.js" defer />
       </head>
       <body>{children}</body>
     </html>

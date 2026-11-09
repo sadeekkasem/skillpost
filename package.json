@@ -5,9 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:youtube": "node scripts/test-youtube.mjs",
+    "test:rls": "node supabase/tests/run_rls.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.80.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
@@ -16,6 +19,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
