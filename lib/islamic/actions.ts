@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { parseLessonVideoId, parseYouTubeChannel } from "../youtube";
-import { inviteMailEnabled } from "../supabase/env";
+import { authMailEnabled, inviteMailEnabled } from "../supabase/env";
 import { createSupabaseServerClient } from "../supabase/server";
 import { createServiceClient } from "../supabase/service";
 
@@ -37,6 +37,9 @@ async function maybeSendInvite(email: string): Promise<string> {
 export async function requestMagicLink(formData: FormData): Promise<ActionResult> {
   const email = readString(formData, "email").toLowerCase();
   if (!email || !email.includes("@")) return { ok: false, message: "أدخل بريدًا صالحًا." };
+  if (!authMailEnabled()) {
+    return { ok: false, message: "إرسال رسائل الدخول غير مفعّل حتى يُضبط ISLAMIC_AUTH_ENABLED." };
+  }
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false, message: "الدخول غير مضبوط في هذا البناء." };
   const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.skillpostapp.com";

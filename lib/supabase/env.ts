@@ -26,3 +26,7 @@ export function fixturesEnabled(): boolean {
 export function inviteMailEnabled(): boolean {
   return process.env.ISLAMIC_SEND_INVITES === "true";
 }
+
+export function authMailEnabled(): boolean {
+  return process.env.ISLAMIC_AUTH_ENABLED === "true";
+}

@@ -49,7 +49,8 @@ Needed when this is connected to a live project:
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - `SUPABASE_SERVICE_ROLE_KEY` (server only, for sending auth invites)
 - `NEXT_PUBLIC_SITE_URL` (used as the magic-link redirect origin)
-- `ISLAMIC_SEND_INVITES` — set to `true` only when mail should actually be sent; otherwise invitations are stored and not emailed
+- `ISLAMIC_AUTH_ENABLED` — set to `true` only when `/login` may send magic-link or OTP messages
+- `ISLAMIC_SEND_INVITES` — set to `true` only when staff invitations should actually be emailed; otherwise invitations are stored and not emailed
 
 Whether these already exist on the Vercel project is unknown without a Vercel login.
 
