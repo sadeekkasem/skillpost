@@ -99,6 +99,7 @@ const config: NextConfig = {
       })),
       { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       { source: "/img/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=2592000" }] },
+      { source: "/hero-image", headers: [{ key: "Cache-Control", value: "public, max-age=3600" }] },
       { source: "/data/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
     ];
   },

@@ -7,10 +7,10 @@ import { pgcrypto } from "@electric-sql/pglite/contrib/pgcrypto";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../..");
 const stubs = fs.readFileSync(path.join(here, "local_auth_stubs.sql"), "utf8");
-const migration = fs.readFileSync(
-  path.join(root, "supabase/migrations/20261109220000_islamic_schema.sql"),
-  "utf8",
-);
+const migrations = [
+  "20261109220000_islamic_schema.sql",
+  "20261109223000_islamic_admin_extensions.sql",
+].map((name) => fs.readFileSync(path.join(root, "supabase/migrations", name), "utf8"));
 
 const db = new PGlite({ extensions: { pgcrypto } });
 const results = [];
@@ -53,7 +53,7 @@ async function asRole(role, fn) {
 
 try {
   await exec(stubs);
-  await exec(migration);
+  for (const migration of migrations) await exec(migration);
   rec("migration_applies", true);
 } catch (e) {
   rec("migration_applies", false, String(e));
@@ -183,7 +183,7 @@ rec("sheikh_cannot_edit_other_sheikh", otherEdit);
 // Add lesson as sheikh
 const lessonId = (await query(`SELECT islamic.add_lesson('${sheikhId}'::uuid, 'مقطع أول', 'AbC_-12345z') AS id`))[0].id;
 const lesson = await query(`SELECT status::text, title FROM islamic.lessons WHERE id = '${lessonId}'`);
-rec("sheikh_adds_lesson_as_draft", lesson[0]?.status === "draft");
+rec("sheikh_adds_lesson_as_published", lesson[0]?.status === "published");
 
 let sheikhPublish = false;
 try {
@@ -192,14 +192,27 @@ try {
 } catch {
   sheikhPublish = false;
 }
-rec("sheikh_cannot_publish_via_admin_fn", sheikhPublish === false);
+rec("sheikh_can_publish_own_lesson", sheikhPublish === true);
+
+await query(`SELECT islamic.admin_set_lesson_status('${lessonId}'::uuid, 'hidden')`);
+const hiddenOwn = await query(`SELECT status::text FROM islamic.lessons WHERE id = '${lessonId}'`);
+rec("sheikh_can_hide_own_lesson", hiddenOwn[0]?.status === "hidden");
+
+let sheikhPagePublish = false;
+try {
+  await query(`SELECT islamic.admin_set_sheikh_status('${sheikhId}'::uuid, 'published')`);
+  sheikhPagePublish = true;
+} catch {
+  sheikhPagePublish = false;
+}
+rec("sheikh_can_publish_own_page", sheikhPagePublish === true);
 
 await asRole("anon", async () => {
   const seen = await query(`SELECT id FROM islamic.lessons`);
-  rec("anon_cannot_see_draft_lessons", seen.length === 0, String(seen.length));
+  rec("anon_cannot_see_hidden_lessons", seen.length === 0, String(seen.length));
 });
 
-// other sheikh cannot update lesson
+// other sheikh cannot update or publish lesson/page they do not own
 await setIdentity(S2, "sheikh2@example.test", true);
 let otherLesson = true;
 try {
@@ -209,6 +222,25 @@ try {
   otherLesson = true;
 }
 rec("other_sheikh_cannot_edit_lesson", otherLesson);
+
+let otherPublish = true;
+try {
+  await query(`SELECT islamic.admin_set_lesson_status('${lessonId}'::uuid, 'published')`);
+  otherPublish = false;
+} catch {
+  otherPublish = true;
+}
+rec("other_sheikh_cannot_publish_lesson", otherPublish);
+
+let otherPage = true;
+try {
+  await query(`SELECT islamic.admin_set_sheikh_status('${sheikhId}'::uuid, 'hidden')`);
+  otherPage = false;
+} catch {
+  otherPage = true;
+}
+const pageStill = await query(`SELECT status::text FROM islamic.sheikhs WHERE id = '${sheikhId}'`);
+rec("other_sheikh_cannot_change_page_status", otherPage && pageStill[0]?.status === "published", pageStill[0]?.status);
 
 // student invite
 await setIdentity(S1, "sheikh1@example.test", true);
@@ -229,6 +261,20 @@ await query(`SELECT islamic.accept_pending_invitations()`);
 await query(`SELECT islamic.update_lesson('${lessonId}'::uuid, 'مقطع بعد مساعدة', 'AbC_-12345z')`);
 const updated = await query(`SELECT title FROM islamic.lessons WHERE id = '${lessonId}'`);
 rec("student_can_edit_own_sheikh_lesson", updated[0]?.title === "مقطع بعد مساعدة");
+
+await query(`SELECT islamic.admin_set_lesson_status('${lessonId}'::uuid, 'published')`);
+const studentPub = await query(`SELECT status::text FROM islamic.lessons WHERE id = '${lessonId}'`);
+rec("student_can_publish_own_lesson", studentPub[0]?.status === "published");
+
+await query(`SELECT islamic.admin_set_sheikh_status('${sheikhId}'::uuid, 'published')`);
+let studentOther = true;
+try {
+  await query(`SELECT islamic.admin_set_sheikh_status('${sheikhId2}'::uuid, 'published')`);
+  studentOther = false;
+} catch {
+  studentOther = true;
+}
+rec("student_cannot_publish_other_page", studentOther);
 
 let studentInvite = true;
 try {
@@ -251,6 +297,88 @@ await query(`SELECT islamic.admin_set_lesson_status('${lessonId}'::uuid, 'publis
 await exec(`SELECT set_config('request.jwt.claims', '{}', false)`);
 const anonLessons = await asRole("anon", async () => query(`SELECT title FROM islamic.lessons`));
 rec("anon_sees_published_lesson_of_published_sheikh", anonLessons.length === 1 && anonLessons[0].title === "مقطع بعد مساعدة", JSON.stringify(anonLessons));
+
+// Phase 4 readers/writers
+await setIdentity(S1, "sheikh1@example.test", true);
+let sheikhAudit = true;
+try {
+  await query(`SELECT islamic.admin_list_audit(10)`);
+  sheikhAudit = false;
+} catch {
+  sheikhAudit = true;
+}
+rec("sheikh_cannot_read_audit", sheikhAudit);
+
+let sheikhAccounts = true;
+try {
+  await query(`SELECT islamic.admin_list_accounts()`);
+  sheikhAccounts = false;
+} catch {
+  sheikhAccounts = true;
+}
+rec("sheikh_cannot_read_accounts", sheikhAccounts);
+
+let sheikhContentWrite = true;
+try {
+  await query(`SELECT islamic.admin_upsert_site_content('hero_eyebrow', 'تغيير غير مسموح', true)`);
+  sheikhContentWrite = false;
+} catch {
+  sheikhContentWrite = true;
+}
+rec("sheikh_cannot_upsert_site_content", sheikhContentWrite);
+
+await setIdentity(A2, adminEmail, true);
+const audit = (await query(`SELECT islamic.admin_list_audit(50) AS j`))[0].j;
+rec("admin_can_read_audit", Array.isArray(audit) && audit.length > 0, String(audit?.length));
+const accounts = (await query(`SELECT islamic.admin_list_accounts() AS j`))[0].j;
+rec("admin_can_read_accounts", Array.isArray(accounts) && accounts.some((a) => a.email === adminEmail && a.role === "admin") && accounts.some((a) => a.role === "sheikh"), JSON.stringify(accounts.map((a) => a.role)));
+
+await query(`SELECT islamic.admin_upsert_site_content('hero_eyebrow', 'قراءة وذكر، بخطوات مطمئنة', true)`);
+const content = (await query(`SELECT islamic.admin_list_site_content() AS j`))[0].j;
+rec("admin_can_list_site_content", Array.isArray(content) && content.some((c) => c.key === "hero_eyebrow"), String(content?.length));
+
+let badImage = true;
+try {
+  await query(`SELECT islamic.admin_upsert_site_content('hero_image_url', 'https://evil.example/x.webp', true)`);
+  badImage = false;
+} catch {
+  badImage = true;
+}
+rec("admin_hero_image_rejects_external_url", badImage);
+
+await exec(`SELECT set_config('request.jwt.claims', '{}', false)`);
+const publishedContent = await asRole("anon", async () => query(`SELECT key, value FROM islamic.site_content WHERE key = 'hero_caption_place'`));
+rec("anon_reads_published_site_content", publishedContent[0]?.value === "مكة المكرمة", JSON.stringify(publishedContent));
+
+let anonUpsert = true;
+try {
+  await asRole("anon", async () => query(`SELECT islamic.admin_upsert_site_content('hero_eyebrow', 'x', true)`));
+  anonUpsert = false;
+} catch {
+  anonUpsert = true;
+}
+rec("anon_cannot_upsert_site_content", anonUpsert);
+
+await asRole("anon", async () => {
+  await query(`SELECT islamic.record_page_view('/')`);
+  await query(`SELECT islamic.record_page_view('/sources')`);
+  await query(`SELECT islamic.record_page_view('https://evil.example')`);
+});
+const views = await query(`SELECT path, views FROM islamic.page_views ORDER BY path`);
+rec("anon_can_record_sanitized_page_views", views.length === 2 && views.every((v) => Number(v.views) >= 1), JSON.stringify(views));
+
+let anonReadViews = true;
+try {
+  await asRole("anon", async () => query(`SELECT * FROM islamic.page_views`));
+  anonReadViews = false;
+} catch {
+  anonReadViews = true;
+}
+rec("anon_cannot_read_page_views_table", anonReadViews);
+
+await setIdentity(A2, adminEmail, true);
+const stats = (await query(`SELECT islamic.admin_page_views(14) AS j`))[0].j;
+rec("admin_can_read_page_views", stats?.source === "counters" && Array.isArray(stats.paths) && stats.paths.length >= 1, JSON.stringify(stats));
 
 const failed = results.filter((r) => !r.ok);
 console.log(`TOTAL ${results.length} FAILURES ${failed.length}`);

@@ -30,3 +30,11 @@ export function inviteMailEnabled(): boolean {
 export function authMailEnabled(): boolean {
   return process.env.ISLAMIC_AUTH_ENABLED === "true";
 }
+
+export function lessonAlertsEnabled(): boolean {
+  return (
+    process.env.ISLAMIC_LESSON_ALERTS === "true" &&
+    Boolean(process.env.RESEND_API_KEY) &&
+    Boolean(process.env.ALERT_FROM)
+  );
+}

@@ -9,3 +9,11 @@
 .staff-msg{font-size:13px;margin:10px 0}
 .yt-facade{border:1px dashed #8e7b48;border-radius:12px;padding:18px;margin-top:12px}
 .yt-frame{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}
+.staff-subnav{display:flex;flex-wrap:wrap;gap:8px 12px;margin:0 0 18px}
+.staff-subnav a{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
+.staff-chart{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:10px}
+.staff-chart li{display:grid;grid-template-columns:minmax(0,7.5rem) minmax(0,1fr) auto;gap:8px;align-items:center}
+.staff-chart span{font-size:12px;overflow-wrap:anywhere}
+.staff-chart i{display:block;height:10px;background:var(--gold);border-radius:99px;max-width:100%}
+.staff-chart b{font-size:12px;white-space:nowrap}
+.staff-form textarea{width:100%;min-height:78px;resize:vertical;color:var(--ink)}

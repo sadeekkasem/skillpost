@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { parseLessonVideoId, parseYouTubeChannel } from "../youtube";
+import { notifyNewLesson } from "./alerts";
 import { authMailEnabled, inviteMailEnabled } from "../supabase/env";
 import { createSupabaseServerClient } from "../supabase/server";
 import { createServiceClient } from "../supabase/service";
@@ -142,7 +143,13 @@ export async function addLesson(formData: FormData): Promise<ActionResult> {
     p_title: title,
     p_video_id: parsed.id,
   });
-  return result.ok ? { ok: true, message: "أُضيف المقطع كمسودة." } : result;
+  if (!result.ok) return result;
+  try {
+    await notifyNewLesson({ title, videoId: parsed.id, sheikhId });
+  } catch {
+    // Adding the lesson succeeded; the alert must not roll that back.
+  }
+  return { ok: true, message: "أُضيف المقطع ونُشر." };
 }
 
 export async function updateLesson(formData: FormData): Promise<ActionResult> {
@@ -164,4 +171,60 @@ export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServerClient();
   if (supabase) await supabase.auth.signOut();
   redirect("/login");
+}
+
+const SITE_CONTENT_KEYS = [
+  "hero_eyebrow",
+  "hero_title",
+  "hero_lead",
+  "hero_image_url",
+  "hero_image_alt",
+  "hero_caption_place",
+  "hero_caption_title",
+  "hero_caption_credit",
+] as const;
+
+const HERO_MAX_BYTES = 512 * 1024;
+
+export async function saveSiteContent(formData: FormData): Promise<ActionResult> {
+  for (const key of SITE_CONTENT_KEYS) {
+    if (key === "hero_image_url") continue;
+    const value = readString(formData, key);
+    const published = readString(formData, `${key}_published`) !== "false";
+    const result = await rpc("islamic_admin_upsert_site_content", {
+      p_key: key,
+      p_value: value,
+      p_published: published,
+    });
+    if (!result.ok) return result;
+  }
+  return { ok: true, message: "حُفظت نصوص الموقع." };
+}
+
+export async function uploadHeroImage(formData: FormData): Promise<ActionResult> {
+  const file = formData.get("hero");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, message: "اختر صورة بصيغة WebP." };
+  }
+  if (file.type !== "image/webp") {
+    return { ok: false, message: "الصورة يجب أن تكون بصيغة WebP." };
+  }
+  if (file.size > HERO_MAX_BYTES) {
+    return { ok: false, message: "الحجم الأقصى 512 كيلوبايت." };
+  }
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, message: "لم يُضبط الاتصال بعد." };
+  const { data: isAdmin, error: adminError } = await supabase.rpc("islamic_is_admin");
+  if (adminError || !isAdmin) return { ok: false, message: "غير مخوّل." };
+  const { error } = await supabase.storage.from("islamic-site").upload("hero.webp", file, {
+    upsert: true,
+    contentType: "image/webp",
+  });
+  if (error) return { ok: false, message: error.message };
+  const result = await rpc("islamic_admin_upsert_site_content", {
+    p_key: "hero_image_url",
+    p_value: "/hero-image",
+    p_published: true,
+  });
+  return result.ok ? { ok: true, message: "رُفعت صورة الرئيسية." } : result;
 }

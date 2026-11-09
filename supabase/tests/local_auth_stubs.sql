@@ -4,7 +4,9 @@ CREATE SCHEMA IF NOT EXISTS auth;
 CREATE TABLE IF NOT EXISTS auth.users (
   id uuid PRIMARY KEY,
   email text,
-  email_confirmed_at timestamptz
+  email_confirmed_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  last_sign_in_at timestamptz
 );
 
 CREATE OR REPLACE FUNCTION auth.uid()

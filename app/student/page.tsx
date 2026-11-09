@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { ActionForm } from "../components/ActionForm";
 import { StaffShell } from "../components/StaffShell";
-import { addLesson, updateLesson, updateSheikhPage } from "../../lib/islamic/actions";
+import { addLesson, adminSetLessonStatus, adminSetSheikhStatus, updateLesson, updateSheikhPage } from "../../lib/islamic/actions";
 import { fixturesEnabled } from "../../lib/supabase/env";
 import { loadWorkspace } from "../../lib/islamic/workspace";
 
@@ -26,7 +26,19 @@ export default async function StudentPage() {
     <StaffShell title={`مساعدة: ${sheikh.name}`} eyebrow="حساب المساعد">
       <article className="card source-card">
         <h2>تعديل الصفحة</h2>
-        <p className="mini-label">لا يمكنك تغيير حالة النشر ({sheikh.status}).</p>
+        <p className="mini-label">يمكنك نشر صفحة الشيخ أو إخفاءها مباشرة. الحالة الحالية: {sheikh.status}</p>
+        <div className="staff-actions">
+          <ActionForm action={adminSetSheikhStatus}>
+            <input type="hidden" name="sheikh_id" value={sheikh.id} />
+            <input type="hidden" name="status" value="published" />
+            <button className="button" type="submit">نشر الصفحة</button>
+          </ActionForm>
+          <ActionForm action={adminSetSheikhStatus}>
+            <input type="hidden" name="sheikh_id" value={sheikh.id} />
+            <input type="hidden" name="status" value="hidden" />
+            <button className="button secondary" type="submit">إخفاء الصفحة</button>
+          </ActionForm>
+        </div>
         <ActionForm action={updateSheikhPage} className="staff-form">
           <input type="hidden" name="sheikh_id" value={sheikh.id} />
           <label>
@@ -53,7 +65,7 @@ export default async function StudentPage() {
             رابط الفيديو
             <input name="video" required dir="ltr" />
           </label>
-          <button className="button" type="submit">إضافة كمسودة</button>
+          <button className="button" type="submit">إضافة ونشر</button>
         </ActionForm>
       </article>
 
@@ -75,6 +87,18 @@ export default async function StudentPage() {
                 <p className="mini-label">الحالة: {item.status}</p>
                 <button className="button" type="submit">حفظ</button>
               </ActionForm>
+              <div className="staff-actions">
+                <ActionForm action={adminSetLessonStatus}>
+                  <input type="hidden" name="lesson_id" value={item.id} />
+                  <input type="hidden" name="status" value="published" />
+                  <button className="button" type="submit">نشر</button>
+                </ActionForm>
+                <ActionForm action={adminSetLessonStatus}>
+                  <input type="hidden" name="lesson_id" value={item.id} />
+                  <input type="hidden" name="status" value="hidden" />
+                  <button className="button secondary" type="submit">إخفاء</button>
+                </ActionForm>
+              </div>
             </li>
           ))}
         </ul>
