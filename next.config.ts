@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
-// Public Islamic site: static files in /public, served through rewrites.
-const csp = [
+const staticCsp = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
@@ -9,6 +8,34 @@ const csp = [
   "font-src 'self'",
   "connect-src 'self'",
   "media-src https://server8.mp3quran.net",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
+
+const nextPublicCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "media-src https://server8.mp3quran.net",
+  "frame-src https://www.youtube-nocookie.com",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
+
+const staffCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -34,6 +61,21 @@ const toHome = [
   "/moderation",
   "/moderation/:path*",
   "/posts",
+  "/feed",
+  "/messages",
+  "/chat",
+  "/notifications",
+  "/settings",
+  "/dashboard",
+  "/u/:path*",
+];
+
+const securityBase = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()" },
 ];
 
 const config: NextConfig = {
@@ -42,6 +84,7 @@ const config: NextConfig = {
     return [
       ...toHome.map((source) => ({ source, destination: "/", statusCode: 301 })),
       { source: "/terms", destination: "/privacy", statusCode: 301 },
+      { source: "/sheikhs.html", destination: "/sheikhs", statusCode: 301 },
     ];
   },
   async rewrites() {
@@ -56,51 +99,38 @@ const config: NextConfig = {
     };
   },
   async headers() {
-    const security = [
-      { key: "Content-Security-Policy", value: csp },
-      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      { key: "X-Content-Type-Options", value: "nosniff" },
-      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()" },
-    ];
-    const pages = ["/", "/sources", "/privacy", "/index.html", "/sources.html", "/privacy.html", "/sheikhs.html"];
-    const nextPublicCsp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data:",
-      "font-src 'self'",
-      "connect-src 'self'",
-      "media-src https://server8.mp3quran.net",
-      "frame-src https://www.youtube-nocookie.com",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "object-src 'none'",
-    ].join("; ");
-    const staffCsp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data:",
-      "font-src 'self'",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "object-src 'none'",
-    ].join("; ");
     return [
-      ...pages.map((source) => ({ source, headers: security })),
-      { source: "/sheikhs", headers: [{ key: "Content-Security-Policy", value: nextPublicCsp }, ...security.slice(1)] },
-      { source: "/sheikhs/:path*", headers: [{ key: "Content-Security-Policy", value: nextPublicCsp }, ...security.slice(1)] },
+      {
+        source: "/:path*",
+        headers: [...securityBase, { key: "Content-Security-Policy", value: staticCsp }],
+      },
+      {
+        source: "/",
+        headers: [...securityBase, { key: "Content-Security-Policy", value: staticCsp }],
+      },
+      {
+        source: "/sheikhs",
+        headers: [...securityBase, { key: "Content-Security-Policy", value: nextPublicCsp }],
+      },
+      {
+        source: "/sheikhs/:path*",
+        headers: [...securityBase, { key: "Content-Security-Policy", value: nextPublicCsp }],
+      },
       ...["/login", "/login/:path*", "/admin", "/admin/:path*", "/sheikh", "/sheikh/:path*", "/student", "/student/:path*", "/auth/:path*"].map((source) => ({
         source,
-        headers: [{ key: "Content-Security-Policy", value: staffCsp }, ...security.slice(1)],
+        headers: [...securityBase, { key: "Content-Security-Policy", value: staffCsp }],
       })),
       { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       { source: "/img/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=2592000" }] },
       { source: "/hero-image", headers: [{ key: "Cache-Control", value: "public, max-age=3600" }] },
       { source: "/data/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
+      { source: "/style.css", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/app.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/menu.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/analytics.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/site-content.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/praytimes.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/yt-facade.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
     ];
   },
 };

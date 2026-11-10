@@ -44,8 +44,8 @@ export function SiteChrome({ current, children, footerNote }: Props) {
         </div>
         <span>صورة الكعبة: Neo Evenger / Pexels</span>
       </footer>
-      <script src="/menu.js" defer />
-      <script src="/yt-facade.js" defer />
+      <script src="/menu.js?v=20261110" defer />
+      <script src="/yt-facade.js?v=20261110" defer />
     </>
   );
 }

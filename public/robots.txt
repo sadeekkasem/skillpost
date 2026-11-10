@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /login
+Disallow: /admin
+Disallow: /sheikh
+Disallow: /student
+Disallow: /auth
+Disallow: /pv
 
 Sitemap: https://www.skillpostapp.com/sitemap.xml
