@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "test:youtube": "node scripts/test-youtube.mjs",
-    "test:rls": "node supabase/tests/run_rls.mjs"
+    "test:rls": "node supabase/tests/run_rls.mjs",
+    "test:reciters": "node scripts/test-reciters.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
