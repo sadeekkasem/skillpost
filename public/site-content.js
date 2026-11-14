@@ -33,6 +33,8 @@
       if (map.hero_image_alt && data.hero_image_url && /^(\/img\/[A-Za-z0-9._-]+|\/hero-image)$/.test(data.hero_image_url)) {
         map.hero_image_alt.src = data.hero_image_url;
         if (data.hero_image_url === "/hero-image") map.hero_image_alt.removeAttribute("srcset");
+        var hero = document.querySelector(".hero");
+        if (hero) hero.classList.add("has-custom-image");
       }
       fillText(map.hero_caption_place, data.hero_caption_place);
       fillText(map.hero_caption_title, data.hero_caption_title);

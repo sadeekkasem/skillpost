@@ -1,6 +1,6 @@
-# النور — public Islamic site
+# نور الإسلام — public Islamic site
 
-The GitHub repository remains `sadeekkasem/skillpost`. The public site name is النور, at `https://www.noorislamsite.com`.
+The GitHub repository remains `sadeekkasem/skillpost`. The public site name is نور الإسلام, at `https://www.noorislamsite.com`.
 
 Non-commercial: no ads, no selling, no accounts. Quran, adhkar, prayer times, and an empty sheikhs page until teachers consent.
 

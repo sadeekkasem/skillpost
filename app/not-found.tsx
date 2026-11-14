@@ -6,9 +6,9 @@ export default function NotFound() {
   return (
     <>
       <header>
-        <a className="brand" href="/#home" aria-label="النور، الرئيسية">
+        <a className="brand" href="/#home" aria-label="نور الإسلام، الرئيسية">
           <span className="brand-icon" aria-hidden="true">✧</span>
-          <span>النور<small>القرآن والذكر</small></span>
+          <span>نور الإسلام<small>القرآن والذكر</small></span>
         </a>
       </header>
       <main id="main" className="static-page">
@@ -22,7 +22,7 @@ export default function NotFound() {
         </div>
       </main>
       <footer>
-        <span>النور · موقع غير تجاري</span>
+        <span>نور الإسلام · موقع غير تجاري</span>
         <div className="footer-links">
           <a href="/sources">المصادر والترخيص</a>
           <a href="/privacy">الخصوصية</a>

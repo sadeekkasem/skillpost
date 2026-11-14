@@ -4,7 +4,7 @@ import { supabasePublishableKey, supabaseUrl } from "../../lib/supabase/env";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const fallback = new URL("/img/kaaba-800.webp", request.url);
+  const fallback = new URL("/images/hero-madinah.webp", request.url);
   const url = supabaseUrl();
   const key = supabasePublishableKey();
   if (!url || !key) {

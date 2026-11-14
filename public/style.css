@@ -31,7 +31,7 @@ header{flex-wrap:wrap}nav{flex-wrap:wrap;gap:18px}.permission{display:flex;align
 html body{background:#0d2c24!important}
 body *,body *::before,body *::after{color:#edd49a!important;-webkit-text-fill-color:#edd49a!important;text-shadow:none}
 header,main,footer{background:transparent!important}
-.card,.explanation-panel,.page-top,.hero,.reading-panel,.bookmark-bar,.toolbar,.disclaimer,.notice,.reader-tools,.quran-license,.no-results{background:#153b2e!important;border-color:#8e7b48!important}
+.card,.explanation-panel,.reading-panel,.bookmark-bar,.toolbar,.disclaimer,.notice,.reader-tools,.quran-license,.no-results{background:#153b2e!important;border-color:#8e7b48!important}
 .art,.icon,.brand-icon{background:#204b38!important;border-color:#9b884e!important}
 button,.button,input,textarea,select,option,optgroup,.status,.ayah-marker,.ayah-marker[aria-pressed=true]{background:#204b38!important;color:#edd49a!important;-webkit-text-fill-color:#edd49a!important;border-color:#ad9457!important}
 button:disabled,input:disabled,textarea:disabled,select:disabled{opacity:1!important;background:#193b2e!important;border-style:dashed!important;cursor:not-allowed}
@@ -64,3 +64,60 @@ main,main>section,.card,.reading-panel,.explanation-panel,.hero-copy,.two-col>*,
 @media(max-width:680px){.hero .photo-art{min-height:0!important}.hero .photo-caption{right:auto;bottom:auto;padding:10px 16px 12px}.hero .photo-caption strong{font-size:23px}}
 
 .reciter-sources{margin:12px 0;padding:0 22px;line-height:2;font-size:13px}.reciter-sources li{overflow-wrap:anywhere;margin:0 0 8px}
+
+
+/* Prophet's Mosque hero background — نور الإسلام */
+.hero,.page-top{
+  background-color:#0b241c!important;
+  background-image:linear-gradient(to left,rgba(7,26,20,.94) 0%,rgba(7,26,20,.86) 36%,rgba(8,28,22,.4) 58%,rgba(8,28,22,.1) 100%),url("/images/hero-madinah.jpg");
+  background-image:linear-gradient(to left,rgba(7,26,20,.94) 0%,rgba(7,26,20,.86) 36%,rgba(8,28,22,.4) 58%,rgba(8,28,22,.1) 100%),image-set(url("/images/hero-madinah.webp") type("image/webp"),url("/images/hero-madinah.jpg") type("image/jpeg"));
+  background-size:cover!important;
+  background-position:left center!important;
+  background-repeat:no-repeat!important;
+}
+.hero{
+  display:grid;
+  grid-template-columns:1fr;
+  min-height:430px;
+}
+.hero .hero-copy{
+  position:relative;
+  z-index:1;
+  max-width:560px;
+  justify-self:start;
+}
+.hero .photo-art{display:none}
+.hero.has-custom-image{
+  grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+}
+.hero.has-custom-image .photo-art{display:flex}
+.hero:after,.page-top:after{opacity:.2}
+.hero::before,.page-top::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:radial-gradient(ellipse 42% 70% at 22% 28%,rgba(255,220,140,.26),transparent 62%);
+  mix-blend-mode:screen;
+}
+.page-top > *{position:relative;z-index:1}
+@keyframes hero-glow{
+  0%,100%{opacity:.4}
+  50%{opacity:1}
+}
+@media (prefers-reduced-motion:no-preference){
+  .hero::before,.page-top::before{animation:hero-glow 8s ease-in-out infinite}
+}
+@media (max-width:800px){
+  .hero.has-custom-image{grid-template-columns:1fr}
+  .hero .hero-copy{max-width:none}
+}
+@media (max-width:680px){
+  .hero,.page-top{
+    background-image:linear-gradient(to left,rgba(7,26,20,.95) 0%,rgba(7,26,20,.88) 48%,rgba(8,28,22,.45) 72%,rgba(8,28,22,.16) 100%),url("/images/hero-madinah-mobile.jpg");
+    background-image:linear-gradient(to left,rgba(7,26,20,.95) 0%,rgba(7,26,20,.88) 48%,rgba(8,28,22,.45) 72%,rgba(8,28,22,.16) 100%),image-set(url("/images/hero-madinah-mobile.webp") type("image/webp"),url("/images/hero-madinah-mobile.jpg") type("image/jpeg"));
+    background-position:15% center!important;
+  }
+  .hero{min-height:360px}
+}

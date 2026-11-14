@@ -1,3 +1,5 @@
+import { DEFAULT_ALERT_FROM } from "../site";
+
 export const ADMIN_ALERT_EMAIL = "sadeekkasem@gmail.com";
 
 export type LessonAlertInfo = {
@@ -37,11 +39,11 @@ export async function sendViaResend(mail: AlertMail): Promise<void> {
 
 export function buildLessonAlert(info: LessonAlertInfo): AlertMail {
   return {
-    from: process.env.ALERT_FROM || "النور <alerts@noorislamsite.com>",
+    from: process.env.ALERT_FROM || DEFAULT_ALERT_FROM,
     to: [ADMIN_ALERT_EMAIL],
     subject: `درس جديد: ${info.title.slice(0, 80)}`,
     text: [
-      "أُضيف درس جديد على النور.",
+      "أُضيف درس جديد على نور الإسلام.",
       `العنوان: ${info.title}`,
       `معرّف الفيديو: ${info.videoId}`,
       `معرّف الصفحة: ${info.sheikhId}`,
