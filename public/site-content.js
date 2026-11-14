@@ -1,5 +1,4 @@
 (function () {
-  var eyebrow = document.getElementById("hero-eyebrow");
   var lead = document.getElementById("hero-lead");
   if (!document.getElementById("home-title")) return;
   function fillText(el, value, multiline) {
@@ -18,7 +17,7 @@
     .then(function (res) { return res.ok ? res.json() : null; })
     .then(function (data) {
       if (!data) return;
-      fillText(eyebrow, data.hero_eyebrow);
+      // Home keeps the large title only; do not re-insert the published eyebrow.
       fillText(lead, data.hero_lead);
     })
     .catch(function () {});

@@ -277,3 +277,82 @@ body.home-overlay #home .hero .ornament-frame::after{
     background-size:132px 20px,11px 11px,11px 11px,11px 11px,11px 11px;
   }
 }
+
+
+/* Home: nav replaces the logo; body blends with the Madinah hero */
+body.home-overlay .brand{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+body.home-overlay header{
+  justify-content:center;
+  flex-wrap:nowrap;
+}
+@media (min-width:681px){
+  body.home-overlay #primary-nav{
+    display:flex;
+    flex-wrap:nowrap;
+    justify-content:center;
+    align-items:center;
+    gap:clamp(14px,2.1vw,28px);
+    flex:1 1 auto;
+    max-width:1144px;
+  }
+  body.home-overlay #primary-nav a{white-space:nowrap}
+}
+
+@media (min-width:1024px){
+  .menu-toggle{display:none!important}
+  #primary-nav{
+    display:flex!important;
+    width:auto;
+    order:initial;
+    background:transparent!important;
+    border:0!important;
+    padding:0;
+    grid-template-columns:none;
+  }
+  body.home-overlay #primary-nav{gap:clamp(16px,2.1vw,28px)}
+}
+
+@media (max-width:680px){
+  body.home-overlay header{
+    justify-content:flex-end;
+    flex-wrap:wrap;
+  }
+  body.home-overlay .menu-toggle{
+    display:inline-block;
+    margin-inline-start:auto;
+  }
+}
+
+/* Page body continues the hero's dark green/teal edge tones */
+html body{
+  background:linear-gradient(180deg,#0b2a22 0%,#0c2e26 22%,#0d2c24 48%,#12382d 100%)!important;
+}
+.heritage-divider span{background:transparent!important}
+
+/* Soften the home hero's bottom edge into the body */
+body.home-overlay #home .hero{
+  background-image:
+    linear-gradient(to top,#0b2a22 0%,rgba(11,42,34,.7) 8%,rgba(11,42,34,0) 28%),
+    linear-gradient(to left,rgba(7,26,20,.94) 0%,rgba(7,26,20,.86) 36%,rgba(8,28,22,.4) 58%,rgba(8,28,22,.1) 100%),
+    image-set(url("/images/hero-madinah.webp") type("image/webp"),url("/images/hero-madinah.jpg") type("image/jpeg"));
+}
+@media (max-width:680px){
+  body.home-overlay #home .hero{
+    background-image:
+      linear-gradient(to top,#0b2a22 0%,rgba(11,42,34,.75) 10%,rgba(11,42,34,0) 32%),
+      linear-gradient(to left,rgba(7,26,20,.95) 0%,rgba(7,26,20,.88) 48%,rgba(8,28,22,.45) 72%,rgba(8,28,22,.16) 100%),
+      image-set(url("/images/hero-madinah-mobile.webp") type("image/webp"),url("/images/hero-madinah-mobile.jpg") type("image/jpeg"));
+    background-position:15% center!important;
+  }
+}
