@@ -83,8 +83,144 @@
 #====================================================================
 </pre></details></section>
 <section id="adhkar-reader" hidden aria-labelledby="adhkar-title"><div class="page-top"><span class="eyebrow">ذكر ودعاء · مختارات موثّقة المصدر</span><h1 id="adhkar-title">الأذكار والأدعية</h1><p>33 بطاقة في خمسة أقسام، وليست مجموعة شاملة. النص من حصن المسلم عبر إصدار OpenDua 0.0.4، منقول حرفيًا.</p></div><div class="adhkar-intro card"><p>تُعرض أرقام المداخل في حصن المسلم كما وثّقها المصدر، لا أرقام أحاديث مُخترعة. لا نضيف أحكام صحة أو فضائل. الأعداد فقط من حقل التكرار الصريح في الملف؛ غيابه لا يعني نفي عدد وارد في مراجع أخرى. قسم الاستغفار يضم صيغًا ذُكرت أيضًا ضمن أذكار الصباح والمساء، ويظهر سياقها على البطاقة.</p><p>العدّاد مساعد قراءة في الذاكرة فقط؛ يبقى عند البحث أو تبديل القسم، ويُصفّر عند إعادة تحميل الصفحة. ليس سجل عبادة أو حفظًا دائمًا.</p></div><div class="toolbar"><label class="search"><input id="adhkar-search" type="search" aria-label="ابحث في الأذكار والمراجع" placeholder="ابحث في النص أو رقم المرجع…"></label><label for="adhkar-category">القسم</label><select id="adhkar-category"><option value="all">جميع الأقسام</option><option>الصباح</option><option>المساء</option><option>النوم</option><option>السفر</option><option>الاستغفار</option></select><button id="adhkar-reset-all" class="button" type="button">تصفير كل العدّادات</button></div><p id="adhkar-results" role="status" aria-live="polite"></p><div class="adhkar-list" id="adhkar-list"></div><div class="card adhkar-attribution"><h2>المصدر والإسناد</h2><p><a href="https://opendua.org/" target="_blank" rel="noopener noreferrer">OpenDua</a>، حصن المسلم لسعيد بن علي بن وهف القحطاني. بيانات التحرير وبنية المجموعة CC BY 4.0 وفق <a href="https://opendua.org/developers" target="_blank" rel="noopener noreferrer">شروط المصدر</a>؛ لا يدّعي المصدر ملكية النصوص الدينية الأصلية. لا تسجيلات صوتية من OpenDua مستخدمة هنا.</p><details><summary>إشعار الإسناد الأصلي</summary><p lang="en" dir="ltr">OpenDua dataset v0.0.4 (https://opendua.org), by Ihsan Labs at the Human Development Fund. Based on Hisn al-Muslim by Sa'id ibn Ali ibn Wahf al-Qahtani. OpenDua editorial text and dataset structure are licensed CC BY 4.0. Recitation by Muhammad Jumah for OpenDua. OpenDua makes no ownership claim over the underlying religious texts.</p></details></div></section>
-<section id="prayer-tools" hidden aria-labelledby="prayer-title"><div class="page-top"><span class="eyebrow">الصلاة والقبلة والهجري · حساب على جهازك</span><h1 id="prayer-title">مكانك ووقتك، بوضوح</h1><p>المواقيت حساب فلكي وليست جدول مسجد أو فتوى. لا نتائج قبل تطبيق الإعدادات، ولا تحديد موقع تلقائي أو حفظ لإحداثياتك.</p></div><form id="prayer-form" class="card"><div class="prayer-fields"><label>أمثلة مدن — ليست موقعك<select id="city-preset"><option value="">اختر مدينة أو أدخل إحداثياتك</option></select></label><label>خط العرض (−90 إلى90)<input id="prayer-lat" type="number" min="-90" max="90" step="any" required></label><label>خط الطول (−180 إلى180)<input id="prayer-lon" type="number" min="-180" max="180" step="any" required></label><label>المنطقة الزمنية IANA<input id="prayer-zone" required placeholder="Europe/Kyiv" dir="ltr"></label><label>التاريخ المدني — 1900 إلى2100<input id="prayer-date" type="date" min="1900-01-01" max="2100-12-31" required></label><label>طريقة الحساب<select id="prayer-method"><option value="MWL">رابطة العالم الإسلامي — فجر18°/عشاء17°</option><option value="ISNA">أمريكا الشمالية — فجر15°/عشاء15°</option><option value="Egypt">الهيئة المصرية — فجر19.5°/عشاء17.5°</option><option value="Karachi">كراتشي — فجر18°/عشاء18°</option></select></label><label>حساب العصر<select id="prayer-madhab"><option value="Standard">شافعي/مالكي/حنبلي — ظل1</option><option value="Hanafi">حنفي — ظل2</option></select></label><label>سياسة خطوط العرض العالية<select id="prayer-high"><option value="None">بدون تقدير — الحدث الغائب غير متاح</option><option value="NightMiddle">تقدير نصف الليل للفجر/العشاء — إذا وجد شروق وغروب</option></select></label></div><div class="actions"><button class="button" type="submit">تطبيق وحساب</button><button class="button" id="prayer-geolocate" type="button">استخدام موقعي بإذن المتصفح</button></div><p class="mini-label">الإحداثيات في الذاكرة فقط، لا تُرسل لخادم. زر الموقع وحده يطلب إذن المتصفح وقد لا يعمل عبر file://؛ يمكنك إدخالها يدويًا. اقتراح المنطقة الزمنية من المتصفح يحتاج مراجعتك قبل التطبيق. تغييرات الحقول لا تغيّر النتائج السابقة حتى تضغط تطبيق.</p><p id="prayer-error" role="alert"></p><p id="location-status" role="status"></p></form><div id="prayer-results" hidden><div class="disclaimer" id="applied-inputs"></div><div class="card"><h2>المواقيت المحسوبة</h2><p>الوقت المحلي بالمنطقة المختارة مع تاريخ كل حدث وإزاحته عن UTC؛ التوقيت الصيفي يُطبّق عند لحظة الحدث نفسها. الارتفاع مفترض صفرًا. لا أذان أو تنبيهات.</p><div id="prayer-times" class="prayer-times"></div><p id="polar-note" class="mini-label"></p></div><div class="two-col"><article class="card"><h2>اتجاه القبلة</h2><div class="bearing-display" id="qibla-bearing"></div><p>زاوية ابتدائية لدائرة عظمى نحو الكعبة (21.4225،39.8262)، باتجاه عقارب الساعة من الشمال الحقيقي، لا المغناطيسي. زاوية محسوبة ثابتة، لا تستعمل حساسات الجهاز.</p></article><article class="card"><h2>التاريخ الهجري المدني</h2><div class="hijri-display" id="hijri-result"></div><p>تقويم حسابي جدولي عبر Intl، الخوارزمية islamic-civil، وليس أم القرى. تحويل التاريخ المدني المختار، لا رصد هلال أو انتقال عند المغرب. قد يخالف الرؤية المحلية؛ ليس مرجعًا لإثبات الشهور.</p></article></div></div><div class="card" style="margin-top:24px"><h2>كيف حُسبت النتائج؟</h2><p>PrayTimes2.5، تطوير حميد زرابي زاده، LGPLv3. <a href="https://praytimes.org/docs/manual-v2" target="_blank" rel="noopener noreferrer">دليل الحساب والسياسات</a> · <a href="https://praytimes.org/" target="_blank" rel="noopener noreferrer">المصدر</a>. المصدر الكامل غير المعدّل وإشعاراته مضمّنان في الحزمة. لا ضمان لمطابقة المسجد؛ راجع الجهة المحلية المختصة. تفصيل الحساب والاختبارات في PRAYER-SOURCES.md.</p></div></section>
+<section id="prayer-tools" hidden aria-labelledby="prayer-title"><div class="page-top"><span class="eyebrow">الصلاة والقبلة والهجري · حساب على جهازك</span><h1 id="prayer-title">مكانك ووقتك، بوضوح</h1><p>المواقيت حساب فلكي وليست جدول مسجد أو فتوى. لا نتائج قبل تطبيق الإعدادات، ولا تحديد موقع تلقائي أو حفظ لإحداثياتك.</p></div><form id="prayer-form" class="card"><div class="prayer-fields"><label>أمثلة مدن — ليست موقعك<select id="city-preset">
+<option value="">اختر مدينة أو أدخل إحداثياتك</option>
+<optgroup label="فنلندا والشمال الأوروبي">
+<option value="helsinki">هلسنكي</option>
+<option value="espoo">إسبو</option>
+<option value="tampere">تامبيري</option>
+<option value="turku">توركو</option>
+<option value="oulu">أولو</option>
+<option value="vaasa">فاسا</option>
+<option value="jyvaskyla">يوفاسكولا</option>
+<option value="lahti">لاهتي</option>
+<option value="kuopio">كوبيو</option>
+<option value="rovaniemi">روفانييمي</option>
+<option value="tromso">ترومسو — قطبي</option>
+</optgroup>
+<optgroup label="الخليج والجزيرة العربية">
+<option value="mecca">مكة</option>
+<option value="madinah">المدينة المنورة</option>
+<option value="riyadh">الرياض</option>
+<option value="jeddah">جدة</option>
+<option value="dammam">الدمام</option>
+<option value="dubai">دبي</option>
+<option value="abudhabi">أبوظبي</option>
+<option value="sharjah">الشارقة</option>
+<option value="doha">الدوحة</option>
+<option value="kuwait">الكويت</option>
+<option value="manama">المنامة</option>
+<option value="muscat">مسقط</option>
+<option value="sanaa">صنعاء</option>
+<option value="aden">عدن</option>
+</optgroup>
+<optgroup label="الشام والعراق">
+<option value="amman">عمّان</option>
+<option value="damascus">دمشق</option>
+<option value="aleppo">حلب</option>
+<option value="beirut">بيروت</option>
+<option value="jerusalem">القدس</option>
+<option value="gaza">غزة</option>
+<option value="baghdad">بغداد</option>
+<option value="mosul">الموصل</option>
+<option value="basra">البصرة</option>
+</optgroup>
+<optgroup label="مصر والسودان والمغرب العربي">
+<option value="cairo">القاهرة</option>
+<option value="alexandria">الإسكندرية</option>
+<option value="khartoum">الخرطوم</option>
+<option value="tripoli">طرابلس</option>
+<option value="benghazi">بنغازي</option>
+<option value="tunis">تونس</option>
+<option value="algiers">الجزائر</option>
+<option value="casablanca">الدار البيضاء</option>
+<option value="rabat">الرباط</option>
+<option value="marrakesh">مراكش</option>
+<option value="fez">فاس</option>
+</optgroup>
+<optgroup label="تركيا وإيران وآسيا الوسطى">
+<option value="istanbul">إسطنبول</option>
+<option value="ankara">أنقرة</option>
+<option value="izmir">إزمير</option>
+<option value="tehran">طهران</option>
+<option value="mashhad">مشهد</option>
+<option value="isfahan">أصفهان</option>
+<option value="kabul">كابل</option>
+<option value="tashkent">طشقند</option>
+<option value="almaty">ألماتي</option>
+<option value="astana">أستانا</option>
+<option value="baku">باكو</option>
+<option value="bishkek">بيشكيك</option>
+<option value="dushanbe">دوشانبه</option>
+<option value="ashgabat">عشق آباد</option>
+</optgroup>
+<optgroup label="جنوب آسيا">
+<option value="karachi">كراتشي</option>
+<option value="lahore">لاهور</option>
+<option value="islamabad">إسلام آباد</option>
+<option value="peshawar">بيشاور</option>
+<option value="dhaka">دكا</option>
+<option value="chittagong">شيتاغونغ</option>
+<option value="delhi">دلهي</option>
+<option value="mumbai">مومباي</option>
+<option value="hyderabad">حيدر آباد</option>
+<option value="male">ماليه</option>
+<option value="colombo">كولومبو</option>
+</optgroup>
+<optgroup label="جنوب شرق آسيا">
+<option value="jakarta">جاكرتا</option>
+<option value="surabaya">سورابايا</option>
+<option value="kualalumpur">كوالالمبور</option>
+<option value="singapore">سنغافورة</option>
+<option value="brunei">بندر سري بكاوان</option>
+<option value="manila">مانيلا</option>
+</optgroup>
+<optgroup label="أفريقيا">
+<option value="lagos">لاغوس</option>
+<option value="kano">كانو</option>
+<option value="abuja">أبوجا</option>
+<option value="dakar">داكار</option>
+<option value="bamako">باماكو</option>
+<option value="niamey">نيامي</option>
+<option value="ndjamena">نجامينا</option>
+<option value="mogadishu">مقديشو</option>
+<option value="djibouti">جيبوتي</option>
+<option value="nouakchott">نواكشوط</option>
+<option value="conakry">كوناكري</option>
+<option value="banjul">بانجول</option>
+<option value="ouagadougou">واغادوغو</option>
+<option value="freetown">فريتاون</option>
+<option value="addisababa">أديس أبابا</option>
+<option value="nairobi">نيروبي</option>
+<option value="daressalaam">دار السلام</option>
+<option value="zanzibar">زنجبار</option>
+<option value="johannesburg">جوهانسبرغ</option>
+<option value="capetown">كيب تاون</option>
+<option value="moroni">موروني</option>
+</optgroup>
+<optgroup label="أوروبا والأمريكتان">
+<option value="sarajevo">سراييفو</option>
+<option value="tirana">تيرانا</option>
+<option value="pristina">بريشتينا</option>
+<option value="london">لندن</option>
+<option value="paris">باريس</option>
+<option value="berlin">برلين</option>
+<option value="stockholm">ستوكهولم</option>
+<option value="oslo">أوسلو</option>
+<option value="copenhagen">كوبنهاغن</option>
+<option value="amsterdam">أمستردام</option>
+<option value="brussels">بروكسل</option>
+<option value="kyiv">كييف</option>
+<option value="moscow">موسكو</option>
+<option value="kazan">قازان</option>
+<option value="ny">نيويورك</option>
+<option value="toronto">تورونتو</option>
+<option value="chicago">شيكاغو</option>
+<option value="losangeles">لوس أنجلوس</option>
+<option value="saopaulo">ساو باولو</option>
+</optgroup>
+</select></label><label>خط العرض (−90 إلى90)<input id="prayer-lat" type="number" min="-90" max="90" step="any" required></label><label>خط الطول (−180 إلى180)<input id="prayer-lon" type="number" min="-180" max="180" step="any" required></label><label>المنطقة الزمنية IANA<input id="prayer-zone" required placeholder="Europe/Kyiv" dir="ltr"></label><label>التاريخ المدني — 1900 إلى2100<input id="prayer-date" type="date" min="1900-01-01" max="2100-12-31" required></label><label>طريقة الحساب<select id="prayer-method"><option value="MWL">رابطة العالم الإسلامي — فجر18°/عشاء17°</option><option value="ISNA">أمريكا الشمالية — فجر15°/عشاء15°</option><option value="Egypt">الهيئة المصرية — فجر19.5°/عشاء17.5°</option><option value="Karachi">كراتشي — فجر18°/عشاء18°</option></select></label><label>حساب العصر<select id="prayer-madhab"><option value="Standard">شافعي/مالكي/حنبلي — ظل1</option><option value="Hanafi">حنفي — ظل2</option></select></label><label>سياسة خطوط العرض العالية<select id="prayer-high"><option value="None">بدون تقدير — الحدث الغائب غير متاح</option><option value="NightMiddle">تقدير نصف الليل للفجر/العشاء — إذا وجد شروق وغروب</option></select></label></div><div class="actions"><button class="button" type="submit">تطبيق وحساب</button><button class="button" id="prayer-geolocate" type="button">استخدام موقعي بإذن المتصفح</button></div><p class="mini-label">الإحداثيات في الذاكرة فقط، لا تُرسل لخادم. زر الموقع وحده يطلب إذن المتصفح وقد لا يعمل عبر file://؛ يمكنك إدخالها يدويًا. اقتراح المنطقة الزمنية من المتصفح يحتاج مراجعتك قبل التطبيق. تغييرات الحقول لا تغيّر النتائج السابقة حتى تضغط تطبيق.</p><p id="prayer-error" role="alert"></p><p id="location-status" role="status"></p></form><div id="prayer-results" hidden><div class="disclaimer" id="applied-inputs"></div><div class="card"><h2>المواقيت المحسوبة</h2><p>الوقت المحلي بالمنطقة المختارة مع تاريخ كل حدث وإزاحته عن UTC؛ التوقيت الصيفي يُطبّق عند لحظة الحدث نفسها. الارتفاع مفترض صفرًا. لا أذان أو تنبيهات.</p><div id="prayer-times" class="prayer-times"></div><p id="polar-note" class="mini-label"></p></div><div class="two-col"><article class="card"><h2>اتجاه القبلة</h2><div class="bearing-display" id="qibla-bearing"></div><p>زاوية ابتدائية لدائرة عظمى نحو الكعبة (21.4225،39.8262)، باتجاه عقارب الساعة من الشمال الحقيقي، لا المغناطيسي. زاوية محسوبة ثابتة، لا تستعمل حساسات الجهاز.</p></article><article class="card"><h2>التاريخ الهجري المدني</h2><div class="hijri-display" id="hijri-result"></div><p>تقويم حسابي جدولي عبر Intl، الخوارزمية islamic-civil، وليس أم القرى. تحويل التاريخ المدني المختار، لا رصد هلال أو انتقال عند المغرب. قد يخالف الرؤية المحلية؛ ليس مرجعًا لإثبات الشهور.</p></article></div></div><div class="card" style="margin-top:24px"><h2>كيف حُسبت النتائج؟</h2><p>PrayTimes2.5، تطوير حميد زرابي زاده، LGPLv3. <a href="https://praytimes.org/docs/manual-v2" target="_blank" rel="noopener noreferrer">دليل الحساب والسياسات</a> · <a href="https://praytimes.org/" target="_blank" rel="noopener noreferrer">المصدر</a>. المصدر الكامل غير المعدّل وإشعاراته مضمّنان في الحزمة. لا ضمان لمطابقة المسجد؛ راجع الجهة المحلية المختصة. تفصيل الحساب والاختبارات في PRAYER-SOURCES.md.</p></div></section>
 </main>
 <footer><span>النور · موقع غير تجاري: لا إعلانات ولا بيع</span><div class="footer-links"><a href="/sheikhs">المشايخ</a><a href="/sources">المصادر والترخيص</a><a href="/privacy">الخصوصية</a></div><span>صورة الكعبة: Neo Evenger / Pexels</span></footer>
-<script src="/praytimes.js?v=20261110r" defer></script><script src="/app.js?v=20261110r" defer></script>
+<script src="/praytimes.js?v=20261110r" defer></script><script src="/app.js?v=20261114b" defer></script>
 </body></html>
