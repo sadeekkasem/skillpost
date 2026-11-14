@@ -8,7 +8,9 @@
     "start": "next start",
     "test:youtube": "node scripts/test-youtube.mjs",
     "test:rls": "node supabase/tests/run_rls.mjs",
-    "test:reciters": "node scripts/test-reciters.mjs"
+    "test:reciters": "node scripts/test-reciters.mjs",
+    "test:hadith": "node scripts/test-hadith.mjs",
+    "fetch:hadith": "node scripts/fetch-hadeethenc.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

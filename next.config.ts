@@ -85,6 +85,7 @@ const config: NextConfig = {
       ...toHome.map((source) => ({ source, destination: "/", statusCode: 301 })),
       { source: "/terms", destination: "/privacy", statusCode: 301 },
       { source: "/sheikhs.html", destination: "/sheikhs", statusCode: 301 },
+      { source: "/hadith.html", destination: "/hadith", statusCode: 301 },
     ];
   },
   async rewrites() {
@@ -92,6 +93,7 @@ const config: NextConfig = {
       beforeFiles: [
         { source: "/", destination: "/index.html" },
         { source: "/sources", destination: "/sources.html" },
+        { source: "/hadith", destination: "/hadith.html" },
         { source: "/privacy", destination: "/privacy.html" },
       ],
       afterFiles: [],
@@ -130,6 +132,8 @@ const config: NextConfig = {
       { source: "/analytics.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
       { source: "/site-content.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
       { source: "/praytimes.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/hadith.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/hadith-core.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
       { source: "/yt-facade.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
     ];
   },

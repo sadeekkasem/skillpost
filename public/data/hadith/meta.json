@@ -1,0 +1,21 @@
+{
+  "source": "موسوعة الأحاديث النبوية المترجمة – HadeethEnc.com",
+  "sourceUrl": "https://hadeethenc.com/ar",
+  "api": "https://hadeethenc.com/api/v1/",
+  "language": "ar",
+  "fetchedAt": "2026-11-14T11:30:40.096Z",
+  "datasetVersion": "v1.8.0",
+  "version": "HadeethEnc.com العربية v1.8.0",
+  "terms": "No modification, addition, or deletion of the content. Clearly referring to the publisher and the source (HadeethEnc.com).",
+  "termsUrl": "https://documenter.getpostman.com/view/5211979/TVev3j7q",
+  "filter": "attribution (التخريج) names only al-Bukhari and/or Muslim or «متفق عليه», with no other collector, mu'allaq or أصله wording; grade plainly صحيح. See scripts/hadith-filter.mjs",
+  "counts": {
+    "scanned": 3574,
+    "kept": 2449,
+    "agreed": 1354,
+    "both": 8,
+    "bukhari": 403,
+    "muslim": 684,
+    "excluded": 1125
+  }
+}
