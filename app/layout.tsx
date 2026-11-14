@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
-        <link rel="stylesheet" href="/style.css?v=20261114h" />
+        <link rel="stylesheet" href="/style.css?v=20261114i" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <script src="/analytics.js?v=20261110" defer />
         <script src="/_vercel/insights/script.js" defer />

@@ -87,10 +87,6 @@ main,main>section,.card,.reading-panel,.explanation-panel,.hero-copy,.two-col>*,
   justify-self:start;
 }
 .hero .photo-art{display:none}
-.hero.has-custom-image{
-  grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
-}
-.hero.has-custom-image .photo-art{display:flex}
 .hero:after,.page-top:after{opacity:.2}
 .hero::before,.page-top::before{
   content:"";
@@ -110,7 +106,6 @@ main,main>section,.card,.reading-panel,.explanation-panel,.hero-copy,.two-col>*,
   .hero::before,.page-top::before{animation:hero-glow 8s ease-in-out infinite}
 }
 @media (max-width:800px){
-  .hero.has-custom-image{grid-template-columns:1fr}
   .hero .hero-copy{max-width:none}
 }
 @media (max-width:680px){
@@ -120,4 +115,75 @@ main,main>section,.card,.reading-panel,.explanation-panel,.hero-copy,.two-col>*,
     background-position:15% center!important;
   }
   .hero{min-height:360px}
+}
+
+.hero .hero-kicker{
+  font-family:Amiri,serif;
+  font-size:clamp(22px,2.6vw,30px);
+  color:#e4c98a;
+  margin:-4px 0 14px;
+  font-weight:400;
+  letter-spacing:0;
+}
+.hero h1#home-title{margin-bottom:6px}
+
+/* Home: nav sits inside the Madinah hero */
+body.home-overlay{overflow-x:clip}
+body.home-overlay header{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:40;
+  max-width:none;
+  width:100%;
+  margin:0;
+  box-sizing:border-box;
+  padding:14px max(28px, calc((100% - 1144px) / 2));
+  background:rgba(7,26,20,.42);
+  backdrop-filter:blur(16px) saturate(1.15);
+  -webkit-backdrop-filter:blur(16px) saturate(1.15);
+  border-bottom:1px solid rgba(215,184,115,.3);
+  color:#f9f2df;
+}
+body.home-overlay .brand,
+body.home-overlay nav a{color:#f9f2df}
+body.home-overlay .brand small{color:#e4c98a}
+body.home-overlay .brand-icon{background:rgba(15,47,37,.55);color:#e8c987}
+body.home-overlay nav a[aria-current=page]{border-color:#e3c685}
+body.home-overlay .menu-toggle{
+  background:rgba(255,255,255,.08);
+  color:#f9f2df;
+  border-color:rgba(227,198,133,.45);
+}
+body.home-overlay main{padding-top:0}
+body.home-overlay #home .hero{
+  width:100vw;
+  max-width:100vw;
+  margin-left:calc(50% - 50vw);
+  margin-right:calc(50% - 50vw);
+  border-radius:0 0 28px 28px;
+  box-sizing:border-box;
+  min-height:560px;
+  padding-top:96px;
+}
+body.home-overlay #home .hero-copy{
+  max-width:760px;
+  padding-top:28px;
+}
+
+@media (max-width:800px){
+  body.home-overlay header{padding:14px 20px}
+  body.home-overlay #home .hero{min-height:480px;padding-top:88px}
+}
+@media (max-width:680px){
+  body.home-overlay #primary-nav{
+    background:rgba(10,32,26,.94);
+    border:1px solid rgba(215,184,115,.28);
+  }
+  body.home-overlay #primary-nav a{color:#f9f2df}
+  body.home-overlay #primary-nav a[aria-current=page]{border-color:#e3c685}
+  body.home-overlay #home .hero{min-height:460px;padding-top:84px;border-radius:0 0 20px 20px}
+  body.home-overlay #home .hero-copy{padding-top:16px}
+  .hero .hero-kicker{font-size:22px}
 }
