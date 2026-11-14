@@ -320,7 +320,16 @@ body.home-overlay header{
     padding:0;
     grid-template-columns:none;
   }
-  body.home-overlay #primary-nav{gap:clamp(16px,2.1vw,28px)}
+  body.home-overlay header{
+    justify-content:flex-start;
+    padding-inline-start:43px;
+  }
+  body.home-overlay #primary-nav{
+    justify-content:flex-start;
+    flex:0 1 auto;
+    max-width:none;
+    gap:clamp(16px,2.1vw,28px);
+  }
 }
 
 @media (max-width:680px){
