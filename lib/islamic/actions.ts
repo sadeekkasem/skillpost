@@ -6,6 +6,7 @@ import { notifyNewLesson } from "./alerts";
 import { authMailEnabled, inviteMailEnabled } from "../supabase/env";
 import { createSupabaseServerClient } from "../supabase/server";
 import { createServiceClient } from "../supabase/service";
+import { SITE_URL } from "../site";
 
 export type ActionResult = { ok: true; message: string } | { ok: false; message: string };
 
@@ -43,7 +44,7 @@ export async function requestMagicLink(formData: FormData): Promise<ActionResult
   }
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false, message: "الدخول غير مضبوط في هذا البناء." };
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.skillpostapp.com";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: `${origin}/auth/callback` },

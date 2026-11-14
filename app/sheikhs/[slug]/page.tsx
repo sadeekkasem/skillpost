@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "../../../lib/site";
 import { notFound } from "next/navigation";
 import { SiteChrome } from "../../components/SiteChrome";
 import { getPublishedSheikh } from "../../../lib/islamic/published";
@@ -10,10 +11,10 @@ type Params = { slug: string };
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
   const data = await getPublishedSheikh(slug);
-  if (!data) return { title: "غير موجود | سِكِل بوست", robots: { index: false } };
+  if (!data) return { title: `غير موجود | ${SITE_NAME}`, robots: { index: false } };
   return {
-    title: `${data.sheikh.name} | سِكِل بوست`,
-    alternates: { canonical: `https://www.skillpostapp.com/sheikhs/${data.sheikh.slug}` },
+    title: `${data.sheikh.name} | ${SITE_NAME}`,
+    alternates: { canonical: `${SITE_URL}/sheikhs/${data.sheikh.slug}` },
   };
 }
 

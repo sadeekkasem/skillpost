@@ -21,9 +21,9 @@ export function SiteChrome({ current, children, footerNote }: Props) {
     <>
       <a className="skip-link" href="#main">تخطَّ إلى المحتوى</a>
       <header>
-        <a className="brand" href="/#home" aria-label="سكل بوست، الرئيسية">
+        <a className="brand" href="/#home" aria-label="النور، الرئيسية">
           <span className="brand-icon" aria-hidden="true">✧</span>
-          <span>سِكِل بوست<small>القرآن والذكر</small></span>
+          <span>النور<small>القرآن والذكر</small></span>
         </a>
         <button className="menu-toggle" id="menu-toggle" data-static type="button" aria-expanded="false" aria-controls="primary-nav">القائمة ☰</button>
         <nav id="primary-nav" aria-label="التنقل الرئيسي">
@@ -36,7 +36,7 @@ export function SiteChrome({ current, children, footerNote }: Props) {
       </header>
       <main id="main">{children}</main>
       <footer>
-        <span>{footerNote ?? "سِكِل بوست · موقع غير تجاري: لا إعلانات ولا بيع"}</span>
+        <span>{footerNote ?? "النور · موقع غير تجاري: لا إعلانات ولا بيع"}</span>
         <div className="footer-links">
           <a href="/sheikhs">المشايخ</a>
           <a href="/sources">المصادر والترخيص</a>

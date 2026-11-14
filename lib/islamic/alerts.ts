@@ -37,11 +37,11 @@ export async function sendViaResend(mail: AlertMail): Promise<void> {
 
 export function buildLessonAlert(info: LessonAlertInfo): AlertMail {
   return {
-    from: process.env.ALERT_FROM || "alerts@skillpostapp.com",
+    from: process.env.ALERT_FROM || "النور <alerts@noorislamsite.com>",
     to: [ADMIN_ALERT_EMAIL],
     subject: `درس جديد: ${info.title.slice(0, 80)}`,
     text: [
-      "أُضيف درس جديد على سِكِل بوست.",
+      "أُضيف درس جديد على النور.",
       `العنوان: ${info.title}`,
       `معرّف الفيديو: ${info.videoId}`,
       `معرّف الصفحة: ${info.sheikhId}`,

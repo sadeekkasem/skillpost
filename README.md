@@ -1,4 +1,6 @@
-# SkillPost — public Islamic site
+# النور — public Islamic site
+
+The GitHub repository remains `sadeekkasem/skillpost`. The public site name is النور, at `https://www.noorislamsite.com`.
 
 Non-commercial: no ads, no selling, no accounts. Quran, adhkar, prayer times, and an empty sheikhs page until teachers consent.
 
@@ -54,4 +56,4 @@ Needed when this is connected to a live project:
 
 Whether these already exist on the Vercel project is unknown without a Vercel login.
 
-Redirect URLs to add in Supabase Auth when applying: `https://www.skillpostapp.com/auth/callback` and preview callback URLs as needed.
+Redirect URLs to add in Supabase Auth when applying: `https://www.noorislamsite.com/auth/callback` and preview callback URLs as needed.

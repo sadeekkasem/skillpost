@@ -3,9 +3,25 @@
     {
       "source": "/",
       "has": [
+        { "type": "host", "value": "noorislamsite.com" }
+      ],
+      "destination": "https://www.noorislamsite.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "noorislamsite.com" }
+      ],
+      "destination": "https://www.noorislamsite.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
         { "type": "header", "key": "x-forwarded-proto", "value": "http" }
       ],
-      "destination": "https://www.skillpostapp.com/",
+      "destination": "https://www.noorislamsite.com/",
       "permanent": true
     },
     {
@@ -13,7 +29,7 @@
       "has": [
         { "type": "header", "key": "x-forwarded-proto", "value": "http" }
       ],
-      "destination": "https://www.skillpostapp.com/:path*",
+      "destination": "https://www.noorislamsite.com/:path*",
       "permanent": true
     }
   ]

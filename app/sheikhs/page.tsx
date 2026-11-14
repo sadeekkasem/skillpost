@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
 import { SiteChrome } from "../components/SiteChrome";
 import { listPublishedSheikhs } from "../../lib/islamic/published";
 
 export const metadata: Metadata = {
-  title: "المشايخ | سِكِل بوست",
+  title: `المشايخ | ${SITE_NAME}`,
   description: "نعمل على إضافة صفحات المشايخ بعد موافقتهم، نرجو زيارتنا لاحقًا.",
-  alternates: { canonical: "https://www.skillpostapp.com/sheikhs" },
+  alternates: { canonical: `${SITE_URL}/sheikhs` },
 };
 
 export const dynamic = "force-dynamic";

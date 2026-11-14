@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { SITE_NAME } from "../../lib/site";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "لوحة الإدارة | سِكِل بوست",
+  title: `لوحة الإدارة | ${SITE_NAME}`,
   robots: { index: false, follow: false },
 };
 

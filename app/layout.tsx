@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { SITE_NAME, SITE_URL } from "../lib/site";
 import "./staff.css";
 
 export const metadata: Metadata = {
-  title: "سِكِل بوست",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
   description: "موقع غير تجاري للقرآن والذكر",
 };
 

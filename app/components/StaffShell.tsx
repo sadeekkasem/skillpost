@@ -6,9 +6,9 @@ export function StaffShell({ title, eyebrow, children }: { title: string; eyebro
     <>
       <a className="skip-link" href="#main">تخطَّ إلى المحتوى</a>
       <header>
-        <a className="brand" href="/#home" aria-label="سكل بوست، الرئيسية">
+        <a className="brand" href="/#home" aria-label="النور، الرئيسية">
           <span className="brand-icon" aria-hidden="true">✧</span>
-          <span>سِكِل بوست<small>القرآن والذكر</small></span>
+          <span>النور<small>القرآن والذكر</small></span>
         </a>
         <nav id="staff-nav" aria-label="تنقل العاملين">
           <a href="/">الموقع</a>

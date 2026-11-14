@@ -17,7 +17,7 @@ n += 1;
 
 process.env.ISLAMIC_LESSON_ALERTS = "true";
 process.env.RESEND_API_KEY = "re_test_mock_not_real";
-process.env.ALERT_FROM = "SkillPost Alerts <alerts@skillpostapp.com>";
+process.env.ALERT_FROM = "النور <alerts@noorislamsite.com>";
 
 const mail = buildLessonAlert(info);
 assert.deepEqual(mail.to, [ADMIN_ALERT_EMAIL]);
@@ -33,7 +33,7 @@ const resultOn = await notifyNewLesson(info, async (payload) => {
 assert.equal(resultOn.sent, true);
 assert.equal(sent.length, 1);
 assert.deepEqual(sent[0].to, [ADMIN_ALERT_EMAIL]);
-assert.equal(sent[0].from, "SkillPost Alerts <alerts@skillpostapp.com>");
+assert.equal(sent[0].from, "النور <alerts@noorislamsite.com>");
 n += 1;
 
 console.log(`PASS lesson alert mocks (${n} cases); recipient is admin only; no network call`);
