@@ -86,6 +86,7 @@ const config: NextConfig = {
       { source: "/terms", destination: "/privacy", statusCode: 301 },
       { source: "/sheikhs.html", destination: "/sheikhs", statusCode: 301 },
       { source: "/hadith.html", destination: "/hadith", statusCode: 301 },
+      { source: "/salawat.html", destination: "/salawat", statusCode: 301 },
     ];
   },
   async rewrites() {
@@ -94,6 +95,7 @@ const config: NextConfig = {
         { source: "/", destination: "/index.html" },
         { source: "/sources", destination: "/sources.html" },
         { source: "/hadith", destination: "/hadith.html" },
+        { source: "/salawat", destination: "/salawat.html" },
         { source: "/privacy", destination: "/privacy.html" },
       ],
       afterFiles: [],
@@ -134,6 +136,8 @@ const config: NextConfig = {
       { source: "/praytimes.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
       { source: "/hadith.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
       { source: "/hadith-core.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/salawat.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
+      { source: "/salawat-core.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
       { source: "/yt-facade.js", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
     ];
   },

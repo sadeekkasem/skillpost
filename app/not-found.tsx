@@ -24,6 +24,7 @@ export default function NotFound() {
       <footer>
         <span>نور الإسلام · موقع غير تجاري</span>
         <div className="footer-links">
+          <a href="/salawat">الصلاة على النبي ﷺ</a>
           <a href="/sources">المصادر والترخيص</a>
           <a href="/privacy">الخصوصية</a>
         </div>

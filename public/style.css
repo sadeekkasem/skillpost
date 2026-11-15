@@ -411,3 +411,56 @@ body.home-overlay #home .hero{
 .hadith-hints{font-family:Amiri,serif;font-size:19px}
 .hadith-words dd{font-family:Amiri,serif;font-size:18px}
 @media(max-width:680px){.hadith-explanation{font-size:19px!important}.hadith-hints{font-size:18px}}
+
+/* Desktop: keep .page-top lead text in the dark overlay, off the mosque image */
+@media (min-width:801px){
+  .page-top p{max-width:min(520px,46%);}
+}
+
+/* Salawat page — الصلاة على النبي ﷺ */
+.salawat-friday{margin:0 0 16px;padding:14px 22px;border-radius:14px;background:#153b2e;border:1px solid #e3c685;text-align:center}
+.salawat-friday p{margin:0;font-family:Amiri,serif;font-size:24px;line-height:1.8;color:#f2d696!important;-webkit-text-fill-color:#f2d696!important}
+.salawat-counter{max-width:980px;margin:0 auto 28px;padding:32px 28px 28px;text-align:center}
+.salawat-counter h2{margin:0 0 18px;font-size:31px}
+button.salawat-tap,
+button.salawat-tap:hover,
+button.salawat-tap:hover:not(:disabled),
+button.salawat-tap:focus,
+button.salawat-tap:focus-visible,
+button.salawat-tap:active{
+  display:block;width:100%;min-height:84px;padding:18px 22px;border-radius:16px;
+  border:1px solid #e3c685!important;background:#e3c685!important;
+  color:#123e33!important;-webkit-text-fill-color:#123e33!important;
+  font-family:Amiri,serif;font-size:32px;font-weight:400;line-height:1.6;cursor:pointer
+}
+button.salawat-tap:hover,
+button.salawat-tap:hover:not(:disabled){background:#f0d59a!important;border-color:#f0d59a!important}
+button.salawat-tap:active{transform:translateY(1px)}
+.salawat-counts{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;font-size:18px;margin:20px 0 8px}
+.salawat-counts strong{font-family:Tahoma,"Segoe UI",sans-serif;font-size:34px;font-weight:700;display:block;color:#f2d696!important;-webkit-text-fill-color:#f2d696!important;line-height:1.3}
+.salawat-counts span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px}
+.salawat-goal{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;margin:16px 0 14px}
+.salawat-goal .mini-label{width:100%;margin:0}
+.salawat-goal button{border:1px solid #ad9457;border-radius:999px;padding:8px 18px;font-family:Amiri,serif;font-size:18px;min-height:44px}
+.salawat-goal button[aria-checked=true]{background:#e3c685!important;color:#123e33!important;-webkit-text-fill-color:#123e33!important;border-color:#e3c685!important}
+.salawat-goal input[type=number]{width:140px;text-align:center;min-height:44px}
+.salawat-progress{height:12px;border-radius:999px;background:#0f3026;border:1px solid #8e7b48;overflow:hidden;margin:8px auto 6px;max-width:420px}
+.salawat-progress-fill{height:100%;width:0;background:#e3c685;border-radius:inherit;transition:width .2s ease}
+.salawat-privacy{margin:16px 0 8px;font-size:15px;color:#f2d696!important;-webkit-text-fill-color:#f2d696!important}
+.salawat-reset{margin-top:8px;background:transparent!important;color:#f1dbad!important;-webkit-text-fill-color:#f1dbad!important;border-color:#8d9b78!important}
+.salawat-section{margin:10px 0 28px}
+.salawat-lead{font-size:14px;margin:0 0 16px;max-width:720px}
+.salawat-copy-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0}
+.salawat-copy{font-size:13px;padding:8px 16px;min-height:44px}
+.salawat-copy-status{margin:0}
+@media(max-width:680px){
+  .salawat-counter{padding:24px 16px}
+  .salawat-tap{font-size:26px;min-height:76px;padding:16px 14px}
+  .salawat-counts strong{font-size:30px}
+  .salawat-friday p{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .salawat-progress-fill{transition:none}
+  .salawat-tap:active{transform:none}
+}
+

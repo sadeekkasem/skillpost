@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 type Props = {
-  current?: "home" | "hadith" | "sheikhs" | "sources" | "privacy" | "login";
+  current?: "home" | "hadith" | "salawat" | "sheikhs" | "sources" | "privacy" | "login";
   children: ReactNode;
   footerNote?: string;
 };
@@ -12,6 +12,7 @@ const links = [
   { href: "/#adhkar-reader", id: "adhkar", label: "الأذكار" },
   { href: "/#prayer-tools", id: "prayer", label: "الصلاة والقبلة" },
   { href: "/hadith", id: "hadith", label: "الحديث" },
+  { href: "/salawat", id: "salawat", label: "الصلاة على النبي" },
   { href: "/sheikhs", id: "sheikhs", label: "المشايخ" },
   { href: "/sources", id: "sources", label: "المصادر" },
   { href: "/privacy", id: "privacy", label: "الخصوصية" },
@@ -40,6 +41,7 @@ export function SiteChrome({ current, children, footerNote }: Props) {
         <span>{footerNote ?? "نور الإسلام · موقع غير تجاري: لا إعلانات ولا بيع"}</span>
         <div className="footer-links">
           <a href="/hadith">الحديث الشريف</a>
+          <a href="/salawat">الصلاة على النبي ﷺ</a>
           <a href="/sheikhs">المشايخ</a>
           <a href="/sources">المصادر والترخيص</a>
           <a href="/privacy">الخصوصية</a>
