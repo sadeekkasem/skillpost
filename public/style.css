@@ -375,12 +375,12 @@ body.home-overlay #home .hero{
 .hadith-books button[aria-checked=true]{background:#e3c685!important;color:#123e33!important;-webkit-text-fill-color:#123e33!important;border-color:#e3c685!important}
 .hadith-books button[aria-checked=true] span{color:#123e33!important;-webkit-text-fill-color:#123e33!important}
 #hadith-results{font-size:13px;margin:4px 0 14px}
-.hadith-list{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;max-width:980px;margin:0 auto}
-.hadith-card{padding:30px 34px}
+.hadith-list{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;width:100%;max-width:min(980px,100%);margin:0 auto;min-width:0;box-sizing:border-box}
+.hadith-card{padding:30px 34px;min-width:0;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}
 .hadith-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .hadith-book{font-size:12px;border:1px solid #ad9457;border-radius:999px;padding:3px 14px;background:#0f3026}
-.hadith-title{font-family:Amiri,serif;font-weight:400;font-size:25px!important;line-height:1.7;margin:12px 0 4px}
-.hadith-text{font-family:Amiri,serif;font-size:27px!important;line-height:2.15!important;color:#fbf1d6!important;-webkit-text-fill-color:#fbf1d6!important;margin:14px 0 18px!important;white-space:pre-line;overflow-wrap:anywhere;text-align:justify}
+.hadith-title{font-family:Amiri,serif;font-weight:400;font-size:25px!important;line-height:1.7;margin:12px 0 4px;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.hadith-text{font-family:Amiri,serif;font-size:27px!important;line-height:2.15!important;color:#fbf1d6!important;-webkit-text-fill-color:#fbf1d6!important;margin:14px 0 18px!important;white-space:pre-line;overflow-wrap:anywhere;word-break:break-word;max-width:100%;min-width:0;text-align:justify}
 .hadith-meta{margin:0;border-top:1px solid #8e7b4866;padding-top:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 24px}
 .hadith-field{display:flex;gap:10px;font-size:13px;min-width:0}
 .hadith-field dt{font-weight:bold;flex:none;opacity:.8}
@@ -391,7 +391,7 @@ body.home-overlay #home .hero{
 .hadith-credit{font-size:12px!important;border-top:1px solid #8e7b4866;padding-top:12px;margin:14px 0 0!important}
 .hadith-credit a{text-decoration:underline}
 .hadith-more{text-align:center;margin:24px 0}
-.hadith-attribution{max-width:980px;margin:30px auto 0}
+.hadith-attribution{width:100%;max-width:min(980px,100%);margin:30px auto 0;min-width:0;box-sizing:border-box}
 .hadith-attribution a{text-decoration:underline}
 @media(max-width:680px){.hadith-card{padding:24px 20px}.hadith-title{font-size:22px!important}.hadith-text{font-size:24px!important;line-height:2.1!important;text-align:right}.hadith-meta{grid-template-columns:minmax(0,1fr)}.hadith-toolbar select{width:100%}.hadith-books button{padding:7px 14px;font-size:16px}}
 .hadith-sharh{margin-top:14px;border-top:1px solid #8e7b4866;padding-top:10px}
@@ -405,7 +405,7 @@ body.home-overlay #home .hero{
 .hadith-words>div{display:flex;gap:8px;flex-wrap:wrap;padding:3px 0}
 .hadith-words dt{font-family:Amiri,serif;font-size:18px;font-weight:bold}
 .hadith-words dt:after{content:":"}
-.hadith-words dd{margin:0;flex:1;min-width:200px}
+.hadith-words dd{margin:0;flex:1;min-width:0}
 .hadith-book-both{background:#173f31}
 .hadith-explanation{font-family:Amiri,serif;font-size:20px!important;line-height:2.05!important}
 .hadith-hints{font-family:Amiri,serif;font-size:19px}
@@ -420,7 +420,7 @@ body.home-overlay #home .hero{
 /* Salawat page — الصلاة على النبي ﷺ */
 .salawat-friday{margin:0 0 16px;padding:14px 22px;border-radius:14px;background:#153b2e;border:1px solid #e3c685;text-align:center}
 .salawat-friday p{margin:0;font-family:Amiri,serif;font-size:24px;line-height:1.8;color:#f2d696!important;-webkit-text-fill-color:#f2d696!important}
-.salawat-counter{max-width:980px;margin:0 auto 28px;padding:32px 28px 28px;text-align:center}
+.salawat-counter{width:100%;max-width:min(980px,100%);margin:0 auto 28px;padding:32px 28px 28px;text-align:center;min-width:0;box-sizing:border-box}
 .salawat-counter h2{margin:0 0 18px;font-size:31px}
 button.salawat-tap,
 button.salawat-tap:hover,
@@ -448,8 +448,8 @@ button.salawat-tap:active{transform:translateY(1px)}
 .salawat-progress-fill{height:100%;width:0;background:#e3c685;border-radius:inherit;transition:width .2s ease}
 .salawat-privacy{margin:16px 0 8px;font-size:15px;color:#f2d696!important;-webkit-text-fill-color:#f2d696!important}
 .salawat-reset{margin-top:8px;background:transparent!important;color:#f1dbad!important;-webkit-text-fill-color:#f1dbad!important;border-color:#8d9b78!important}
-.salawat-section{margin:10px 0 28px}
-.salawat-lead{font-size:14px;margin:0 0 16px;max-width:720px}
+.salawat-section{margin:10px 0 28px;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.salawat-lead{font-size:14px;margin:0 auto 16px;width:100%;max-width:min(980px,100%);min-width:0;overflow-wrap:anywhere;word-break:break-word;box-sizing:border-box}
 .salawat-copy-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0}
 .salawat-copy{font-size:13px;padding:8px 16px;min-height:44px}
 .salawat-copy-status{margin:0}
@@ -464,3 +464,27 @@ button.salawat-tap:active{transform:translateY(1px)}
   .salawat-tap:active{transform:none}
 }
 
+/* Wrap fix: keep hadith/salawat wording inside the card and viewport (RTL, 320–1920px) */
+html{overflow-x:clip}
+.salawat-page,
+.hadith-page,
+.salawat-section .section-heading,
+.hadith-page .section-heading{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.salawat-section .section-heading,
+.hadith-page .section-heading{
+  width:100%;
+  max-width:min(980px,100%);
+  margin-inline:auto;
+  flex-wrap:wrap;
+}
+.salawat-friday{width:100%;max-width:min(980px,100%);margin-inline:auto;box-sizing:border-box;overflow-wrap:anywhere}
+.hadith-top,.hadith-meta,.hadith-credit,.hadith-sharh,.hadith-explanation,.hadith-hints,.hadith-words{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.hadith-field dd,.hadith-ref dd{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.salawat-copy-row{max-width:100%}
+@media(max-width:680px){
+  .hadith-text{text-align:start}
+}
