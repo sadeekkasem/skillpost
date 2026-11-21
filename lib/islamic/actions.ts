@@ -45,9 +45,12 @@ export async function requestMagicLink(formData: FormData): Promise<ActionResult
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false, message: "الدخول غير مضبوط في هذا البناء." };
   const origin = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
+  const { safeInternalPath } = await import("../auth/paths");
+  const next = safeInternalPath(readString(formData, "next"));
+  const redirectTo = next ? `${origin}/auth/callback?next=${encodeURIComponent(next)}` : `${origin}/auth/callback`;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${origin}/auth/callback` },
+    options: { emailRedirectTo: redirectTo },
   });
   if (error) return { ok: false, message: error.message };
   return { ok: true, message: "إن كان البريد مخوّلًا فستصلك رسالة الدخول." };

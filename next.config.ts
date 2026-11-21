@@ -42,6 +42,20 @@ const staffCsp = [
   "object-src 'none'",
 ].join("; ");
 
+const hifzCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "media-src https://cdn.mp3quran.net",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
+
 const toHome = [
   "/pricing",
   "/plans",
@@ -120,6 +134,10 @@ const config: NextConfig = {
         source: "/sheikhs/:path*",
         headers: [...securityBase, { key: "Content-Security-Policy", value: nextPublicCsp }],
       },
+      ...["/hifz", "/hifz/:path*"].map((source) => ({
+        source,
+        headers: [...securityBase, { key: "Content-Security-Policy", value: hifzCsp }],
+      })),
       ...["/login", "/login/:path*", "/admin", "/admin/:path*", "/sheikh", "/sheikh/:path*", "/student", "/student/:path*", "/auth/:path*"].map((source) => ({
         source,
         headers: [...securityBase, { key: "Content-Security-Policy", value: staffCsp }],

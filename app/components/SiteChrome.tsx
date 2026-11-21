@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 type Props = {
-  current?: "home" | "hadith" | "salawat" | "sheikhs" | "sources" | "privacy" | "login";
+  current?: "home" | "hadith" | "salawat" | "sheikhs" | "sources" | "privacy" | "login" | "hifz";
   children: ReactNode;
   footerNote?: string;
 };
@@ -9,6 +9,7 @@ type Props = {
 const links = [
   { href: "/#home", id: "home", label: "الرئيسية" },
   { href: "/#quran-reader", id: "quran", label: "القرآن" },
+  { href: "/hifz", id: "hifz", label: "رفيق الحفظ" },
   { href: "/#adhkar-reader", id: "adhkar", label: "الأذكار" },
   { href: "/#prayer-tools", id: "prayer", label: "الصلاة والقبلة" },
   { href: "/hadith", id: "hadith", label: "الحديث" },

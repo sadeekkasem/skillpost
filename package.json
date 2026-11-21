@@ -14,7 +14,10 @@
     "fetch:hadith": "node scripts/fetch-hadeethenc.mjs",
     "test:ayah-timings": "node scripts/test-ayah-timings.mjs",
     "test:ayah-coverage": "node scripts/test-ayah-coverage.mjs",
-    "test:quran-player": "/workspace/.pwvenv/bin/python scripts/test-quran-player.py"
+    "test:quran-player": "/workspace/.pwvenv/bin/python scripts/test-quran-player.py",
+    "test:hifz": "npx tsx scripts/test-hifz.mjs",
+    "test:hifz-rls": "node supabase/tests/run_hifz_rls.mjs",
+    "test:hifz-ui": "/workspace/.pwvenv/bin/python scripts/test-hifz-ui.py"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
@@ -30,6 +33,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.0"
   }
 }

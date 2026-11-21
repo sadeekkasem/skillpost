@@ -33,5 +33,7 @@ export const config = {
     "/student",
     "/student/:path*",
     "/auth/:path*",
+    "/hifz",
+    "/hifz/:path*",
   ],
 };
