@@ -11,7 +11,7 @@ export default function LoginPage() {
         <div className="page-top">
           <span className="eyebrow">للعاملين فقط</span>
           <h1>تسجيل الدخول</h1>
-          <p>يُرسل رابط الدخول إلى البريد. الزوار لا يحتاجون حسابًا.</p>
+          <p>هذه الصفحة للعاملين في الموقع فقط. يُرسل رابط الدخول إلى البريد. زوار رفيق الحفظ ينشئون حسابهم من صفحة <a href="/hifz">رفيق الحفظ</a>.</p>
         </div>
         <article className="card source-card">
           {!ready ? (

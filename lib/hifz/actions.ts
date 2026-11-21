@@ -18,7 +18,11 @@ export async function requestHifzMagicLink(formData: FormData): Promise<ActionRe
   if (!formData.get("next")) formData.set("next", "/hifz");
   const next = safeInternalPath(String(formData.get("next") || "/hifz"));
   if (next) formData.set("next", next);
-  return staffMagicLink(formData);
+  const result = await staffMagicLink(formData);
+  if (result.ok) {
+    return { ok: true, message: "إن كان البريد صحيحاً فستصلك رسالة فيها رابط لإنشاء حسابك أو الدخول إلى رفيق الحفظ." };
+  }
+  return result;
 }
 
 export async function enterFixtureSession(): Promise<ActionResult> {
