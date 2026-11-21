@@ -44,9 +44,10 @@ ok(new Set(ids).size === ids.length, 'reciter ids are unique');
 for (const reciter of catalog.reciters) {
   ok(typeof reciter.id === 'string' && reciter.id.length > 0, `${reciter.id || '?'} has an id`);
   ok(typeof reciter.name_ar === 'string' && reciter.name_ar.length > 0, `${reciter.id} has an Arabic name`);
-  ok(reciter.moshaf_name === 'حفص عن عاصم - مرتل', `${reciter.id} uses Hafs murattal`);
+  const expectedMoshaf = reciter.id === 'maher-muaiqly' ? 'حفص عن عاصم - المصحف المجود' : 'حفص عن عاصم - مرتل';
+  ok(reciter.moshaf_name === expectedMoshaf, `${reciter.id} uses ${expectedMoshaf}`);
   ok(typeof reciter.has_ayat_timing === 'boolean', `${reciter.id} records timing support`);
-  ok(reciter.has_ayat_timing === (reciter.id !== 'maher-muaiqly'), `${reciter.id} timing flag matches verified moshaf`);
+  ok(reciter.has_ayat_timing === true, `${reciter.id} has official ayat timings for this moshaf`);
   ok(typeof reciter.server === 'string' && reciter.server.startsWith('https://') && reciter.server.endsWith('/'), `${reciter.id} has an https server URL`);
   ok(!reciter.server.includes(' '), `${reciter.id} server has no spaces`);
   ok(new URL(reciter.server).protocol === 'https:', `${reciter.id} server parses as https`);

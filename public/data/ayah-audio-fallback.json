@@ -1,0 +1,17 @@
+{
+  "notes": "Used only when official MP3Quran ayat_timing for the same moshaf and surah file is incomplete. Never mixed with a different reciter or a guessed timestamp map.",
+  "reciters": {
+    "mahmoud-husary": {
+      "1": {
+        "source_name": "EveryAyah",
+        "source_url": "https://everyayah.com/data/Husary_128kbps/",
+        "reciter_label": "محمود خليل الحصري",
+        "style": "حفص عن عاصم - مرتل",
+        "server": "https://everyayah.com/data/Husary_128kbps/",
+        "file_pattern": "{surah:03d}{ayah:03d}.mp3",
+        "ayah_count": 7,
+        "reason": "MP3Quran ayat_timing for moshaf 118 surah 1 returns ayah 0–6, not 1–7. Quran.com Husary murattal timestamps belong to a different file (about 48s, not the MP3Quran r1 recording), so they are not applied to that MP3. This fallback plays the same reciter verse by verse from EveryAyah."
+      }
+    }
+  }
+}

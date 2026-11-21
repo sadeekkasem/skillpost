@@ -3,7 +3,7 @@
   "retrieved_at": "2026-11-10T13:25:45+02:00",
   "file_pattern": "{surah:03d}.mp3",
   "file_pattern_source": "https://docs-staging.mp3quran.net/migrating-from-v3.md",
-  "notes": "Servers and surah_list copied from the official v3 API. The file name pattern is the official mapping of the v3 server field: audio.base + {surah:03d}.mp3. Prefer Hafs murattal (حفص عن عاصم - مرتل) when a reciter has several moshafs. Audio URLs stay static. Ayat timings are fetched at play time from /api/v3/ayat_timing using the same moshaf_id. has_ayat_timing is true only when /api/v3/ayat_timing/reads lists that same moshaf_id and folder. Maher Al-Muaiqly r1 (moshaf 102) has no timings; r3 (133) must not be mixed with r1 audio.",
+  "notes": "Servers and surah_list copied from the official v3 API. The file name pattern is the official mapping of the v3 server field: audio.base + {surah:03d}.mp3. Prefer Hafs murattal (حفص عن عاصم - مرتل) when a reciter has several moshafs, except when that moshaf has no ayat timings and another complete Hafs moshaf of the same reciter does. Maher Al-Muaiqly therefore uses المصحف المجود (moshaf 133, r3), which has official timings for all 114 surahs; r1 (moshaf 102) has none. Ayat timings are fetched at play time from /api/v3/ayat_timing using the same moshaf_id. has_ayat_timing is true only when /api/v3/ayat_timing/reads lists that same moshaf_id and folder. Husary Fatiha is the one documented gap in those timings; playback then uses the EveryAyah verse files listed in ayah-audio-fallback.json.",
   "default_id": "mishary-alafasy",
   "reciters": [
     {
@@ -766,9 +766,9 @@
       "id": "maher-muaiqly",
       "name_ar": "ماهر المعيقلي",
       "reciter_id": 102,
-      "moshaf_id": 102,
-      "moshaf_name": "حفص عن عاصم - مرتل",
-      "server": "https://cdn.mp3quran.net/audio/maher-muaiqly/r1/",
+      "moshaf_id": 133,
+      "moshaf_name": "حفص عن عاصم - المصحف المجود",
+      "server": "https://cdn.mp3quran.net/audio/maher-muaiqly/r3/",
       "surah_total": 114,
       "surah_list": [
         1,
@@ -886,7 +886,7 @@
         113,
         114
       ],
-      "has_ayat_timing": false
+      "has_ayat_timing": true
     }
   ]
 }

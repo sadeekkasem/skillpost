@@ -87,11 +87,11 @@ ok(timingUrl(0, 123) === null && timingUrl(1, 0) === null, 'timing URL rejects i
 ok(TIMING_API === 'https://www.mp3quran.net/api/v3/ayat_timing', 'API constant points at the official endpoint');
 
 const byId = Object.fromEntries(catalog.reciters.map((r) => [r.id, r]));
-ok(catalog.reciters.filter((r) => r.has_ayat_timing === true).length === 6, 'six reciters are marked as having timings');
-ok(byId['maher-muaiqly']?.has_ayat_timing === false, 'Maher Al-Muaiqly (r1 / moshaf 102) is marked without timings');
+ok(catalog.reciters.filter((r) => r.has_ayat_timing === true).length === 7, 'all seven reciters are marked as having timings');
+ok(byId['maher-muaiqly']?.has_ayat_timing === true && byId['maher-muaiqly'].moshaf_id === 133, 'Maher uses moshaf 133 (r3) with official timings');
 ok(byId['mishary-alafasy']?.has_ayat_timing === true && byId['mishary-alafasy'].moshaf_id === 123, 'Mishary is marked with moshaf 123');
 ok(reciterSupportsTiming(byId['mishary-alafasy']) === true, 'helper accepts a supported reciter');
-ok(reciterSupportsTiming(byId['maher-muaiqly']) === false, 'helper rejects Maher without guessing another moshaf');
+ok(reciterSupportsTiming(byId['maher-muaiqly']) === true, 'helper accepts Maher on the timed moshaf');
 
 ok(indexHtml.includes('ayah-timings.js'), 'index.html loads ayah-timings.js');
 ok(indexHtml.includes('id="audio-autoscroll"'), 'index.html has an auto-scroll toggle');
@@ -102,6 +102,26 @@ ok(appJs.includes("addEventListener('timeupdate'"), 'app.js listens to timeupdat
 ok(csp.includes("connect-src 'self' https://www.mp3quran.net"), 'CSP allows timing fetches to www.mp3quran.net');
 ok(sources.includes('ayat_timing'), 'sources page cites the ayat_timing endpoint');
 ok(privacy.includes('ayat_timing') || privacy.includes('مواقيت الآيات'), 'privacy mentions the timing request');
+
+const firstRender = appJs.indexOf('window.__quranShown=renderQuran;renderQuran();');
+const recitingDecl = appJs.search(/let [\s\S]{0,240}recitingAyah=/);
+ok(recitingDecl !== -1 && recitingDecl < firstRender, 'recitingAyah is declared before the first renderQuran() call');
+ok(appJs.includes("addEventListener('click',playAudio)"), 'play button is bound to playAudio');
+ok(appJs.includes("addEventListener('click',pauseAudio)"), 'pause button is bound to pauseAudio');
+ok(appJs.includes("addEventListener('click',()=>stopAudio())"), 'stop button is bound to stopAudio');
+
+const fallbackPath = path.join(root, 'public/data/ayah-audio-fallback.json');
+const fallback = JSON.parse(readFileSync(fallbackPath, 'utf8'));
+const husaryFatiha = fallback.reciters?.['mahmoud-husary']?.['1'];
+ok(Boolean(husaryFatiha), 'Husary Fatiha has an EveryAyah fallback entry');
+ok(husaryFatiha.server === 'https://everyayah.com/data/Husary_128kbps/', 'fallback server is EveryAyah HTTPS');
+ok(husaryFatiha.ayah_count === 7, 'fallback covers all 7 Fatiha ayat');
+ok(indexHtml.includes('ayah-audio-fallback.json') || appJs.includes('/data/ayah-audio-fallback.json'), 'app loads the fallback catalog');
+ok(csp.includes('https://everyayah.com'), 'CSP media-src allows EveryAyah');
+ok(sources.includes('everyayah.com/data/Husary_128kbps'), 'sources cite the EveryAyah Husary verse files');
+ok(privacy.includes('everyayah.com'), 'privacy mentions the EveryAyah connection');
+ok(appJs.includes('playCurrentAyahFile'), 'app can play verse files sequentially for the fallback');
+
 
 async function fetchTimings(surah, readId) {
   const url = timingUrl(surah, readId);
@@ -131,6 +151,30 @@ for (const reciter of catalog.reciters) {
     } catch (error) {
       ok(false, `${label} -> ${error.message}`);
     }
+  }
+}
+
+console.log('\nEveryAyah Husary Fatiha verse files:');
+for (let ayah = 1; ayah <= 7; ayah += 1) {
+  const url = `${husaryFatiha.server}001${String(ayah).padStart(3, '0')}.mp3`;
+  try {
+    const res = await fetch(url, { method: 'HEAD', redirect: 'follow', headers: { 'User-Agent': 'SkillPostIslamic/1.0 (non-commercial audio check)' } });
+    const type = res.headers.get('content-type') || '';
+    ok(res.ok && (type.includes('audio') || type.includes('mpeg') || type.includes('octet-stream')), `Husary Fatiha ayah ${ayah} ${res.status} ${type} ${url}`);
+  } catch (error) {
+    ok(false, `${url} -> ${error.message}`);
+  }
+}
+
+console.log('\nMaher moshaf 133 sample surahs:');
+for (const surah of [1, 2, 18, 36, 114]) {
+  const expectedAyat = { 1: 7, 2: 286, 18: 110, 36: 83, 114: 6 }[surah];
+  try {
+    const raw = await fetchTimings(surah, 133);
+    const timings = normalizeTimings(raw, expectedAyat);
+    ok(timings !== null && timings.length === expectedAyat, `maher-muaiqly r3 surah ${String(surah).padStart(3, '0')} timing count equals ${expectedAyat} ayat`);
+  } catch (error) {
+    ok(false, `maher-muaiqly r3 surah ${surah} -> ${error.message}`);
   }
 }
 
