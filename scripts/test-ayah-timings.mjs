@@ -92,8 +92,11 @@ ok(byId['maher-muaiqly']?.has_ayat_timing === true && byId['maher-muaiqly'].mosh
 ok(byId['mishary-alafasy']?.has_ayat_timing === true && byId['mishary-alafasy'].moshaf_id === 123, 'Mishary is marked with moshaf 123');
 ok(reciterSupportsTiming(byId['mishary-alafasy']) === true, 'helper accepts a supported reciter');
 ok(reciterSupportsTiming(byId['maher-muaiqly']) === true, 'helper accepts Maher on the timed moshaf');
+ok(reciterSupportsTiming({ id: 'legacy-alafasy', moshaf_id: 123 }) === true, 'helper still requests timings when a cached catalog omits has_ayat_timing');
+ok(reciterSupportsTiming({ id: 'explicit-off', moshaf_id: 123, has_ayat_timing: false }) === false, 'helper skips reciters explicitly marked without timings');
+ok(reciterSupportsTiming({ id: 'no-moshaf', has_ayat_timing: true }) === false, 'helper rejects a reciter without a moshaf id');
 
-ok(indexHtml.includes('ayah-timings.js'), 'index.html loads ayah-timings.js');
+ok(indexHtml.includes('ayah-timings.js?v=20261121c'), 'index.html loads ayah-timings.js with a cache-busting version');
 ok(indexHtml.includes('id="audio-autoscroll"'), 'index.html has an auto-scroll toggle');
 ok(indexHtml.includes('id="timing-note"'), 'index.html has a timing note slot');
 ok(!indexHtml.includes('لا مزامنة آيات'), 'old “no ayah sync” copy is gone from the player');
@@ -116,7 +119,9 @@ const husaryFatiha = fallback.reciters?.['mahmoud-husary']?.['1'];
 ok(Boolean(husaryFatiha), 'Husary Fatiha has an EveryAyah fallback entry');
 ok(husaryFatiha.server === 'https://everyayah.com/data/Husary_128kbps/', 'fallback server is EveryAyah HTTPS');
 ok(husaryFatiha.ayah_count === 7, 'fallback covers all 7 Fatiha ayat');
-ok(indexHtml.includes('ayah-audio-fallback.json') || appJs.includes('/data/ayah-audio-fallback.json'), 'app loads the fallback catalog');
+ok(appJs.includes("/data/reciters.json?v=20261121c"), 'app fetches the reciter catalog with a cache-busting version');
+ok(appJs.includes("/data/ayah-audio-fallback.json?v=20261121c"), 'app fetches the verse-file fallback catalog with a cache-busting version');
+ok(csp.includes('/data/:path*') && csp.includes('max-age=3600, must-revalidate') && !csp.includes('stale-while-revalidate=604800'), 'data files no longer use a 24-hour stale-while-revalidate cache');
 ok(csp.includes('https://everyayah.com'), 'CSP media-src allows EveryAyah');
 ok(sources.includes('everyayah.com/data/Husary_128kbps'), 'sources cite the EveryAyah Husary verse files');
 ok(privacy.includes('everyayah.com'), 'privacy mentions the EveryAyah connection');

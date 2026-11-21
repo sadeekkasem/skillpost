@@ -79,7 +79,12 @@
   }
 
   function reciterSupportsTiming(reciter) {
-    return Boolean(reciter && reciter.has_ayat_timing === true && Number.isInteger(reciter.moshaf_id) && reciter.moshaf_id > 0);
+    // A missing catalog flag (stale cached reciters.json) must not disable
+    // highlighting. Only skip when the flag is explicitly false, or when
+    // there is no official moshaf id to request timings for.
+    if (!reciter || !Number.isInteger(reciter.moshaf_id) || reciter.moshaf_id < 1) return false;
+    if (reciter.has_ayat_timing === false) return false;
+    return true;
   }
 
   return {
