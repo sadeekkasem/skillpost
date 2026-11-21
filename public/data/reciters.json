@@ -3,7 +3,7 @@
   "retrieved_at": "2026-11-10T13:25:45+02:00",
   "file_pattern": "{surah:03d}.mp3",
   "file_pattern_source": "https://docs-staging.mp3quran.net/migrating-from-v3.md",
-  "notes": "Servers and surah_list copied from the official v3 API. The file name pattern is the official mapping of the v3 server field: audio.base + {surah:03d}.mp3. Prefer Hafs murattal (حفص عن عاصم - مرتل) when a reciter has several moshafs. No runtime call to the API.",
+  "notes": "Servers and surah_list copied from the official v3 API. The file name pattern is the official mapping of the v3 server field: audio.base + {surah:03d}.mp3. Prefer Hafs murattal (حفص عن عاصم - مرتل) when a reciter has several moshafs. Audio URLs stay static. Ayat timings are fetched at play time from /api/v3/ayat_timing using the same moshaf_id. has_ayat_timing is true only when /api/v3/ayat_timing/reads lists that same moshaf_id and folder. Maher Al-Muaiqly r1 (moshaf 102) has no timings; r3 (133) must not be mixed with r1 audio.",
   "default_id": "mishary-alafasy",
   "reciters": [
     {
@@ -129,7 +129,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": true
     },
     {
       "id": "abdulbasit-abdulsamad",
@@ -254,7 +255,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": true
     },
     {
       "id": "mahmoud-husary",
@@ -379,7 +381,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": true
     },
     {
       "id": "muhammad-minshawi",
@@ -504,7 +507,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": true
     },
     {
       "id": "abdulrahman-sudais",
@@ -629,7 +633,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": true
     },
     {
       "id": "saud-shuraim",
@@ -754,7 +759,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": true
     },
     {
       "id": "maher-muaiqly",
@@ -879,7 +885,8 @@
         112,
         113,
         114
-      ]
+      ],
+      "has_ayat_timing": false
     }
   ]
 }

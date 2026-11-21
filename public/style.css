@@ -33,7 +33,7 @@ body *,body *::before,body *::after{color:#edd49a!important;-webkit-text-fill-co
 header,main,footer{background:transparent!important}
 .card,.explanation-panel,.reading-panel,.bookmark-bar,.toolbar,.disclaimer,.notice,.reader-tools,.quran-license,.no-results{background:#153b2e!important;border-color:#8e7b48!important}
 .art,.icon,.brand-icon{background:#204b38!important;border-color:#9b884e!important}
-button,.button,input,textarea,select,option,optgroup,.status,.ayah-marker,.ayah-marker[aria-pressed=true]{background:#204b38!important;color:#edd49a!important;-webkit-text-fill-color:#edd49a!important;border-color:#ad9457!important}
+button,.button,input,textarea,select,option,optgroup,.status,.ayah-marker,.ayah-marker[aria-pressed=true],.ayah.is-reciting,.ayah.is-reciting .ayah-copy{background:#204b38!important;color:#edd49a!important;-webkit-text-fill-color:#edd49a!important;border-color:#ad9457!important}
 button:disabled,input:disabled,textarea:disabled,select:disabled{opacity:1!important;background:#193b2e!important;border-style:dashed!important;cursor:not-allowed}
 input::placeholder,textarea::placeholder{color:#edd49a!important;-webkit-text-fill-color:#edd49a!important;opacity:1!important}
 button:hover:not(:disabled),a.button:hover,option:checked{background:#295540!important}
@@ -488,3 +488,13 @@ html{overflow-x:clip}
 @media(max-width:680px){
   .hadith-text{text-align:start}
 }
+
+/* Ayah recitation highlight: gold on dark green, no layout jump */
+.ayah{display:inline;border-radius:8px;padding:0 2px;box-decoration-break:clone;-webkit-box-decoration-break:clone;box-shadow:0 0 0 0 transparent;scroll-margin-top:24px;scroll-margin-bottom:24px}
+.ayah.is-reciting{background:#204b38;color:#edd49a;box-shadow:0 0 0 2px #ad9457}
+.ayah.is-reciting .ayah-copy{color:#edd49a}
+.ayah.is-seekable{cursor:pointer}
+.audio-autoscroll{display:flex;align-items:flex-start;gap:10px;margin:10px 0 4px;font-size:12px;line-height:1.8;color:#e2c78b}
+.audio-autoscroll input{margin-top:5px;flex:none;accent-color:#edd49a}
+#timing-note:empty{display:none}
+#timing-note{font-size:12px;color:#e2c78b;margin:6px 0}
