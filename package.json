@@ -11,7 +11,10 @@
     "test:reciters": "node scripts/test-reciters.mjs",
     "test:hadith": "node scripts/test-hadith.mjs",
     "test:salawat": "node scripts/test-salawat.mjs",
-    "fetch:hadith": "node scripts/fetch-hadeethenc.mjs"
+    "fetch:hadith": "node scripts/fetch-hadeethenc.mjs",
+    "test:ayah-timings": "node scripts/test-ayah-timings.mjs",
+    "test:ayah-coverage": "node scripts/test-ayah-coverage.mjs",
+    "test:quran-player": "/workspace/.pwvenv/bin/python scripts/test-quran-player.py"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
