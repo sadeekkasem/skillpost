@@ -6,5 +6,6 @@ Disallow: /sheikh
 Disallow: /student
 Disallow: /auth
 Disallow: /pv
+Disallow: /offline
 
 Sitemap: https://www.noorislamsite.com/sitemap.xml

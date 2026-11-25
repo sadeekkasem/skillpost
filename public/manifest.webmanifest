@@ -1,0 +1,25 @@
+{
+  "name": "نور الإسلام — القرآن والأذكار ومواقيت الصلاة",
+  "short_name": "نور الإسلام",
+  "description": "القرآن الكريم والأذكار ومواقيت الصلاة والقبلة والتقويم الهجري في منصة غير تجارية.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F5EF",
+  "theme_color": "#123F38",
+  "categories": ["education", "lifestyle", "books"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "القرآن الكريم", "url": "/#quran-reader", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "الأذكار", "url": "/#adhkar-reader", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "مواقيت الصلاة", "url": "/#prayer-tools", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "اتجاه القبلة", "url": "/qibla", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

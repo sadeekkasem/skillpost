@@ -1,0 +1,33 @@
+// Automated checks for public/zakat.js (calculation only). Run: node scripts/test-zakat.mjs
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const Z = require("../public/zakat.js");
+let fail = 0;
+const ok = (c, m) => { console.log((c ? "ok   " : "FAIL ") + m); if (!c) fail++; };
+const near = (a, b) => Math.abs(a - b) < 1e-6;
+const base = { goldPrice: 300, silverPrice: 3, nisab: "gold", hawl: true, deduct: "yes", jewelry: "exclude", karat: 24 };
+let r = Z.calculateZakat({ ...base, cash: 30000 });
+ok(near(r.nisabValue, 25500) && r.due && near(r.zakat, 750), "cash above gold nisab → 2.5% (750)");
+r = Z.calculateZakat({ ...base, cash: 20000 });
+ok(!r.reached && r.zakat === 0, "cash below nisab → no zakat");
+r = Z.calculateZakat({ ...base, cash: 30000, hawl: false });
+ok(r.reached && !r.due && r.zakat === 0, "nisab reached but hawl not complete → not due yet");
+r = Z.calculateZakat({ ...base, nisab: "silver", cash: 2000 });
+ok(near(r.nisabValue, 1785) && near(r.zakat, 50), "silver nisab (595 g × 3) → 50 on 2000");
+r = Z.calculateZakat({ ...base, cash: 30000, debts: 10000 });
+ok(near(r.net, 20000) && r.zakat === 0, "due debts deducted (Hanafi/Hanbali) → below nisab");
+r = Z.calculateZakat({ ...base, cash: 30000, debts: 10000, deduct: "no" });
+ok(near(r.zakat, 750), "debts not deducted (Shafi'i) → 750");
+r = Z.calculateZakat({ ...base, goldGrams: 100, karat: 21 });
+ok(near(r.gross, 26250) && near(r.zakat, 656.25), "100 g of 21k = 87.5 g pure → 656.25");
+r = Z.calculateZakat({ ...base, goldGrams: 100, karat: 21, jewelryGrams: 50 });
+ok(near(r.gross, 13125) && r.zakat === 0 && r.excludedJewelryG === 50, "worn jewellery excluded (majority view)");
+r = Z.calculateZakat({ ...base, goldGrams: 100, karat: 21, jewelryGrams: 50, jewelry: "include" });
+ok(near(r.zakat, 656.25), "worn jewellery included (Hanafi view)");
+r = Z.calculateZakat({ ...base, cash: 1000, debts: 5000 });
+ok(r.net === 0 && r.zakat === 0, "debts larger than assets never produce a negative base");
+let threw = false; try { Z.calculateZakat({ ...base, goldPrice: 0, cash: 100 }); } catch { threw = true; }
+ok(threw, "missing gold price with gold nisab is rejected");
+r = Z.calculateZakat({ ...base, cash: -500, savings: "abc" });
+ok(r.gross === 0, "negative and non-numeric inputs are ignored");
+console.log(fail ? fail + " failed" : "all zakat checks passed"); process.exit(fail ? 1 : 0);

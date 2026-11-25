@@ -11,14 +11,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
-        <link rel="stylesheet" href="/style.css?v=20261115b" />
+        <script src="/theme-init.js?v=20261125a" />
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#123F38" />
+        <link rel="stylesheet" href="/style.css?v=20261125a" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <script src="/analytics.js?v=20261110" defer />
         <script src="/_vercel/insights/script.js" defer />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script src="/ui.js?v=20261125a" defer />
+      </body>
     </html>
   );
 }
