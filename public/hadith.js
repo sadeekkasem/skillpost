@@ -72,6 +72,14 @@
     kids(state.root,0);sel.disabled=sel.options.length<2;
   }
 
+  function showTarget(){
+    var id=new URLSearchParams(location.search).get('id');if(!id||!/^\d+$/.test(id))return;
+    var h=db.hadiths.find(function(x){return x.id===id;});if(!h)return;
+    var c=card(h);c.classList.add('is-target');var lead=make('p','mini-label','الحديث المطلوب:');
+    var list=el('hadith-list');list.insertBefore(c,list.firstChild);list.insertBefore(lead,c);
+    var d=c.querySelector('details');if(d)d.open=true;
+    setTimeout(function(){c.scrollIntoView({block:'start'});},0);
+  }
   var timer=null;
   function bind(){
     el('hadith-search').addEventListener('input',function(e){clearTimeout(timer);timer=setTimeout(function(){state.q=e.target.value;apply(true);},220);});
@@ -85,6 +93,6 @@
     db=H.prepare(data);
     var m=db.meta||{};
     if(m.version)el('hadith-version').textContent='الإصدار: '+m.version+'، تاريخ الجلب: '+String(m.fetchedAt||'').slice(0,10)+'.';
-    fillRoots();bind();apply(true);
+    fillRoots();bind();apply(true);showTarget();
   }).catch(function(){el('hadith-results').textContent='تعذّر تحميل الأحاديث. أعد تحميل الصفحة.';});
 })();

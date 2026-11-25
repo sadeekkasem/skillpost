@@ -17,14 +17,19 @@
     "test:quran-player": "/workspace/.pwvenv/bin/python scripts/test-quran-player.py",
     "test:hifz": "npx tsx scripts/test-hifz.mjs",
     "test:hifz-rls": "node supabase/tests/run_hifz_rls.mjs",
-    "test:hifz-ui": "/workspace/.pwvenv/bin/python scripts/test-hifz-ui.py"
+    "test:hifz-ui": "/workspace/.pwvenv/bin/python scripts/test-hifz-ui.py",
+    "test:zakat": "node scripts/test-zakat.mjs",
+    "test:calendar": "node scripts/test-calendar.mjs",
+    "test:e2e": "python3 scripts/test-e2e.py",
+    "build:daily-hadith": "node scripts/build-daily-hadith.mjs",
+    "sync:chrome": "python3 scripts/sync-chrome.py"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.80.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "next": "^16.0.0",
+    "next": "^16.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

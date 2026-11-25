@@ -1,0 +1,2 @@
+/* نور الإسلام — يطبّق الوضع وحجم الخط قبل الرسم لتجنّب الوميض. الإعداد محفوظ في هذا المتصفح فقط. */
+(function(){try{var s=JSON.parse(localStorage.getItem('noor-ui-v1')||'{}');var d=document.documentElement;var t=s.theme==='light'||s.theme==='dark'?s.theme:(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');d.setAttribute('data-theme',t);var k=Number(s.scale);if(k>=0.85&&k<=1.4)d.style.setProperty('--scale',String(k));}catch(e){}})();

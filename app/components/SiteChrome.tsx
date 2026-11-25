@@ -11,12 +11,13 @@ const links = [
   { href: "/#quran-reader", id: "quran", label: "القرآن" },
   { href: "/hifz", id: "hifz", label: "رفيق الحفظ" },
   { href: "/#adhkar-reader", id: "adhkar", label: "الأذكار" },
-  { href: "/#prayer-tools", id: "prayer", label: "الصلاة والقبلة" },
+  { href: "/#prayer-tools", id: "prayer", label: "مواقيت الصلاة" },
+  { href: "/qibla", id: "qibla", label: "القبلة" },
+  { href: "/calendar", id: "calendar", label: "التقويم" },
   { href: "/hadith", id: "hadith", label: "الحديث" },
   { href: "/salawat", id: "salawat", label: "الصلاة على النبي" },
+  { href: "/zakat", id: "zakat", label: "الزكاة" },
   { href: "/sheikhs", id: "sheikhs", label: "المشايخ" },
-  { href: "/sources", id: "sources", label: "المصادر" },
-  { href: "/privacy", id: "privacy", label: "الخصوصية" },
 ] as const;
 
 export function SiteChrome({ current, children, footerNote }: Props) {
@@ -39,12 +40,12 @@ export function SiteChrome({ current, children, footerNote }: Props) {
       </header>
       <main id="main">{children}</main>
       <footer>
-        <span>{footerNote ?? "نور الإسلام · موقع غير تجاري: لا إعلانات ولا بيع"}</span>
+        <span>{footerNote ?? "نور الإسلام · منصة غير تجارية: لا إعلانات ولا بيع"}</span>
         <div className="footer-links">
-          <a href="/hadith">الحديث الشريف</a>
           <a href="/salawat">الصلاة على النبي ﷺ</a>
+          <a href="/hadith">الحديث الشريف</a>
           <a href="/sheikhs">المشايخ</a>
-          <a href="/sources">المصادر والترخيص</a>
+          <a href="/sources">عن المنصة والمصادر</a>
           <a href="/privacy">الخصوصية</a>
         </div>
         <span>صورة الكعبة: Neo Evenger / Pexels</span>

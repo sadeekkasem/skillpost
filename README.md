@@ -2,13 +2,19 @@
 
 The GitHub repository remains `sadeekkasem/skillpost`. The public site name is نور الإسلام, at `https://www.noorislamsite.com`.
 
-Non-commercial: no ads, no selling, no accounts. Quran, adhkar, prayer times, and an empty sheikhs page until teachers consent.
+Non-commercial: no ads, no selling, no accounts. Quran, adhkar, prayer times, qibla, Hijri calendar, zakat calculator, hadith, salawat, hifz companion, and sheikh pages.
+
+**November 2026 platform upgrade:** see [docs/PLATFORM-UPGRADE.md](docs/PLATFORM-UPGRADE.md) for what changed, what is not done yet, and the test report.
 
 The previous commercial app is preserved on branch `archive/legacy-app` and tag `legacy-app-2026-11-09` (commit 6405098).
 
 ## What is here
 - `public/`: the site as static files.
-  - `index.html`: home, Quran reader, adhkar, prayer/qibla/Hijri.
+  - `index.html`: home, Quran reader, adhkar, prayer/qibla/Hijri. `home.js` (home widgets), `quran-extras.js` (search, favourites, juz index, ayah audio).
+  - `qibla.html`, `calendar.html`, `zakat.html`, `offline.html` and their scripts. `cities.js` is shared by prayer and qibla.
+  - `style.css`: design system (light/dark). `theme-init.js` + `ui.js`: theme, text size, mobile bottom nav, service worker.
+  - `sw.js` + `manifest.webmanifest`: installable PWA with offline reading.
+  - `data/adhkar-extra.json`: extra Hisn al-Muslim entries from OpenDua (verbatim). `data/hadith/daily/`: hadith-of-the-day files (built by `scripts/build-daily-hadith.mjs`).
   - `sheikhs.html`, `sources.html`, `privacy.html`, `robots.txt`, `sitemap.xml`.
   - `data/quran/NNN.json`: 114 per-surah files (Tanzil Uthmani 1.1, verbatim, plus Jalalayn).
   - `fonts/amiri-regular.woff2`: Amiri, SIL OFL 1.1.
@@ -18,7 +24,7 @@ The previous commercial app is preserved on branch `archive/legacy-app` and tag 
 - `app/api/[[...path]]`: old `/api/*` routes return 410 Gone.
 - `app/not-found.tsx`: the 404 page.
 
-Build: `npm ci && npx next build`.
+Build: `npm ci && npx next build`. Tests: `npm run test:zakat`, `npm run test:calendar`, `npm run test:e2e` (needs `npx next start -p 3100`).
 
 ## Analytics
 Pages load `/_vercel/insights/script.js` (same origin, no cookies). If that script 404s in production, enable Web Analytics once in the Vercel project dashboard. No other analytics are included.
