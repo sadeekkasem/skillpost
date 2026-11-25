@@ -1,0 +1,22 @@
+// Checks for the site assistant search (public/chat.js) against the real data files. Run: node scripts/test-chat.mjs
+import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+const require = createRequire(import.meta.url);
+const C = require("../public/chat.js");
+const j = (p) => JSON.parse(readFileSync(new URL("../public/data/chat/" + p, import.meta.url), "utf8"));
+const quran = []; j("quran-text.json").surahs.forEach((s) => s[2].forEach((t, i) => quran.push({ s: s[0], a: i + 1, text: t, n: C.norm(t) + " | " + C.norm(t, true) })));
+const hadith = j("hadith-index.json").hadiths.map((h) => ({ id: h[0], title: h[1], n: C.norm(h[1] + " " + h[4]) }));
+const adhkar = j("adhkar.json").adhkar.map((x) => ({ cat: x[0], text: x[2], n: C.norm(x[0] + " " + x[1] + " " + x[2]) }));
+let fail = 0; const ok = (c, m) => { console.log((c ? "ok   " : "FAIL ") + m); if (!c) fail++; };
+const top = (list, q, n = 3) => C.rank(list, C.terms(q), (x) => x.n, n);
+ok(quran.length === 6236, "quran index has 6236 ayahs");
+ok(top(adhkar, "دعاء الخروج من المنزل")[0]?.item.cat === "المنزل والمسجد", "dhikr for leaving home is found");
+ok(top(adhkar, "أذكار بعد الصلاة").every((r) => r.item.cat === "بعد الصلاة"), "after-prayer adhkar are found");
+ok(top(quran, "آية الصابرين").length > 0, "Quran search matches الصابرين despite Uthmani spelling");
+ok(top(quran, "الله لا إله إلا هو الحي القيوم").some((r) => r.item.s === 2 && r.item.a === 255), "Ayat al-Kursi is found");
+ok(top(hadith, "حديث عن بر الوالدين").length > 0, "hadith about parents is found");
+ok(C.faq("كيف أحسب الزكاة")[0]?.t === "حاسبة الزكاة", "zakat question points to the calculator");
+ok(C.faq("متى أذان المغرب")[0]?.t === "مواقيت الصلاة", "prayer-time question points to the prayer panel");
+ok(C.isFatwa("ما حكم الغناء") && !C.isFatwa("آية عن الصبر"), "ruling questions get the no-fatwa notice");
+ok(top(quran, "كلمةغيرموجودةأبدا").length === 0, "nonsense query returns nothing");
+console.log(fail ? fail + " failed" : "all chat checks passed"); process.exit(fail ? 1 : 0);

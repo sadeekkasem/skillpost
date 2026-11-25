@@ -124,6 +124,40 @@ async def main():
         ok('غير متصل' in await pg6.inner_text('body'), 'unvisited page offline shows the offline page')
         await ctx.set_offline(False)
 
+        # Assistant «اسأل نور»
+        pa, errsa = await page_with_errors(ctx, '/qibla')
+        await pa.click('#chat-fab'); await pa.wait_for_selector('#chat-panel:not([hidden])')
+        await pa.fill('#chat-panel input', 'دعاء الخروج من المنزل'); await pa.press('#chat-panel input', 'Enter')
+        await pa.wait_for_selector('#chat-panel .chat-card', timeout=30000)
+        txt = await pa.inner_text('#chat-panel .chat-log')
+        ok('توكلت' in txt.replace('\u064e','').replace('\u0652','').replace('\u0651','').replace('\u0650','').replace('\u064f','') or 'تَوَكَّلْتُ' in txt, 'assistant finds the dhikr for leaving home')
+        await pa.fill('#chat-panel input', 'ما حكم الغناء'); await pa.press('#chat-panel input', 'Enter'); await pa.wait_for_timeout(600)
+        ok('لا أفتي' in await pa.inner_text('#chat-panel .chat-log'), 'assistant shows the no-fatwa notice')
+        ok(not errsa, 'assistant: no JS errors ' + str(errsa[:3]))
+        # Home ask bar opens the assistant with the query
+        await pa.goto(BASE + '/', wait_until='networkidle')
+        await pa.fill('#ask-input', 'اتجاه القبلة'); await pa.press('#ask-input', 'Enter')
+        await pa.wait_for_selector('#chat-panel .chat-sec', timeout=30000)
+        ok('اتجاه القبلة' in await pa.inner_text('#chat-panel .chat-log'), 'home ask bar sends the question to the assistant')
+
+        # Qibla map (OSM tiles stubbed)
+        await pa.route('https://tile.openstreetmap.org/**', lambda r: r.fulfill(status=200, content_type='image/png', body=b''))
+        await pa.goto(BASE + '/qibla', wait_until='networkidle')
+        await pa.select_option('#qibla-city', 'london'); await pa.click('#map-show')
+        await pa.wait_for_selector('#qibla-map .leaflet-interactive', timeout=15000)
+        ok(await pa.locator('#qibla-map path.leaflet-interactive').count() >= 1, 'qibla map draws the great-circle line')
+        ok('OpenStreetMap' in await pa.inner_text('#qibla-map'), 'map shows OpenStreetMap attribution')
+
+        # QuranEnc translation (API stubbed with the documented response shape)
+        import json as _json
+        await pa.route('https://quranenc.com/api/v1/translations/list**', lambda r: r.fulfill(status=200, content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}, body=_json.dumps({'translations':[{'key':'english_saheeh','direction':'ltr','language_iso_code':'en','version':'1.1.0','title':'English - Saheeh International'}]})))
+        await pa.route('https://quranenc.com/api/v1/translation/sura/english_saheeh/1', lambda r: r.fulfill(status=200, content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}, body=_json.dumps({'result':[{'id':str(i),'sura':'1','aya':str(i),'arabic_text':'','translation':'TEST TRANSLATION %d'%i,'footnotes':''} for i in range(1,8)]})))
+        await pa.goto(BASE + '/#quran-reader/1/2', wait_until='networkidle'); await pa.wait_for_timeout(500)
+        await pa.select_option('#translation-select', 'english_saheeh'); await pa.wait_for_timeout(600)
+        ok('TEST TRANSLATION 2' in await pa.inner_text('#translation-aya'), 'translation of the selected ayah is shown')
+        ok(await pa.locator('#translation-list li').count() == 7, 'translation of the whole visible section is listed')
+        ok('1.1.0' in await pa.inner_text('#translation-credit') and 'QuranEnc' in await pa.inner_text('#translation-credit'), 'translation credit shows QuranEnc and the version')
+
         # Mobile layout: no horizontal overflow
         m = await b.new_context(viewport={'width': 375, 'height': 812}, is_mobile=True, has_touch=True, bypass_csp=True)
         for path in ['/', '/#quran-reader', '/#adhkar-reader', '/#prayer-tools', '/qibla', '/calendar', '/zakat', '/hadith', '/salawat', '/sources', '/privacy']:

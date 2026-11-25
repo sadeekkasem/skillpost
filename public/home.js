@@ -20,6 +20,9 @@
   }
   window.NoorShare={copy:copyText,share:share};
 
+  /* ---------- Ask bar → assistant ---------- */
+  $('ask-bar').addEventListener('submit',function(e){e.preventDefault();var q=$('ask-input').value.trim();if(q.length<2)return;$('ask-input').value='';if(window.NoorOpenChat)window.NoorOpenChat(q);});
+
   /* ---------- Smooth scroll for "ابدأ رحلتك" ---------- */
   document.querySelectorAll('[data-scroll-to]').forEach(function(a){a.addEventListener('click',function(e){var t=$(a.dataset.scrollTo);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});});
 

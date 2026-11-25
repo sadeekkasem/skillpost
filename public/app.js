@@ -33,7 +33,7 @@ restoreBookmark();window.__quranShown=renderQuran;
 const LAST_READ_KEY='noor-last-read-v1';
 function rememberLastRead(){try{const s=quranData[surahIndex];window.localStorage.setItem(LAST_READ_KEY,JSON.stringify({surah:s.id,name:s.name,verse:verseIndex+1,t:Date.now()}));}catch{}}
 window.__quranOpen=function(surahNumber,ayahNumber){const index=surahNumber-1;if(!quranData[index])return false;const count=quranData[index].count;surahIndex=index;verseIndex=Math.min(Math.max(ayahNumber,1),count)-1;readingPage=Math.floor(verseIndex/PAGE_SIZE);document.getElementById('jump-message').textContent='';pendingOpen=true;pendingFocus=true;renderQuran();if(quranData[index].verses){setTafsir(true);focusVerse();}window.dispatchEvent(new CustomEvent('noor:quran-surah'));return true;};
-window.__quranState=function(){return {surahIndex,verseIndex,surah:quranData[surahIndex],quranData,fontSize};};
+window.__quranState=function(){const r=quranData[surahIndex].verses?pageRanges(quranData[surahIndex].verses.length)[readingPage]:null;return {surahIndex,verseIndex,readingPage,range:r,surah:quranData[surahIndex],quranData,fontSize};};
 window.__quranLoadSurah=loadSurah;window.__quranSelect=(i)=>selectVerse(i,true,true);
 renderQuran();
 
