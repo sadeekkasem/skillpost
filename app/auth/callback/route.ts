@@ -8,12 +8,19 @@ export async function GET(request: NextRequest) {
   const key = supabasePublishableKey();
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const tokenHash = requestUrl.searchParams.get("token_hash");
+  const otpType = requestUrl.searchParams.get("type");
   const next = safeInternalPath(requestUrl.searchParams.get("next"));
-  if (!url || !key || !code) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  const loginWith = (reason: string) => {
+    const u = new URL("/login", request.url);
+    u.searchParams.set("e", reason);
+    if (next) u.searchParams.set("next", next);
+    return u;
+  };
+  if (!url || !key) return NextResponse.redirect(loginWith("config"));
+  if (!code && !tokenHash) return NextResponse.redirect(loginWith(requestUrl.searchParams.get("error") ? "expired" : "missing"));
 
-  const redirectTo = new URL("/login", request.url);
+  const redirectTo = loginWith("norole");
   const response = NextResponse.redirect(redirectTo);
   const supabase = createServerClient(url, key, {
     cookies: {
@@ -28,8 +35,14 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) return response;
+  const { error } = tokenHash
+    ? await supabase.auth.verifyOtp({ token_hash: tokenHash, type: (otpType === "magiclink" || otpType === "signup" || otpType === "invite" || otpType === "recovery" || otpType === "email_change") ? otpType : "email" })
+    : await supabase.auth.exchangeCodeForSession(code as string);
+  if (error) {
+    // PKCE links only work in the same browser that requested them; otherwise the verifier cookie is missing.
+    const reason = /code verifier|code_verifier|both auth code and code verifier/i.test(error.message) ? "browser" : "expired";
+    return NextResponse.redirect(loginWith(reason));
+  }
 
   await supabase.rpc("islamic_accept_pending_invitations");
   const { data } = await supabase.rpc("islamic_staff_workspace");
