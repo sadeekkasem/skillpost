@@ -22,7 +22,9 @@
     "test:calendar": "node scripts/test-calendar.mjs",
     "test:e2e": "python3 scripts/test-e2e.py",
     "build:daily-hadith": "node scripts/build-daily-hadith.mjs",
-    "sync:chrome": "python3 scripts/sync-chrome.py"
+    "sync:chrome": "python3 scripts/sync-chrome.py",
+    "test:chat": "node scripts/test-chat.mjs",
+    "build:chat-index": "node scripts/build-chat-index.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

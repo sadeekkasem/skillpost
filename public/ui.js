@@ -77,6 +77,22 @@
   }
   window.addEventListener('hashchange',markBottom);markBottom();
 
+  /* «اسأل نور» — يُحمَّل chat.js عند أول ضغط فقط */
+  var chatLoading=null;
+  function openChat(q){
+    if(window.NoorChat){if(q)window.NoorChat.ask(q);else window.NoorChat.toggle();return;}
+    if(!chatLoading){chatLoading=new Promise(function(res,rej){var sc=document.createElement('script');sc.src='/chat.js?v=20261125b';sc.onload=res;sc.onerror=rej;document.body.appendChild(sc);});}
+    chatLoading.then(function(){if(q)window.NoorChat.ask(q);else window.NoorChat.toggle();}).catch(function(){chatLoading=null;});
+  }
+  window.NoorOpenChat=openChat;
+  if(!document.getElementById('chat-fab')&&!/^\/(login|admin|sheikh|student)(\/|$)/.test(location.pathname)){
+    var fab=el('button',{'class':'chat-fab',id:'chat-fab',type:'button','aria-controls':'chat-panel','aria-expanded':'false','aria-label':'اسأل نور: ابحث في محتوى الموقع'});
+    fab.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>اسأل نور</span>';
+    fab.addEventListener('click',function(){openChat();});
+    document.body.appendChild(fab);
+  }
+  document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-open-chat]');if(t){e.preventDefault();openChat(t.getAttribute('data-open-chat')||'');}});
+
   applyTheme();applyScale();
 
   window.NoorUI={toast:function(text){var t=el('div',{'class':'toast',role:'status'},text);document.body.appendChild(t);setTimeout(function(){t.remove();},2600);}};

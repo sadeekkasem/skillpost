@@ -3,7 +3,7 @@
 Run: python3 scripts/sync-chrome.py   (idempotent)"""
 import re, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent / 'public'
-V = '20261125a'
+V = '20261125b'
 NAV = [
   ('/#home','home','الرئيسية'),
   ('/#quran-reader','quran-reader','القرآن'),

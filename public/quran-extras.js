@@ -80,6 +80,37 @@
     }).catch(function(){$('quran-search-status').textContent='تعذّر تحميل نص المصحف. تحقّق من الاتصال ثم أعد المحاولة.';});
   });
 
-  window.addEventListener('noor:ayah-selected',function(){syncTools();});
+  /* Translation of meanings — QuranEnc.com (live API, unmodified; credit + version shown) */
+  var TR_KEY='noor-translation-v1',trList=null,trCache={},trChoice='';
+  try{trChoice=localStorage.getItem(TR_KEY)||'';}catch(e){}
+  function trMeta(){return trList&&trList.find(function(t){return t.key===trChoice;});}
+  function credit(){var m=trMeta();return m?('الترجمة: '+m.title+' — الإصدار '+m.version+' · المصدر: موسوعة القرآن الكريم QuranEnc.com، تُعرض كما هي دون تعديل. الترجمة بيان لمعاني القرآن وليست قرآنًا.'):'';}
+  function loadSura(key,s){var id=key+'/'+s;if(!trCache[id])trCache[id]=fetch('https://quranenc.com/api/v1/translation/sura/'+encodeURIComponent(key)+'/'+s,{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){var map={};(d.result||[]).forEach(function(x){map[Number(x.aya)]=x;});return map;}).catch(function(e){delete trCache[id];throw e;});return trCache[id];}
+  function renderTr(){
+    var box=$('translation-aya'),page=$('translation-page');
+    if(!trChoice){box.hidden=true;page.hidden=true;$('translation-credit').textContent='ترجمات معتمدة بعشرات اللغات من QuranEnc.com، تُجلب من موقعهم عند اختيارها.';return;}
+    var st=window.__quranState();if(!st.surah.verses)return;var m=trMeta();var dir=m&&m.direction==='rtl'?'rtl':'ltr';var lang=m?m.language_iso_code:'en';
+    box.dir=dir;box.lang=lang;box.hidden=false;box.textContent='جارٍ تحميل الترجمة…';
+    loadSura(trChoice,st.surah.id).then(function(map){
+      var x=map[st.verseIndex+1];box.replaceChildren();
+      if(x){var t=document.createElement('p');t.textContent=x.translation;box.appendChild(t);if(x.footnotes){var f=document.createElement('p');f.className='footnotes';f.textContent=x.footnotes;box.appendChild(f);}}
+      $('translation-credit').textContent=credit();
+      var list=$('translation-list');list.replaceChildren();var r=st.range||{start:0,end:st.surah.verses.length};
+      for(var i=r.start;i<r.end;i++){var y=map[i+1];if(!y)continue;var li=document.createElement('li');li.dir=dir;li.lang=lang;var n=document.createElement('span');n.className='num';n.textContent=String(i+1);li.appendChild(n);li.appendChild(document.createTextNode(y.translation));list.appendChild(li);}
+      $('translation-page-credit').textContent=credit();page.hidden=false;
+    }).catch(function(){box.textContent='تعذّر تحميل الترجمة من QuranEnc.com. تحقّق من الاتصال.';page.hidden=true;});
+  }
+  var listLoading=null;function ensureList(){if(listLoading||$('quran-reader').hidden)return;listLoading=fetch('https://quranenc.com/api/v1/translations/list?localization=ar',{credentials:'omit'}).then(function(r){return r.json();}).then(function(d){
+    trList=(d.translations||[]).filter(function(t){return t&&t.key;});
+    var sel=$('translation-select');var byLang={};
+    trList.forEach(function(t){(byLang[t.language_iso_code]=byLang[t.language_iso_code]||[]).push(t);});
+    var prefer=['en','fr','es','de','tr','ur','id','ms','bn','ru','fa','zh','sw','ha','so','am','bs','sq'];
+    Object.keys(byLang).sort(function(a,b){var ia=prefer.indexOf(a),ib=prefer.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib)||a.localeCompare(b);}).forEach(function(l){var og=document.createElement('optgroup');og.label=l.toUpperCase();byLang[l].forEach(function(t){var o=document.createElement('option');o.value=t.key;o.textContent=t.title;og.appendChild(o);});sel.appendChild(og);});
+    if(trChoice&&!trMeta())trChoice='';sel.value=trChoice;renderTr();
+  }).catch(function(){listLoading=null;$('translation-credit').textContent='تعذّر تحميل قائمة الترجمات من QuranEnc.com.';});}
+  window.addEventListener('hashchange',function(){setTimeout(ensureList,0);});ensureList();
+  $('translation-select').addEventListener('change',function(e){trChoice=e.target.value;try{localStorage.setItem(TR_KEY,trChoice);}catch(x){}renderTr();});
+
+  window.addEventListener('noor:ayah-selected',function(){syncTools();ensureList();if(trChoice&&trList)renderTr();});
   renderFavs();syncTools();
 })();

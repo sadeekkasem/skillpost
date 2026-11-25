@@ -4,7 +4,7 @@
    - نصوص القرآن والحديث والأذكار: تُحفظ عند أول فتح لتعمل دون إنترنت.
    - لا يتدخل في: صفحات الدخول والإدارة ورفيق الحفظ، والإحصاءات، والطلبات الخارجية (الصوت). */
 'use strict';
-const VERSION = '20261125a';
+const VERSION = '20261125b';
 const SHELL = 'noor-shell-' + VERSION;
 const RUNTIME = 'noor-runtime-' + VERSION;
 const DATA = 'noor-data-v1';
